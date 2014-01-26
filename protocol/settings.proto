@@ -1,0 +1,4 @@
+message Settings
+{
+	optional uint32 test = 1;
+}
