@@ -2,12 +2,66 @@
 #include "utils.hpp"
 #include "world.hpp"
 #include "player.hpp"
-#include "renderer.hpp"
 #include "rolling_average.hpp"
 #include "window_event_manager.hpp"
+#include "virtual_window_manager.hpp"
 
 using namespace sf;
 using namespace swarm;
+
+//-----------------------------------------------------------------------------
+MainWindow::MainWindow(const string& title, const Vector2f& pos, const Vector2f& size, Game* game)
+  : VirtualWindow(title, pos, size)
+  , _game(game)
+{
+
+}
+
+//-----------------------------------------------------------------------------
+void MainWindow::Draw()
+{
+  _texture.clear();
+  auto* world = _game->_world.get();
+  
+  View view = _texture.getView();
+  view.setCenter(world->_players[0]->_pos);
+  _texture.setView(view);
+  _texture.draw(world->_level->_sprite);
+
+  for (const auto& player : world->_players)
+  {
+    CircleShape circle;
+    circle.setFillColor(Color::Green);
+    Vector2f p(VectorCast<float>(player->_pos));
+    p.x -= 5;
+    p.y -= 5;
+    circle.setPosition(p);
+    circle.setRadius(5);
+    _texture.draw(circle);
+  }
+  _texture.display();
+}
+
+//-----------------------------------------------------------------------------
+DebugWindow::DebugWindow(const string& title, const Vector2f& pos, const Vector2f& size, Game* game)
+  : VirtualWindow(title, pos, size)
+  , _game(game)
+{
+}
+
+//-----------------------------------------------------------------------------
+void DebugWindow::Draw()
+{
+  _texture.clear();
+  Text frameTime("", _game->_font, 10);
+  frameTime.setColor(Color::Blue);
+
+  frameTime.setString(toString("%.2f ms", _game->_frameTime.GetAverage() / 1000.0));
+  frameTime.setPosition(20, 20);
+  _texture.draw(frameTime);
+
+  _texture.display();
+}
 
 //-----------------------------------------------------------------------------
 void Game::FindAppRoot()
@@ -72,6 +126,7 @@ void Game::FindAppRoot()
 //----------------------------------------------------------------------------------
 Game::Game()
   : _done(false)
+  , _frameTime(100)
 {
 }
 
@@ -92,8 +147,8 @@ bool Game::Init()
 
   _renderWindow.reset(new RenderWindow(sf::VideoMode(8 * width / 10, 8 * height / 10), "..."));
   _renderWindow->setFramerateLimit(60);
-  _renderer.reset(new Renderer);
   _eventManager.reset(new WindowEventManager(_renderWindow.get()));
+  _windowManager.reset(new VirtualWindowManager(_renderWindow.get(), _eventManager.get()));
   _world.reset(World::Create());
   if (!_world->_level->Load("data/pacman.png"))
     return false;
@@ -106,6 +161,9 @@ bool Game::Init()
   _eventManager->RegisterHandler(Event::KeyPressed, bind(&Game::OnKeyPressed, this, _1));
   _eventManager->RegisterHandler(Event::KeyReleased, bind(&Game::OnKeyReleased  , this, _1));
 
+  _windowManager->AddWindow(new DebugWindow("DEBUG", Vector2f(0,0), Vector2f(200, _renderWindow->getSize().y), this));
+  _windowManager->AddWindow(new MainWindow("MAIN", Vector2f(200,0), Vector2f(_renderWindow->getSize().x-200, _renderWindow->getSize().y), this));
+
   return true;
 }
 
@@ -114,28 +172,10 @@ bool Game::OnKeyPressed(const Event& event)
 {
   Keyboard::Key key = event.key.code;
 
-  float s = 20;
-
   switch (key)
   {
     case Keyboard::Escape:
       _done = true;
-      break;
-
-    case Keyboard::Left:
-      _world->_players[0]->_speed = Vector2f(-s, 0);
-      break;
-
-    case Keyboard::Right:
-      _world->_players[0]->_speed = Vector2f(+s, 0);
-      break;
-
-    case Keyboard::Up:
-      _world->_players[0]->_speed = Vector2f(0, -s);
-      break;
-
-    case Keyboard::Down:
-      _world->_players[0]->_speed = Vector2f(0, +s);
       break;
   }
 
@@ -149,25 +189,60 @@ bool Game::OnKeyReleased(const Event& event)
 }
 
 //----------------------------------------------------------------------------------
+void Game::UpdatePlayers()
+{
+  float s = 20;
+
+  Player& player = *_world->_players[0];
+
+  player._acc = Vector2f(0,0);
+
+  if (Keyboard::isKeyPressed(Keyboard::Left))
+    player._acc += Vector2f(-s, 0);
+
+  if (Keyboard::isKeyPressed(Keyboard::Right))
+    player._acc += Vector2f(+s, 0);
+
+  if (Keyboard::isKeyPressed(Keyboard::Up))
+    player._acc += Vector2f(0, -s);
+
+  if (Keyboard::isKeyPressed(Keyboard::Down))
+    player._acc += Vector2f(0, +s);
+
+}
+
+//----------------------------------------------------------------------------------
 void Game::Update(const time_duration& delta)
 {
+  UpdatePlayers();
+
+  float dt = delta.total_milliseconds() / 1000.0f;
   float scale = _world->_level->_scale;
   for (auto& player : _world->_players)
   {
-    Vector2f newPos = player->_pos + delta.total_milliseconds() / 1000.0f * player->_speed;
+    // Velocity Verlet integration
+    float friction = 0.99f;
+    Vector2f oldVel = player->_vel;
+    Vector2f p = player->_pos;
+    Vector2f v = friction * (player->_vel + player->_acc * dt);
+
+    Vector2f newPos = player->_pos + (oldVel + player->_vel) * 0.5f * dt;
 
     u8 b;
-    // Check that the new position is inside the world, and doesn't collide with the background
-    Vector2f t(newPos.x / scale, newPos.y / scale);
-    if (_world->_level->PosToBackground(t, &b) && b == 0)
+    if (!(_world->_level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
     {
-      player->_pos = newPos;
-    }
-    else
-    {
-      player->_speed = Vector2f(0,0);
+      newPos.x = p.x;
+      v.x = -v.x;
     }
 
+    if (!(_world->_level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
+    {
+      newPos.y = p.y;
+      v.y = -v.y;
+    }
+
+    player->_vel = v;
+    player->_pos = newPos;
   }
 }
 
@@ -179,16 +254,13 @@ void Game::Run()
 
   RollingAverage<s64> avg(100);
 
-  Text frameTime("", _font, 10);
-  frameTime.setColor(Color::Blue);
-
   Time lastUpdate = clock.getElapsedTime();
   while (_renderWindow->isOpen() && !_done)
   {
     Time start = clock.getElapsedTime();
     _renderWindow->clear();
     _eventManager->Poll();
-    _renderer->DrawWorld(*_renderWindow, *_world);
+    _windowManager->Update();
 
     Time end = clock.getElapsedTime();
     Time computeTime = end - start;
@@ -196,9 +268,6 @@ void Game::Run()
     lastUpdate = end;
     Update(milliseconds(delta.asMilliseconds()));
     avg.AddSample(computeTime.asMicroseconds());
-    frameTime.setString(toString("%.2f ms", avg.GetAverage() / 1000.0));
-    frameTime.setPosition(20, 20);
-    _renderWindow->draw(frameTime);
     _renderWindow->display();
   }
 }

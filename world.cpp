@@ -17,7 +17,7 @@ void World::AddPlayer()
     int y = rand() % _level->_height/4;
     if (_level->_background[y*_level->_width+x] == 0)
     {
-      player->_pos = Vector2f(x*scale, y*scale);
+      player->_pos = player->_oldPos = Vector2f(x*scale, y*scale);
       break;
     }
   }

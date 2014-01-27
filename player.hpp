@@ -10,7 +10,9 @@ namespace swarm
     public:
     Player();
     Vector2f _pos;
-    Vector2f _speed;
+    Vector2f _oldPos;
+    Vector2f _vel;
+    Vector2f _acc;
     u32 _refCount;
   };
 

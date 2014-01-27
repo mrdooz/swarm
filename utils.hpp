@@ -69,6 +69,32 @@ namespace swarm
     return sf::Vector2<To>((To)src.x, (To)src.y);
   }
 
+  template <typename T>
+  T min3(T a, T b, T c)
+  {
+    return min(c, min(a, b));
+  }
+
+  template <typename T>
+  T max3(T a, T b, T c)
+  {
+    return max(c, max(a, b));
+  }
+
+  template <typename T>
+  float Length(const sf::Vector2<T>& a)
+  {
+    return sqrt(a.x*a.x + a.y*a.y);
+  }
+
+  template <typename T>
+  float Dist(const sf::Vector2<T>& a, const sf::Vector2<T>& b)
+  {
+    float dx = a.x - b.x;
+    float dy = a.y - b.y;
+
+    return sqrt(dx*dx+dy*dy);
+  }
 
   inline int IntAbs(int a)
   {
