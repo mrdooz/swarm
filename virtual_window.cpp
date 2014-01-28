@@ -8,7 +8,8 @@ using namespace swarm;
 VirtualWindow::VirtualWindow(
     const string& title,
     const Vector2f& pos,
-    const Vector2f& size)
+    const Vector2f& size,
+    u32 flags)
   : _windowManager(nullptr)
   , _title(title)
   , _pos(pos)
@@ -19,6 +20,7 @@ VirtualWindow::VirtualWindow(
   , _focus(false)
   , _moving(false)
   , _resizing(false)
+  , _flags(flags)
 {
   _texture.create((int)size.x, (int)size.y);
   _sprite.setTexture(_texture.getTexture());
@@ -52,20 +54,27 @@ void VirtualWindow::SetPosition(const Vector2f& pos)
 //-----------------------------------------------------------------------------
 void VirtualWindow::DrawBorder(RenderWindow* window)
 {
-  float w = (float)_borderWidth;
-  RoundedRectangleShape rect(_size + Vector2f(2*w, w+10), 10, 10, 0, 0, 40);
-  rect.setPosition(_pos - Vector2f(w, 10));
-  rect.setFillColor(_focus ? Color(50, 50, 50) : Color(30, 30, 30));
+  bool drawBorder = _flags & WindowFlags::DrawBorder;
+
+  float w = drawBorder ? (float)_borderWidth : 0;
+
+  if (drawBorder)
+  {
+    RoundedRectangleShape rect(_size + Vector2f(2*w, w+_titleBarHeight), 10, 10, 0, 0, 40);
+    rect.setPosition(_pos - Vector2f(w, 10));
+    rect.setFillColor(_focus ? Color(50, 50, 50) : Color(30, 30, 30));
+    window->draw(rect);
+  }
 
   // center the text (taking border into account)
-  Text text(_title, _font, 8);
-  float tw = text.getLocalBounds().width;
-  text.setPosition(_pos + Vector2f(w + (_size.x - tw) / 2, -10));
-  text.setColor(Color::White);
-
-  // Draw to the underlying render target
-  window->draw(rect);
-  window->draw(text);
+  if (_flags & WindowFlags::DrawTitle)
+  {
+    Text text(_title, _font, _titleBarHeight - 2);
+    float tw = text.getLocalBounds().width;
+    text.setPosition(_pos + Vector2f(w + (_size.x - tw) / 2, _titleBarHeight));
+    text.setColor(Color::White);
+    window->draw(text);
+  }
 }
 
 //-----------------------------------------------------------------------------

@@ -4,10 +4,24 @@ namespace swarm
 {
   class VirtualWindowManager;
 
+  namespace WindowFlags
+  {
+    enum Type
+    {
+      DrawBorder    =   1 << 1,
+      DrawTitle     =   1 << 2,
+      Movable       =   1 << 3,
+      Resizable     =   1 << 4,
+
+      DefaultFlags  =   DrawBorder | DrawTitle | Movable | Resizable
+    };
+  }
+
   class VirtualWindow
   {
     friend class VirtualWindowManager;
   public:
+
     virtual ~VirtualWindow() {}
 
     virtual bool Init();
@@ -25,8 +39,8 @@ namespace swarm
     VirtualWindow(
         const string& title,
         const Vector2f& pos,
-        const Vector2f& size);
-
+        const Vector2f& size,
+        u32 flags = WindowFlags::DefaultFlags);
 
     void SetSize(const Vector2f& size);
     void SetPosition(const Vector2f& pos);
@@ -48,5 +62,6 @@ namespace swarm
     bool _focus;
     bool _moving;
     bool _resizing;
+    u32 _flags;
   };
 }

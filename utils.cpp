@@ -135,5 +135,61 @@ namespace swarm
     return true;
   }
 
+  //-----------------------------------------------------------------------------
+  string FindAppRoot()
+  {
+#ifdef _WIN32
+    char startingDir[MAX_PATH];
+    if (!_getcwd(startingDir, MAX_PATH))
+      return startingDir;
+
+    // keep going up directory levels until we find "app.json", or we hit the bottom..
+    char prevDir[MAX_PATH], curDir[MAX_PATH];
+    ZeroMemory(prevDir, sizeof(prevDir));
+
+    while (true)
+    {
+      if (!_getcwd(curDir, MAX_PATH))
+        break;
+
+      // check if we haven't moved
+      if (!strncmp(curDir, prevDir, MAX_PATH))
+        break;
+
+      memcpy(prevDir, curDir, MAX_PATH);
+
+      if (fileExists("settings.pb"))
+        return curDir;
+
+      if (_chdir("..") == -1)
+        break;
+    }
+#else
+    char startingDir[256];
+    getcwd(startingDir, 256);
+
+    // keep going up directory levels until we find "app.json", or we hit the bottom..
+    char prevDir[256], curDir[256];
+    memset(prevDir, 0, sizeof(prevDir));
+
+    while (true)
+    {
+      getcwd(curDir, 256);
+      // check if we haven't moved
+      if (!strcmp(curDir, prevDir))
+        break;
+
+      memcpy(prevDir, curDir, 256);
+
+      if (FileExists("settings.pb"))
+        return curDir;
+
+      if (chdir("..") == -1)
+        break;
+    }
+#endif
+    return "";
+  }
+
 }
 

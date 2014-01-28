@@ -96,6 +96,13 @@ namespace swarm
     return sqrt(dx*dx+dy*dy);
   }
 
+  template <typename T>
+  sf::Vector2<T> Normalize(const sf::Vector2<T>& a)
+  {
+    float len = Length(a);
+    return len > 0 ? 1/len * a : sf::Vector2<T>(0,0);
+  }
+
   inline int IntAbs(int a)
   {
     return a > 0 ? a : -a;
@@ -109,6 +116,8 @@ namespace swarm
   {
     return max(minValue, min(maxValue, v));
   }
+
+  string FindAppRoot();
 
   // Macro for creating "local" names
 #define GEN_NAME2(prefix, line) prefix##line

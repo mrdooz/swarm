@@ -14,7 +14,28 @@ MainWindow::MainWindow(const string& title, const Vector2f& pos, const Vector2f&
   : VirtualWindow(title, pos, size)
   , _game(game)
 {
+  game->_windowManager->RegisterHandler(Event::MouseButtonReleased, this, bind(&MainWindow::OnMouseButtonReleased, this, _1));
+  game->_windowManager->RegisterHandler(Event::MouseButtonPressed, this, bind(&MainWindow::OnMouseButtonPressed, this, _1));
 
+}
+
+//-----------------------------------------------------------------------------
+bool MainWindow::OnMouseButtonPressed(const Event& event)
+{
+  _clickStart = microsec_clock::local_time();
+
+  // Convert mouse pos to world space
+  _clickPos = _texture.mapPixelToCoords(Vector2i(event.mouseButton.x, event.mouseButton.y));
+  _game->_mousePos = _clickPos;
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+bool MainWindow::OnMouseButtonReleased(const Event& event)
+{
+  _clickStart = ptime();
+  return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -28,9 +49,9 @@ void MainWindow::Draw()
   _texture.setView(view);
   _texture.draw(world->_level->_sprite);
 
-  for (const auto& player : world->_players)
+  CircleShape circle;
+  for (Player* player : world->_players)
   {
-    CircleShape circle;
     circle.setFillColor(Color::Green);
     Vector2f p(VectorCast<float>(player->_pos));
     p.x -= 5;
@@ -39,7 +60,37 @@ void MainWindow::Draw()
     circle.setRadius(5);
     _texture.draw(circle);
   }
+
+  for (const auto& monster : world->_monsters)
+  {
+    circle.setFillColor(Color::Red);
+    Vector2f p(VectorCast<float>(monster->_pos));
+    p.x -= monster->_size;
+    p.y -= monster->_size;
+    circle.setPosition(p);
+    circle.setRadius(monster->_size);
+    _texture.draw(circle);
+  }
+
+  _clickRadius = -1.0f;
+  if (!_clickStart.is_not_a_date_time())
+  {
+    time_duration delta = microsec_clock::local_time() - _clickStart;
+    circle.setFillColor(Color(0xcc, 0xcc, 0, 0x80));
+    float r = 0.25f * delta.total_microseconds() / 1000.0;
+    circle.setPosition(_clickPos - r * Vector2f(1,1));
+    circle.setRadius(r);
+    _texture.draw(circle);
+    _clickRadius = r;
+  }
+
   _texture.display();
+}
+
+//-----------------------------------------------------------------------------
+PlayerWindow::PlayerWindow(const string& title, const Vector2f& pos, const Vector2f& size, Game* game)
+  : VirtualWindow(title, pos, size)
+{
 }
 
 //-----------------------------------------------------------------------------
@@ -60,80 +111,37 @@ void DebugWindow::Draw()
   frameTime.setPosition(20, 20);
   _texture.draw(frameTime);
 
+  frameTime.setString(toString("%d, %d", (int)_game->_mousePos.x, (int)_game->_mousePos.y));
+  frameTime.setPosition(20, 30);
+  _texture.draw(frameTime);
+
   _texture.display();
-}
-
-//-----------------------------------------------------------------------------
-void Game::FindAppRoot()
-{
-#ifdef _WIN32
-  char startingDir[MAX_PATH];
-  if (!_getcwd(startingDir, MAX_PATH))
-    return;
-
-  // keep going up directory levels until we find "app.json", or we hit the bottom..
-  char prevDir[MAX_PATH], curDir[MAX_PATH];
-  ZeroMemory(prevDir, sizeof(prevDir));
-
-  while (true) {
-    if (!_getcwd(curDir, MAX_PATH))
-      return;
-
-    // check if we haven't moved
-    if (!strncmp(curDir, prevDir, MAX_PATH))
-      break;
-
-    memcpy(prevDir, curDir, MAX_PATH);
-
-    if (fileExists("settings.pb")) {
-      _appRoot = curDir;
-      return;
-    }
-
-    if (_chdir("..") == -1)
-      break;
-  }
-  _appRoot = startingDir;
-#else
-  char startingDir[256];
-  getcwd(startingDir, 256);
-
-  // keep going up directory levels until we find "app.json", or we hit the bottom..
-  char prevDir[256], curDir[256];
-  memset(prevDir, 0, sizeof(prevDir));
-
-  while (true) {
-    getcwd(curDir, 256);
-    // check if we haven't moved
-    if (!strcmp(curDir, prevDir))
-      break;
-
-    memcpy(prevDir, curDir, 256);
-
-    if (FileExists("settings.pb")) {
-      _appRoot = curDir;
-      return;
-    }
-
-    if (chdir("..") == -1)
-      break;
-  }
-  _appRoot = startingDir;
-  
-#endif
 }
 
 //----------------------------------------------------------------------------------
 Game::Game()
   : _done(false)
   , _frameTime(100)
+  , _mainWindow(nullptr)
+  , _playerWindow(nullptr)
+  , _debugWindow(nullptr)
 {
+}
+
+//----------------------------------------------------------------------------------
+Game::~Game()
+{
+  delete exch_null(_mainWindow);
+  delete exch_null(_playerWindow);
+  delete exch_null(_debugWindow);
 }
 
 //----------------------------------------------------------------------------------
 bool Game::Init()
 {
-  FindAppRoot();
+  _appRoot = FindAppRoot();
+  if (_appRoot.empty())
+    return false;
 
   size_t width, height;
 #ifdef _WIN32
@@ -154,15 +162,18 @@ bool Game::Init()
     return false;
 
   _world->AddPlayer();
+  _world->AddMonsters();
 
   if (!_font.loadFromFile("gfx/wscsnrg.ttf"))
     return false;
 
   _eventManager->RegisterHandler(Event::KeyPressed, bind(&Game::OnKeyPressed, this, _1));
-  _eventManager->RegisterHandler(Event::KeyReleased, bind(&Game::OnKeyReleased  , this, _1));
+  _eventManager->RegisterHandler(Event::KeyReleased, bind(&Game::OnKeyReleased, this, _1));
 
-  _windowManager->AddWindow(new DebugWindow("DEBUG", Vector2f(0,0), Vector2f(200, _renderWindow->getSize().y), this));
-  _windowManager->AddWindow(new MainWindow("MAIN", Vector2f(200,0), Vector2f(_renderWindow->getSize().x-200, _renderWindow->getSize().y), this));
+  _debugWindow = new DebugWindow("DEBUG", Vector2f(0,0), Vector2f(200, _renderWindow->getSize().y), this);
+  _mainWindow = new MainWindow("MAIN", Vector2f(200,0), Vector2f(_renderWindow->getSize().x-200, _renderWindow->getSize().y), this);
+  _windowManager->AddWindow(_debugWindow);
+  _windowManager->AddWindow(_mainWindow);
 
   return true;
 }
@@ -189,6 +200,13 @@ bool Game::OnKeyReleased(const Event& event)
 }
 
 //----------------------------------------------------------------------------------
+bool Game::OnMouseReleased(const Event& event)
+{
+
+  return true;
+}
+
+//----------------------------------------------------------------------------------
 void Game::UpdatePlayers()
 {
   float s = 20;
@@ -197,53 +215,88 @@ void Game::UpdatePlayers()
 
   player._acc = Vector2f(0,0);
 
-  if (Keyboard::isKeyPressed(Keyboard::Left))
+  if (Keyboard::isKeyPressed(Keyboard::Left) || Keyboard::isKeyPressed(Keyboard::A))
     player._acc += Vector2f(-s, 0);
 
-  if (Keyboard::isKeyPressed(Keyboard::Right))
+  if (Keyboard::isKeyPressed(Keyboard::Right) || Keyboard::isKeyPressed(Keyboard::D))
     player._acc += Vector2f(+s, 0);
 
-  if (Keyboard::isKeyPressed(Keyboard::Up))
+  if (Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W))
     player._acc += Vector2f(0, -s);
 
-  if (Keyboard::isKeyPressed(Keyboard::Down))
+  if (Keyboard::isKeyPressed(Keyboard::Down) || Keyboard::isKeyPressed(Keyboard::S))
     player._acc += Vector2f(0, +s);
+}
 
+//----------------------------------------------------------------------------------
+void Game::UpdateMonsters()
+{
+  float r = _mainWindow->_clickRadius;
+
+  for (auto* monster : _world->_monsters)
+  {
+    // Set acceleration for any mobs inside the click radius
+    if (r > 0)
+    {
+      Vector2f dir = _mainWindow->_clickPos - monster->_pos;
+      float d = Length(dir);
+      if (d < r)
+      {
+        monster->_acc = 10.0f * Normalize(dir);
+      }
+    }
+  }
+
+}
+
+//----------------------------------------------------------------------------------
+void Game::UpdateEntity(Entity& entity, float dt)
+{
+  // Velocity Verlet integration
+  float friction = 0.99f;
+  float scale = _world->_level->_scale;
+  Vector2f oldVel = entity._vel;
+  Vector2f p = entity._pos;
+  Vector2f v = friction * (entity._vel + entity._acc * dt);
+
+  Vector2f newPos = entity._pos + (oldVel + entity._vel) * 0.5f * dt;
+
+  u8 b;
+  // check horizontal collisions
+  if (!(_world->_level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
+  {
+    newPos.x = p.x;
+    v.x = -v.x;
+  }
+
+  // check vertical
+  if (!(_world->_level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
+  {
+    newPos.y = p.y;
+    v.y = -v.y;
+  }
+
+  entity._vel = v;
+  entity._pos = newPos;
 }
 
 //----------------------------------------------------------------------------------
 void Game::Update(const time_duration& delta)
 {
   UpdatePlayers();
+  UpdateMonsters();
 
   float dt = delta.total_milliseconds() / 1000.0f;
-  float scale = _world->_level->_scale;
-  for (auto& player : _world->_players)
+  for (auto player : _world->_players)
   {
-    // Velocity Verlet integration
-    float friction = 0.99f;
-    Vector2f oldVel = player->_vel;
-    Vector2f p = player->_pos;
-    Vector2f v = friction * (player->_vel + player->_acc * dt);
-
-    Vector2f newPos = player->_pos + (oldVel + player->_vel) * 0.5f * dt;
-
-    u8 b;
-    if (!(_world->_level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
-    {
-      newPos.x = p.x;
-      v.x = -v.x;
-    }
-
-    if (!(_world->_level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
-    {
-      newPos.y = p.y;
-      v.y = -v.y;
-    }
-
-    player->_vel = v;
-    player->_pos = newPos;
+    UpdateEntity(*player, dt);
   }
+
+  for (auto monster : _world->_monsters)
+  {
+    UpdateEntity(*monster, dt);
+  }
+
 }
 
 //----------------------------------------------------------------------------------
