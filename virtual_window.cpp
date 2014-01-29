@@ -54,7 +54,7 @@ void VirtualWindow::SetPosition(const Vector2f& pos)
 //-----------------------------------------------------------------------------
 void VirtualWindow::DrawBorder(RenderWindow* window)
 {
-  bool drawBorder = _flags & WindowFlags::DrawBorder;
+  bool drawBorder = !!(_flags & WindowFlags::DrawBorder);
 
   float w = drawBorder ? (float)_borderWidth : 0;
 

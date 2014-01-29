@@ -158,7 +158,7 @@ namespace swarm
 
       memcpy(prevDir, curDir, MAX_PATH);
 
-      if (fileExists("settings.pb"))
+      if (FileExists("settings.pb"))
         return curDir;
 
       if (_chdir("..") == -1)

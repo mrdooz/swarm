@@ -1,10 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
-#include <SFML/Graphics/Export.hpp>
-#include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/Transformable.hpp>
-#include <SFML/Graphics/Vertex.hpp>
-#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Network.hpp>
 
 #include <algorithm>
 #include <deque>
@@ -20,7 +16,6 @@
 
 #include <sys/stat.h>
 #include <stdio.h>
-#include <unistd.h>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time.hpp>
@@ -28,7 +23,10 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <direct.h>
+#include <io.h>
 #else
+#include <unistd.h>
 #include <CoreGraphics/CGDirectDisplay.h>
 #endif
 
@@ -90,6 +88,9 @@ namespace swarm
   using sf::Vector2u;
   using sf::IntRect;
   using sf::FloatRect;
+
+  using sf::TcpListener;
+  using sf::TcpSocket;
 
   using boost::intrusive_ptr;
   using boost::posix_time::ptime;
