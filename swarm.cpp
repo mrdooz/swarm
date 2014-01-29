@@ -16,7 +16,6 @@ MainWindow::MainWindow(const string& title, const Vector2f& pos, const Vector2f&
 {
   game->_windowManager->RegisterHandler(Event::MouseButtonReleased, this, bind(&MainWindow::OnMouseButtonReleased, this, _1));
   game->_windowManager->RegisterHandler(Event::MouseButtonPressed, this, bind(&MainWindow::OnMouseButtonPressed, this, _1));
-
 }
 
 //-----------------------------------------------------------------------------
@@ -42,18 +41,18 @@ bool MainWindow::OnMouseButtonReleased(const Event& event)
 void MainWindow::Draw()
 {
   _texture.clear();
-  auto* world = _game->_world.get();
+  //auto* world = _game->_world.get();
   
   View view = _texture.getView();
-  view.setCenter(world->_players[0]->_pos);
+  view.setCenter(_game->_renderPlayers[0]._pos);
   _texture.setView(view);
-  _texture.draw(world->_level->_sprite);
+  _texture.draw(_game->_level->_sprite);
 
   CircleShape circle;
-  for (Player* player : world->_players)
+  for (const RenderPlayer& player : _game->_renderPlayers)
   {
     circle.setFillColor(Color::Green);
-    Vector2f p(VectorCast<float>(player->_pos));
+    Vector2f p(VectorCast<float>(player._pos));
     p.x -= 5;
     p.y -= 5;
     circle.setPosition(p);
@@ -61,14 +60,14 @@ void MainWindow::Draw()
     _texture.draw(circle);
   }
 
-  for (const auto& monster : world->_monsters)
+  for (const RenderMonster& monster : _game->_renderMonsters)
   {
     circle.setFillColor(Color::Red);
-    Vector2f p(VectorCast<float>(monster->_pos));
-    p.x -= monster->_size;
-    p.y -= monster->_size;
+    Vector2f p(VectorCast<float>(monster._pos));
+    p.x -= monster._size;
+    p.y -= monster._size;
     circle.setPosition(p);
-    circle.setRadius(monster->_size);
+    circle.setRadius(monster._size);
     _texture.draw(circle);
   }
 
@@ -122,6 +121,7 @@ void DebugWindow::Draw()
 Game::Game()
   : _done(false)
   , _frameTime(100)
+  , _level(nullptr)
   , _mainWindow(nullptr)
   , _playerWindow(nullptr)
   , _debugWindow(nullptr)
@@ -131,6 +131,7 @@ Game::Game()
 //----------------------------------------------------------------------------------
 Game::~Game()
 {
+  delete exch_null(_level);
   delete exch_null(_mainWindow);
   delete exch_null(_playerWindow);
   delete exch_null(_debugWindow);
@@ -157,12 +158,13 @@ bool Game::Init()
   _renderWindow->setFramerateLimit(60);
   _eventManager.reset(new WindowEventManager(_renderWindow.get()));
   _windowManager.reset(new VirtualWindowManager(_renderWindow.get(), _eventManager.get()));
-  _world.reset(World::Create());
-  if (!_world->_level->Load("data/pacman.png"))
+  //_world.reset(World::Create());
+  _level = new Level();
+  if (!_level->Load("data/pacman.png"))
     return false;
 
-  _world->AddPlayer();
-  _world->AddMonsters();
+  //_world->AddPlayer();
+  //_world->AddMonsters();
 
   if (!_font.loadFromFile("gfx/wscsnrg.ttf"))
     return false;
@@ -174,6 +176,15 @@ bool Game::Init()
   _mainWindow = new MainWindow("MAIN", Vector2f(200,0), Vector2f(_renderWindow->getSize().x-200, _renderWindow->getSize().y), this);
   _windowManager->AddWindow(_debugWindow);
   _windowManager->AddWindow(_mainWindow);
+
+  if (!_server.Init())
+    return false;
+
+  TcpSocket socket;
+  socket.connect(IpAddress("localhost"), 50000);
+  socket.setBlocking(false);
+
+  _renderPlayers.push_back(RenderPlayer());
 
   return true;
 }
@@ -211,42 +222,21 @@ void Game::UpdatePlayers()
 {
   float s = 20;
 
-  Player& player = *_world->_players[0];
-
-  player._acc = Vector2f(0,0);
+  _player._acc = Vector2f(0,0);
 
   if (Keyboard::isKeyPressed(Keyboard::Left) || Keyboard::isKeyPressed(Keyboard::A))
-    player._acc += Vector2f(-s, 0);
+    _player._acc += Vector2f(-s, 0);
 
   if (Keyboard::isKeyPressed(Keyboard::Right) || Keyboard::isKeyPressed(Keyboard::D))
-    player._acc += Vector2f(+s, 0);
+    _player._acc += Vector2f(+s, 0);
 
   if (Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W))
-    player._acc += Vector2f(0, -s);
+    _player._acc += Vector2f(0, -s);
 
   if (Keyboard::isKeyPressed(Keyboard::Down) || Keyboard::isKeyPressed(Keyboard::S))
-    player._acc += Vector2f(0, +s);
-}
+    _player._acc += Vector2f(0, +s);
 
-//----------------------------------------------------------------------------------
-void Game::UpdateMonsters()
-{
-  float r = _mainWindow->_clickRadius;
-
-  for (auto* monster : _world->_monsters)
-  {
-    // Set acceleration for any mobs inside the click radius
-    if (r > 0)
-    {
-      Vector2f dir = _mainWindow->_clickPos - monster->_pos;
-      float d = Length(dir);
-      if (d < r)
-      {
-        monster->_acc = 10.0f * Normalize(dir);
-      }
-    }
-  }
-
+  _renderPlayers[0]._pos = _player._pos;
 }
 
 //----------------------------------------------------------------------------------
@@ -254,7 +244,7 @@ void Game::UpdateEntity(Entity& entity, float dt)
 {
   // Velocity Verlet integration
   float friction = 0.99f;
-  float scale = _world->_level->_scale;
+  float scale = _level->_scale;
   Vector2f oldVel = entity._vel;
   Vector2f p = entity._pos;
   Vector2f v = friction * (entity._vel + entity._acc * dt);
@@ -263,14 +253,14 @@ void Game::UpdateEntity(Entity& entity, float dt)
 
   u8 b;
   // check horizontal collisions
-  if (!(_world->_level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
+  if (!(_level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
   {
     newPos.x = p.x;
     v.x = -v.x;
   }
 
   // check vertical
-  if (!(_world->_level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
+  if (!(_level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
   {
     newPos.y = p.y;
     v.y = -v.y;
@@ -284,19 +274,9 @@ void Game::UpdateEntity(Entity& entity, float dt)
 void Game::Update(const time_duration& delta)
 {
   UpdatePlayers();
-  UpdateMonsters();
 
   float dt = delta.total_milliseconds() / 1000.0f;
-  for (auto player : _world->_players)
-  {
-    UpdateEntity(*player, dt);
-  }
-
-  for (auto monster : _world->_monsters)
-  {
-    UpdateEntity(*monster, dt);
-  }
-
+  UpdateEntity(_player, dt);
 }
 
 //----------------------------------------------------------------------------------
@@ -335,5 +315,5 @@ int main(int argc, char** argv)
 
   game.Run();
 
-	return 0;
+  return 0;
 }

@@ -11,22 +11,18 @@ namespace swarm
 
   class World
   {
-    public:
+  public:
+    World();
     ~World();
 
     void AddPlayer();
     void AddMonsters();
 
-    static World* Create();
-
     vector<Monster* > _monsters;
     vector<Player* > _players;
     Level* _level;
 
-    private:
-    World();
-
+  private:
     DISALLOW_COPY_AND_ASSIGN(World);
-    
   };
 }

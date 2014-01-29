@@ -13,6 +13,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <thread>
 
 #include <sys/stat.h>
 #include <stdio.h>
@@ -59,6 +60,7 @@ namespace swarm
   using std::make_pair;
   using std::shared_ptr;
   using std::unique_ptr;
+  using std::thread;
 
   using std::function;
 
@@ -89,6 +91,8 @@ namespace swarm
   using sf::IntRect;
   using sf::FloatRect;
 
+  using sf::IpAddress;
+  using sf::Socket;
   using sf::TcpListener;
   using sf::TcpSocket;
 

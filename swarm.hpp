@@ -1,6 +1,8 @@
 #pragma once
 #include "virtual_window.hpp"
 #include "rolling_average.hpp"
+#include "swarm_server.hpp"
+#include "player.hpp"
 
 namespace swarm
 {
@@ -40,6 +42,18 @@ namespace swarm
     Game* _game;
   };
 
+  struct RenderPlayer
+  {
+    Vector2f _pos;
+    float _size;
+  };
+
+  struct RenderMonster
+  {
+    Vector2f _pos;
+    float _size;
+  };
+
   class Game
   {
     friend class MainWindow;
@@ -60,23 +74,27 @@ namespace swarm
     bool OnMouseReleased(const Event& event);
 
     void UpdatePlayers();
-    void UpdateMonsters();
 
     void UpdateEntity(Entity& entity, float dt);
 
     bool _done;
     string _appRoot;
+    vector<RenderPlayer> _renderPlayers;
+    vector<RenderMonster> _renderMonsters;
     unique_ptr<RenderWindow> _renderWindow;
     unique_ptr<WindowEventManager> _eventManager;
-    unique_ptr<World> _world;
     unique_ptr<VirtualWindowManager> _windowManager;
     RollingAverage<s64> _frameTime;
     Font _font;
 
     Vector2f _mousePos;
 
+    Player _player;
+    Level* _level;
     MainWindow* _mainWindow;
     PlayerWindow* _playerWindow;
     DebugWindow* _debugWindow;
+
+    Server _server;
   };
 }

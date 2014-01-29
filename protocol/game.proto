@@ -1,0 +1,38 @@
+message PlayerJoined
+{
+	optional string name = 1;
+}
+
+message PlayerLeft
+{
+	optional string name = 1;
+}
+
+message Position
+{
+	optional float x = 1;
+	optional float y = 2;
+}
+
+message Monster
+{
+	optional Position pos = 1;
+	optional float size = 2;
+}
+
+message SwarmState
+{
+	repeated Monster monster = 1;
+}
+
+message Player
+{
+	optional Position pos = 1;
+	optional Position click_pos = 2;
+	optional float click_size = 3;
+}
+
+message PlayerState
+{
+	repeated Player player = 1;
+}

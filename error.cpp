@@ -85,5 +85,3 @@ LogStream& swarm::operator<<(LogStream& s, const char* desc)
   s.Append("desc", desc);
   return s;
 }
-
-
