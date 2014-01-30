@@ -21,6 +21,43 @@ Server::~Server()
 }
 
 //-----------------------------------------------------------------------------
+void Server::HandleClientMessages()
+{
+  vector<u8> buf(16*1024);
+  for (TcpSocket* s : _connectedClients)
+  {
+    size_t recievedSize = 0;
+    Socket::Status status = s->receive(buf.data(), buf.size(), recievedSize);
+    if (status == Socket::Done)
+    {
+      game::PlayerMessage playerMsg;
+      if (playerMsg.ParseFromArray(buf.data(), recievedSize))
+      {
+        auto it = _addrToId.find(make_pair(s->getRemoteAddress().toInteger(), s->getRemotePort()));
+        if (it == _addrToId.end())
+        {
+          LOG_WARN("Unknown client");
+          continue;
+        }
+
+        int id = it->second;
+        switch (playerMsg.type())
+        {
+        case game::PlayerMessage_Type_PLAYER_POS:
+          _playerData[id].pos = Vector2f(playerMsg.pos().x(), playerMsg.pos().y());
+          break;
+
+        case game::PlayerMessage_Type_PLAYER_CLICK:
+          break;
+        }
+      }
+
+    }
+  }
+
+}
+
+//-----------------------------------------------------------------------------
 void Server::ThreadProc()
 {
   TcpListener listener;
@@ -40,7 +77,34 @@ void Server::ThreadProc()
     if (status == Socket::Done)
     {
       _connectedClients.push_back(socket);
-      u16 port = socket->getLocalPort();
+      u16 port = socket->getRemotePort();
+      u32 addr = socket->getRemoteAddress().toInteger();
+
+      // save the address to id mapping
+      auto key = make_pair(addr, port);
+      int id;
+      auto it = _addrToId.find(key);
+      if (it != _addrToId.end())
+      {
+        id = it->second;
+      }
+      else
+      {
+        id = _addrToId.size();
+        _addrToId[key] = id;
+      }
+
+      // send the ack to the client
+      game::ServerMessage msg;
+      msg.set_type(game::ServerMessage_Type_CONNECTION_ACK);
+      game::ConnectionAck& ack = *msg.mutable_connection_ack();
+      ack.set_player_id(id);
+      string str;
+      if (msg.SerializeToString(&str))
+      {
+        socket->send(str.data(), str.size());
+      }
+
       socket = new TcpSocket();
       socket->setBlocking(false);
     }
@@ -53,34 +117,13 @@ void Server::ThreadProc()
     {
       lastUpdate = end;
       Update(milliseconds(delta.asMilliseconds()));
+      SendPlayerState();
     }
 
-    vector<u8> buf(16*1024);
-    for (TcpSocket* s : _connectedClients)
-    {
-      size_t recievedSize = 0;
-      status = s->receive(buf.data(), buf.size(), recievedSize);
-      if (status == Socket::Done)
-      {
-        game::PlayerMessage playerMsg;
-        if (playerMsg.ParseFromArray(buf.data(), recievedSize))
-        {
-          switch (playerMsg.type())
-          {
-          case game::PlayerMessage_Type_PLAYER_POS:
-            break;
-
-          case game::PlayerMessage_Type_PLAYER_CLICK:
-            break;
-          }
-        }
-
-      }
-    }
+    HandleClientMessages();
   }
 
   delete socket;
-
 }
 
 //-----------------------------------------------------------------------------
@@ -159,6 +202,53 @@ void Server::UpdateEntity(Entity& entity, float dt)
 }
 
 //----------------------------------------------------------------------------------
+void Server::SendToClients(const string& str)
+{
+  for (auto it = _connectedClients.begin(); it != _connectedClients.end(); )
+  {
+    TcpSocket* socket = *it;
+    Socket::Status status = socket->send(str.data(), str.size());
+    if (status != Socket::Done)
+    {
+      // unable to send, so remove the client
+      delete socket;
+      it = _connectedClients.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------
+void Server::SendPlayerState()
+{
+  game::ServerMessage msg;
+  msg.set_type(game::ServerMessage_Type_PLAYER_STATE);
+  game::PlayerState* state = msg.mutable_player_state();
+
+  for (auto it = _playerData.begin(); it != _playerData.end(); ++it)
+  {
+    const PlayerData& data = it->second;
+    game::Player* player = state->add_player();
+    player->set_id(it->first);
+    game::Position* pos = player->mutable_pos();
+    pos->set_x(data.pos.x);
+    pos->set_y(data.pos.y);
+  }
+
+  string str;
+  if (!msg.SerializeToString(&str))
+  {
+    LOG_WARN("Unable to serialize state");
+    return;
+  }
+
+  SendToClients(str);
+}
+
+//----------------------------------------------------------------------------------
 void Server::Update(const time_duration& delta)
 {
   UpdateMonsters();
@@ -188,19 +278,5 @@ void Server::Update(const time_duration& delta)
     return;
   }
 
-  for (auto it = _connectedClients.begin(); it != _connectedClients.end(); )
-  {
-    TcpSocket* socket = *it;
-    Socket::Status status = socket->send(str.data(), str.size());
-    if (status != Socket::Done)
-    {
-      // unable to send, so remove the client
-      delete socket;
-      it = _connectedClients.erase(it);
-    }
-    else
-    {
-      ++it;
-    }
-  }
+  SendToClients(str);
 }

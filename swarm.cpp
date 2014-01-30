@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "world.hpp"
 #include "player.hpp"
+#include "error.hpp"
 #include "rolling_average.hpp"
 #include "window_event_manager.hpp"
 #include "virtual_window_manager.hpp"
@@ -47,7 +48,7 @@ void MainWindow::Draw()
   //auto* world = _game->_world.get();
   
   View view = _texture.getView();
-  view.setCenter(_game->_renderPlayers[0]._pos);
+  view.setCenter(_game->_world._players[0]->_pos);
   _texture.setView(view);
   _texture.draw(_game->_world._level->_sprite);
 
@@ -185,6 +186,23 @@ bool Game::Init()
   }
 
   _socket.connect(IpAddress(_serverAddr.empty() ? "localhost" : _serverAddr), _serverPort);
+
+  // wait for connection ack
+  vector<u8> buf(16*1024);
+  size_t recv;
+  Socket::Status status = _socket.receive(buf.data(), buf.size(), recv);
+  if (status != Socket::Done)
+  {
+    LOG_WARN("No ack recieved");
+    return false;
+  }
+
+  game::ServerMessage msg;
+  if (!msg.ParseFromArray(buf.data(), recv) || msg.type() != game::ServerMessage_Type_CONNECTION_ACK)
+    return false;
+
+  _playerId = msg.connection_ack().player_id();
+
   _socket.setBlocking(false);
 
   _renderPlayers.push_back(RenderPlayer());
@@ -240,7 +258,7 @@ void Game::UpdatePlayers()
   if (Keyboard::isKeyPressed(Keyboard::Down) || Keyboard::isKeyPressed(Keyboard::S))
     player._acc += Vector2f(0, +s);
 
-  _renderPlayers[0]._pos = player._pos;
+  //_renderPlayers[0]._pos = player._pos;
 }
 
 //----------------------------------------------------------------------------------
@@ -287,6 +305,26 @@ void Game::HandlePlayerLeft(const game::PlayerLeft& msg)
 }
 
 //----------------------------------------------------------------------------------
+void Game::HandlePlayerState(const game::PlayerState& msg)
+{
+  if (_renderPlayers.size() != msg.player_size())
+    _renderPlayers.resize(msg.player_size());
+
+  for (int i = 0; i < msg.player_size(); ++i)
+  {
+    const game::Player& player = msg.player(i);
+
+    // Skip local player info
+    if (player.id() == _playerId)
+    {
+      _renderPlayers[i]._pos = _world._players[0]->_pos;
+      continue;
+    }
+    _renderPlayers[i]._pos = Vector2f(player.pos().x(), player.pos().y());
+  }
+}
+
+//----------------------------------------------------------------------------------
 void Game::HandleSwarmState(const game::SwarmState& msg)
 {
   if (_renderMonsters.size() != msg.monster_size())
@@ -320,6 +358,7 @@ void Game::Run()
   RollingAverage<s64> avg(100);
 
   Time lastUpdate = clock.getElapsedTime();
+  Time lastSend = clock.getElapsedTime();
   while (_renderWindow->isOpen() && !_done)
   {
     Time start = clock.getElapsedTime();
@@ -348,6 +387,10 @@ void Game::Run()
         case game::ServerMessage_Type_SWARM_STATE:
           HandleSwarmState(msg.swarm_state());
           break;
+
+        case game::ServerMessage_Type_PLAYER_STATE:
+          HandlePlayerState(msg.player_state());
+          break;
         }
       }
     }
@@ -362,7 +405,7 @@ void Game::Run()
       game::PlayerClick* click = msg.mutable_click();
       game::Position* pos = click->mutable_click_pos();
       pos->set_x(_mainWindow->_clickPos.x);
-      pos->set_x(_mainWindow->_clickPos.y);
+      pos->set_y(_mainWindow->_clickPos.y);
       click->set_click_size(r);
 
       string str;
@@ -377,6 +420,23 @@ void Game::Run()
     Time delta = end - lastUpdate;
     lastUpdate = end;
     Update(milliseconds(delta.asMilliseconds()));
+
+    if ((end - lastSend).asMilliseconds() > 100)
+    {
+      // send player state
+      game::PlayerMessage msg;
+      msg.set_type(game::PlayerMessage_Type_PLAYER_POS);
+      game::Position* pos = msg.mutable_pos();
+      pos->set_x(_world._players[0]->_pos.x);
+      pos->set_y(_world._players[0]->_pos.y);
+
+      string str;
+      if (msg.SerializePartialToString(&str))
+      {
+        _socket.send(str.data(), str.size());
+      }
+    }
+
     avg.AddSample(computeTime.asMicroseconds());
     _renderWindow->display();
   }

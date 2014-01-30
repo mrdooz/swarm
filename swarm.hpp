@@ -17,6 +17,7 @@ namespace swarm
     class PlayerLeft;
     class PlayerJoined;
     class SwarmState;
+    class PlayerState;
   }
 
   class MainWindow : public VirtualWindow
@@ -86,6 +87,7 @@ namespace swarm
     void HandlePlayerJoined(const game::PlayerJoined& msg);
     void HandlePlayerLeft(const game::PlayerLeft& msg);
     void HandleSwarmState(const game::SwarmState& msg);
+    void HandlePlayerState(const game::PlayerState& msg);
 
     bool _done;
     string _appRoot;
@@ -109,6 +111,7 @@ namespace swarm
     time_duration _clickDuration;
     bool _sendClick;
 
+    u32 _playerId;
     u16 _serverPort;
     string _serverAddr;
   };

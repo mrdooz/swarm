@@ -8,6 +8,13 @@ message Position
 }
 
 //-----------------------------------------------------------------------------
+message ConnectionAck
+{
+	// sent to a newly connected player to allow him to initialize player state
+	optional uint32 player_id = 1;
+}
+
+//-----------------------------------------------------------------------------
 message PlayerJoined
 {
 	optional string name = 1;
@@ -35,7 +42,9 @@ message SwarmState
 //-----------------------------------------------------------------------------
 message Player
 {
-	optional Position pos = 1;
+	// message about a generic player (from server -> client)
+	optional uint32 id = 1;
+	optional Position pos = 2;
 }
 
 //-----------------------------------------------------------------------------
@@ -58,16 +67,20 @@ message ServerMessage
 	
 	enum Type
 	{ 
+		CONNECTION_ACK	= 0;
 		PLAYER_JOINED 	= 1;
 		PLAYER_LEFT 	= 2;
 		SWARM_STATE 	= 3;
+		PLAYER_STATE	= 4;
 	}
 	
 	required Type type = 1;
 	
-	optional PlayerJoined player_joined = 2;
-	optional PlayerLeft player_left = 3;
-	optional SwarmState swarm_state = 4;
+	optional ConnectionAck connection_ack = 2;
+	optional PlayerJoined player_joined = 3;
+	optional PlayerLeft player_left = 4;
+	optional SwarmState swarm_state = 5;
+	optional PlayerState player_state = 6;
 }
 
 //-----------------------------------------------------------------------------

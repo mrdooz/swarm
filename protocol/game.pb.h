@@ -36,6 +36,7 @@ void protobuf_AssignDesc_game_2eproto();
 void protobuf_ShutdownFile_game_2eproto();
 
 class Position;
+class ConnectionAck;
 class PlayerJoined;
 class PlayerLeft;
 class Monster;
@@ -47,13 +48,15 @@ class ServerMessage;
 class PlayerMessage;
 
 enum ServerMessage_Type {
+  ServerMessage_Type_CONNECTION_ACK = 0,
   ServerMessage_Type_PLAYER_JOINED = 1,
   ServerMessage_Type_PLAYER_LEFT = 2,
-  ServerMessage_Type_SWARM_STATE = 3
+  ServerMessage_Type_SWARM_STATE = 3,
+  ServerMessage_Type_PLAYER_STATE = 4
 };
 bool ServerMessage_Type_IsValid(int value);
-const ServerMessage_Type ServerMessage_Type_Type_MIN = ServerMessage_Type_PLAYER_JOINED;
-const ServerMessage_Type ServerMessage_Type_Type_MAX = ServerMessage_Type_SWARM_STATE;
+const ServerMessage_Type ServerMessage_Type_Type_MIN = ServerMessage_Type_CONNECTION_ACK;
+const ServerMessage_Type ServerMessage_Type_Type_MAX = ServerMessage_Type_PLAYER_STATE;
 const int ServerMessage_Type_Type_ARRAYSIZE = ServerMessage_Type_Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* ServerMessage_Type_descriptor();
@@ -176,6 +179,88 @@ class Position : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Position* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ConnectionAck : public ::google::protobuf::Message {
+ public:
+  ConnectionAck();
+  virtual ~ConnectionAck();
+
+  ConnectionAck(const ConnectionAck& from);
+
+  inline ConnectionAck& operator=(const ConnectionAck& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ConnectionAck& default_instance();
+
+  void Swap(ConnectionAck* other);
+
+  // implements Message ----------------------------------------------
+
+  ConnectionAck* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ConnectionAck& from);
+  void MergeFrom(const ConnectionAck& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 player_id = 1;
+  inline bool has_player_id() const;
+  inline void clear_player_id();
+  static const int kPlayerIdFieldNumber = 1;
+  inline ::google::protobuf::uint32 player_id() const;
+  inline void set_player_id(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.ConnectionAck)
+ private:
+  inline void set_has_player_id();
+  inline void clear_has_player_id();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 player_id_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static ConnectionAck* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -586,10 +671,17 @@ class Player : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .swarm.game.Position pos = 1;
+  // optional uint32 id = 1;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 1;
+  inline ::google::protobuf::uint32 id() const;
+  inline void set_id(::google::protobuf::uint32 value);
+
+  // optional .swarm.game.Position pos = 2;
   inline bool has_pos() const;
   inline void clear_pos();
-  static const int kPosFieldNumber = 1;
+  static const int kPosFieldNumber = 2;
   inline const ::swarm::game::Position& pos() const;
   inline ::swarm::game::Position* mutable_pos();
   inline ::swarm::game::Position* release_pos();
@@ -597,15 +689,18 @@ class Player : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:swarm.game.Player)
  private:
+  inline void set_has_id();
+  inline void clear_has_id();
   inline void set_has_pos();
   inline void clear_has_pos();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::swarm::game::Position* pos_;
+  ::google::protobuf::uint32 id_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
@@ -848,9 +943,11 @@ class ServerMessage : public ::google::protobuf::Message {
   // nested types ----------------------------------------------------
 
   typedef ServerMessage_Type Type;
+  static const Type CONNECTION_ACK = ServerMessage_Type_CONNECTION_ACK;
   static const Type PLAYER_JOINED = ServerMessage_Type_PLAYER_JOINED;
   static const Type PLAYER_LEFT = ServerMessage_Type_PLAYER_LEFT;
   static const Type SWARM_STATE = ServerMessage_Type_SWARM_STATE;
+  static const Type PLAYER_STATE = ServerMessage_Type_PLAYER_STATE;
   static inline bool Type_IsValid(int value) {
     return ServerMessage_Type_IsValid(value);
   }
@@ -881,53 +978,77 @@ class ServerMessage : public ::google::protobuf::Message {
   inline ::swarm::game::ServerMessage_Type type() const;
   inline void set_type(::swarm::game::ServerMessage_Type value);
 
-  // optional .swarm.game.PlayerJoined player_joined = 2;
+  // optional .swarm.game.ConnectionAck connection_ack = 2;
+  inline bool has_connection_ack() const;
+  inline void clear_connection_ack();
+  static const int kConnectionAckFieldNumber = 2;
+  inline const ::swarm::game::ConnectionAck& connection_ack() const;
+  inline ::swarm::game::ConnectionAck* mutable_connection_ack();
+  inline ::swarm::game::ConnectionAck* release_connection_ack();
+  inline void set_allocated_connection_ack(::swarm::game::ConnectionAck* connection_ack);
+
+  // optional .swarm.game.PlayerJoined player_joined = 3;
   inline bool has_player_joined() const;
   inline void clear_player_joined();
-  static const int kPlayerJoinedFieldNumber = 2;
+  static const int kPlayerJoinedFieldNumber = 3;
   inline const ::swarm::game::PlayerJoined& player_joined() const;
   inline ::swarm::game::PlayerJoined* mutable_player_joined();
   inline ::swarm::game::PlayerJoined* release_player_joined();
   inline void set_allocated_player_joined(::swarm::game::PlayerJoined* player_joined);
 
-  // optional .swarm.game.PlayerLeft player_left = 3;
+  // optional .swarm.game.PlayerLeft player_left = 4;
   inline bool has_player_left() const;
   inline void clear_player_left();
-  static const int kPlayerLeftFieldNumber = 3;
+  static const int kPlayerLeftFieldNumber = 4;
   inline const ::swarm::game::PlayerLeft& player_left() const;
   inline ::swarm::game::PlayerLeft* mutable_player_left();
   inline ::swarm::game::PlayerLeft* release_player_left();
   inline void set_allocated_player_left(::swarm::game::PlayerLeft* player_left);
 
-  // optional .swarm.game.SwarmState swarm_state = 4;
+  // optional .swarm.game.SwarmState swarm_state = 5;
   inline bool has_swarm_state() const;
   inline void clear_swarm_state();
-  static const int kSwarmStateFieldNumber = 4;
+  static const int kSwarmStateFieldNumber = 5;
   inline const ::swarm::game::SwarmState& swarm_state() const;
   inline ::swarm::game::SwarmState* mutable_swarm_state();
   inline ::swarm::game::SwarmState* release_swarm_state();
   inline void set_allocated_swarm_state(::swarm::game::SwarmState* swarm_state);
 
+  // optional .swarm.game.PlayerState player_state = 6;
+  inline bool has_player_state() const;
+  inline void clear_player_state();
+  static const int kPlayerStateFieldNumber = 6;
+  inline const ::swarm::game::PlayerState& player_state() const;
+  inline ::swarm::game::PlayerState* mutable_player_state();
+  inline ::swarm::game::PlayerState* release_player_state();
+  inline void set_allocated_player_state(::swarm::game::PlayerState* player_state);
+
   // @@protoc_insertion_point(class_scope:swarm.game.ServerMessage)
  private:
   inline void set_has_type();
   inline void clear_has_type();
+  inline void set_has_connection_ack();
+  inline void clear_has_connection_ack();
   inline void set_has_player_joined();
   inline void clear_has_player_joined();
   inline void set_has_player_left();
   inline void clear_has_player_left();
   inline void set_has_swarm_state();
   inline void clear_has_swarm_state();
+  inline void set_has_player_state();
+  inline void clear_has_player_state();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::swarm::game::ConnectionAck* connection_ack_;
   ::swarm::game::PlayerJoined* player_joined_;
   ::swarm::game::PlayerLeft* player_left_;
   ::swarm::game::SwarmState* swarm_state_;
+  ::swarm::game::PlayerState* player_state_;
   int type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
@@ -1115,6 +1236,32 @@ inline float Position::y() const {
 inline void Position::set_y(float value) {
   set_has_y();
   y_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ConnectionAck
+
+// optional uint32 player_id = 1;
+inline bool ConnectionAck::has_player_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ConnectionAck::set_has_player_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ConnectionAck::clear_has_player_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ConnectionAck::clear_player_id() {
+  player_id_ = 0u;
+  clear_has_player_id();
+}
+inline ::google::protobuf::uint32 ConnectionAck::player_id() const {
+  return player_id_;
+}
+inline void ConnectionAck::set_player_id(::google::protobuf::uint32 value) {
+  set_has_player_id();
+  player_id_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -1362,15 +1509,37 @@ SwarmState::mutable_monster() {
 
 // Player
 
-// optional .swarm.game.Position pos = 1;
-inline bool Player::has_pos() const {
+// optional uint32 id = 1;
+inline bool Player::has_id() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void Player::set_has_pos() {
+inline void Player::set_has_id() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void Player::clear_has_pos() {
+inline void Player::clear_has_id() {
   _has_bits_[0] &= ~0x00000001u;
+}
+inline void Player::clear_id() {
+  id_ = 0u;
+  clear_has_id();
+}
+inline ::google::protobuf::uint32 Player::id() const {
+  return id_;
+}
+inline void Player::set_id(::google::protobuf::uint32 value) {
+  set_has_id();
+  id_ = value;
+}
+
+// optional .swarm.game.Position pos = 2;
+inline bool Player::has_pos() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Player::set_has_pos() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Player::clear_has_pos() {
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void Player::clear_pos() {
   if (pos_ != NULL) pos_->::swarm::game::Position::Clear();
@@ -1508,7 +1677,7 @@ inline void ServerMessage::clear_has_type() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void ServerMessage::clear_type() {
-  type_ = 1;
+  type_ = 0;
   clear_has_type();
 }
 inline ::swarm::game::ServerMessage_Type ServerMessage::type() const {
@@ -1520,15 +1689,53 @@ inline void ServerMessage::set_type(::swarm::game::ServerMessage_Type value) {
   type_ = value;
 }
 
-// optional .swarm.game.PlayerJoined player_joined = 2;
-inline bool ServerMessage::has_player_joined() const {
+// optional .swarm.game.ConnectionAck connection_ack = 2;
+inline bool ServerMessage::has_connection_ack() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void ServerMessage::set_has_player_joined() {
+inline void ServerMessage::set_has_connection_ack() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void ServerMessage::clear_has_player_joined() {
+inline void ServerMessage::clear_has_connection_ack() {
   _has_bits_[0] &= ~0x00000002u;
+}
+inline void ServerMessage::clear_connection_ack() {
+  if (connection_ack_ != NULL) connection_ack_->::swarm::game::ConnectionAck::Clear();
+  clear_has_connection_ack();
+}
+inline const ::swarm::game::ConnectionAck& ServerMessage::connection_ack() const {
+  return connection_ack_ != NULL ? *connection_ack_ : *default_instance_->connection_ack_;
+}
+inline ::swarm::game::ConnectionAck* ServerMessage::mutable_connection_ack() {
+  set_has_connection_ack();
+  if (connection_ack_ == NULL) connection_ack_ = new ::swarm::game::ConnectionAck;
+  return connection_ack_;
+}
+inline ::swarm::game::ConnectionAck* ServerMessage::release_connection_ack() {
+  clear_has_connection_ack();
+  ::swarm::game::ConnectionAck* temp = connection_ack_;
+  connection_ack_ = NULL;
+  return temp;
+}
+inline void ServerMessage::set_allocated_connection_ack(::swarm::game::ConnectionAck* connection_ack) {
+  delete connection_ack_;
+  connection_ack_ = connection_ack;
+  if (connection_ack) {
+    set_has_connection_ack();
+  } else {
+    clear_has_connection_ack();
+  }
+}
+
+// optional .swarm.game.PlayerJoined player_joined = 3;
+inline bool ServerMessage::has_player_joined() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ServerMessage::set_has_player_joined() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ServerMessage::clear_has_player_joined() {
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void ServerMessage::clear_player_joined() {
   if (player_joined_ != NULL) player_joined_->::swarm::game::PlayerJoined::Clear();
@@ -1558,15 +1765,15 @@ inline void ServerMessage::set_allocated_player_joined(::swarm::game::PlayerJoin
   }
 }
 
-// optional .swarm.game.PlayerLeft player_left = 3;
+// optional .swarm.game.PlayerLeft player_left = 4;
 inline bool ServerMessage::has_player_left() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void ServerMessage::set_has_player_left() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void ServerMessage::clear_has_player_left() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void ServerMessage::clear_player_left() {
   if (player_left_ != NULL) player_left_->::swarm::game::PlayerLeft::Clear();
@@ -1596,15 +1803,15 @@ inline void ServerMessage::set_allocated_player_left(::swarm::game::PlayerLeft* 
   }
 }
 
-// optional .swarm.game.SwarmState swarm_state = 4;
+// optional .swarm.game.SwarmState swarm_state = 5;
 inline bool ServerMessage::has_swarm_state() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void ServerMessage::set_has_swarm_state() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void ServerMessage::clear_has_swarm_state() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void ServerMessage::clear_swarm_state() {
   if (swarm_state_ != NULL) swarm_state_->::swarm::game::SwarmState::Clear();
@@ -1631,6 +1838,44 @@ inline void ServerMessage::set_allocated_swarm_state(::swarm::game::SwarmState* 
     set_has_swarm_state();
   } else {
     clear_has_swarm_state();
+  }
+}
+
+// optional .swarm.game.PlayerState player_state = 6;
+inline bool ServerMessage::has_player_state() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void ServerMessage::set_has_player_state() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void ServerMessage::clear_has_player_state() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void ServerMessage::clear_player_state() {
+  if (player_state_ != NULL) player_state_->::swarm::game::PlayerState::Clear();
+  clear_has_player_state();
+}
+inline const ::swarm::game::PlayerState& ServerMessage::player_state() const {
+  return player_state_ != NULL ? *player_state_ : *default_instance_->player_state_;
+}
+inline ::swarm::game::PlayerState* ServerMessage::mutable_player_state() {
+  set_has_player_state();
+  if (player_state_ == NULL) player_state_ = new ::swarm::game::PlayerState;
+  return player_state_;
+}
+inline ::swarm::game::PlayerState* ServerMessage::release_player_state() {
+  clear_has_player_state();
+  ::swarm::game::PlayerState* temp = player_state_;
+  player_state_ = NULL;
+  return temp;
+}
+inline void ServerMessage::set_allocated_player_state(::swarm::game::PlayerState* player_state) {
+  delete player_state_;
+  player_state_ = player_state;
+  if (player_state) {
+    set_has_player_state();
+  } else {
+    clear_has_player_state();
   }
 }
 
