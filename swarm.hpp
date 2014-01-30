@@ -2,7 +2,7 @@
 #include "virtual_window.hpp"
 #include "rolling_average.hpp"
 #include "swarm_server.hpp"
-#include "player.hpp"
+#include "world.hpp"
 
 namespace swarm
 {
@@ -11,6 +11,13 @@ namespace swarm
   class WindowEventManager;
   class Game;
   class Entity;
+
+  namespace game
+  {
+    class PlayerLeft;
+    class PlayerJoined;
+    class SwarmState;
+  }
 
   class MainWindow : public VirtualWindow
   {
@@ -22,7 +29,6 @@ namespace swarm
 
     Game* _game;
     Vector2f _clickPos;
-    float _clickRadius;
     ptime _clickStart;
   };
 
@@ -60,7 +66,7 @@ namespace swarm
     friend class DebugWindow;
     
     public:
-    Game();
+    Game(u16 serverPort, const string& serverAddr);
     ~Game();
     
     bool Init();
@@ -77,6 +83,10 @@ namespace swarm
 
     void UpdateEntity(Entity& entity, float dt);
 
+    void HandlePlayerJoined(const game::PlayerJoined& msg);
+    void HandlePlayerLeft(const game::PlayerLeft& msg);
+    void HandleSwarmState(const game::SwarmState& msg);
+
     bool _done;
     string _appRoot;
     vector<RenderPlayer> _renderPlayers;
@@ -89,12 +99,17 @@ namespace swarm
 
     Vector2f _mousePos;
 
-    Player _player;
-    Level* _level;
+    World _world;
     MainWindow* _mainWindow;
     PlayerWindow* _playerWindow;
     DebugWindow* _debugWindow;
 
+    TcpSocket _socket;
     Server _server;
+    time_duration _clickDuration;
+    bool _sendClick;
+
+    u16 _serverPort;
+    string _serverAddr;
   };
 }

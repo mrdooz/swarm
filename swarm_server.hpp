@@ -28,7 +28,7 @@ namespace swarm
 
     World _world;
     vector<MonsterAttractor> _monsterAttractors;
-    vector<Socket *> _connectedClients;
+    vector<TcpSocket *> _connectedClients;
     thread* _serverThread;
   };
 }

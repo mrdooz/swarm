@@ -1,6 +1,8 @@
 #include "swarm_server.hpp"
 #include "utils.hpp"
 #include "entity.hpp"
+#include "protocol/game.pb.h"
+#include "error.hpp"
 
 using namespace swarm;
 
@@ -26,6 +28,7 @@ void Server::ThreadProc()
   listener.listen(50000);
 
   TcpSocket *socket = new TcpSocket();
+  socket->setBlocking(false);
 
   Clock clock;
   clock.restart();
@@ -37,13 +40,43 @@ void Server::ThreadProc()
     if (status == Socket::Done)
     {
       _connectedClients.push_back(socket);
+      u16 port = socket->getLocalPort();
       socket = new TcpSocket();
+      socket->setBlocking(false);
     }
 
     Time end = clock.getElapsedTime();
     Time delta = end - lastUpdate;
-    lastUpdate = end;
-    Update(milliseconds(delta.asMilliseconds()));
+
+    // update 10 times/sec
+    if (delta.asMilliseconds() > 100)
+    {
+      lastUpdate = end;
+      Update(milliseconds(delta.asMilliseconds()));
+    }
+
+    vector<u8> buf(16*1024);
+    for (TcpSocket* s : _connectedClients)
+    {
+      size_t recievedSize = 0;
+      status = s->receive(buf.data(), buf.size(), recievedSize);
+      if (status == Socket::Done)
+      {
+        game::PlayerMessage playerMsg;
+        if (playerMsg.ParseFromArray(buf.data(), recievedSize))
+        {
+          switch (playerMsg.type())
+          {
+          case game::PlayerMessage_Type_PLAYER_POS:
+            break;
+
+          case game::PlayerMessage_Type_PLAYER_CLICK:
+            break;
+          }
+        }
+
+      }
+    }
   }
 
   delete socket;
@@ -53,6 +86,10 @@ void Server::ThreadProc()
 //-----------------------------------------------------------------------------
 bool Server::Init()
 {
+  if (!_world._level->Load("data/pacman.png"))
+    return false;
+  _world.AddMonsters();
+
   _serverThread = new thread(bind(&Server::ThreadProc, this));
   return true;
 }
@@ -126,9 +163,44 @@ void Server::Update(const time_duration& delta)
 {
   UpdateMonsters();
 
+  game::ServerMessage msg;
+  msg.set_type(game::ServerMessage_Type_SWARM_STATE);
+  game::SwarmState& state = *msg.mutable_swarm_state();
+
   float dt = delta.total_milliseconds() / 1000.0f;
-  for (auto monster : _world._monsters)
+  for (Monster* monster : _world._monsters)
   {
     UpdateEntity(*monster, dt);
+
+    // add monster to state
+    game::Monster* m = state.add_monster();
+    auto* p = m->mutable_pos();
+    p->set_x(monster->_pos.x);
+    p->set_y(monster->_pos.y);
+    m->set_size(monster->_size);
+  }
+
+  // Send state to all connected clients
+  string str;
+  if (!msg.SerializeToString(&str))
+  {
+    LOG_WARN("Unable to serialize state");
+    return;
+  }
+
+  for (auto it = _connectedClients.begin(); it != _connectedClients.end(); )
+  {
+    TcpSocket* socket = *it;
+    Socket::Status status = socket->send(str.data(), str.size());
+    if (status != Socket::Done)
+    {
+      // unable to send, so remove the client
+      delete socket;
+      it = _connectedClients.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
   }
 }

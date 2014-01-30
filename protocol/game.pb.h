@@ -23,8 +23,12 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/extension_set.h>
+#include <google/protobuf/generated_enum_reflection.h>
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
+
+namespace swarm {
+namespace game {
 
 // Internal implementation detail -- do not call these.
 void  protobuf_AddDesc_game_2eproto();
@@ -32,9 +36,55 @@ void protobuf_AssignDesc_game_2eproto();
 void protobuf_ShutdownFile_game_2eproto();
 
 class Position;
+class PlayerJoined;
+class PlayerLeft;
 class Monster;
 class SwarmState;
+class Player;
+class PlayerClick;
+class PlayerState;
+class ServerMessage;
+class PlayerMessage;
 
+enum ServerMessage_Type {
+  ServerMessage_Type_PLAYER_JOINED = 1,
+  ServerMessage_Type_PLAYER_LEFT = 2,
+  ServerMessage_Type_SWARM_STATE = 3
+};
+bool ServerMessage_Type_IsValid(int value);
+const ServerMessage_Type ServerMessage_Type_Type_MIN = ServerMessage_Type_PLAYER_JOINED;
+const ServerMessage_Type ServerMessage_Type_Type_MAX = ServerMessage_Type_SWARM_STATE;
+const int ServerMessage_Type_Type_ARRAYSIZE = ServerMessage_Type_Type_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* ServerMessage_Type_descriptor();
+inline const ::std::string& ServerMessage_Type_Name(ServerMessage_Type value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    ServerMessage_Type_descriptor(), value);
+}
+inline bool ServerMessage_Type_Parse(
+    const ::std::string& name, ServerMessage_Type* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<ServerMessage_Type>(
+    ServerMessage_Type_descriptor(), name, value);
+}
+enum PlayerMessage_Type {
+  PlayerMessage_Type_PLAYER_POS = 1,
+  PlayerMessage_Type_PLAYER_CLICK = 2
+};
+bool PlayerMessage_Type_IsValid(int value);
+const PlayerMessage_Type PlayerMessage_Type_Type_MIN = PlayerMessage_Type_PLAYER_POS;
+const PlayerMessage_Type PlayerMessage_Type_Type_MAX = PlayerMessage_Type_PLAYER_CLICK;
+const int PlayerMessage_Type_Type_ARRAYSIZE = PlayerMessage_Type_Type_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* PlayerMessage_Type_descriptor();
+inline const ::std::string& PlayerMessage_Type_Name(PlayerMessage_Type value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    PlayerMessage_Type_descriptor(), value);
+}
+inline bool PlayerMessage_Type_Parse(
+    const ::std::string& name, PlayerMessage_Type* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<PlayerMessage_Type>(
+    PlayerMessage_Type_descriptor(), name, value);
+}
 // ===================================================================
 
 class Position : public ::google::protobuf::Message {
@@ -105,7 +155,7 @@ class Position : public ::google::protobuf::Message {
   inline float y() const;
   inline void set_y(float value);
 
-  // @@protoc_insertion_point(class_scope:Position)
+  // @@protoc_insertion_point(class_scope:swarm.game.Position)
  private:
   inline void set_has_x();
   inline void clear_has_x();
@@ -126,6 +176,180 @@ class Position : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Position* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class PlayerJoined : public ::google::protobuf::Message {
+ public:
+  PlayerJoined();
+  virtual ~PlayerJoined();
+
+  PlayerJoined(const PlayerJoined& from);
+
+  inline PlayerJoined& operator=(const PlayerJoined& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PlayerJoined& default_instance();
+
+  void Swap(PlayerJoined* other);
+
+  // implements Message ----------------------------------------------
+
+  PlayerJoined* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PlayerJoined& from);
+  void MergeFrom(const PlayerJoined& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string name = 1;
+  inline bool has_name() const;
+  inline void clear_name();
+  static const int kNameFieldNumber = 1;
+  inline const ::std::string& name() const;
+  inline void set_name(const ::std::string& value);
+  inline void set_name(const char* value);
+  inline void set_name(const char* value, size_t size);
+  inline ::std::string* mutable_name();
+  inline ::std::string* release_name();
+  inline void set_allocated_name(::std::string* name);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.PlayerJoined)
+ private:
+  inline void set_has_name();
+  inline void clear_has_name();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* name_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static PlayerJoined* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class PlayerLeft : public ::google::protobuf::Message {
+ public:
+  PlayerLeft();
+  virtual ~PlayerLeft();
+
+  PlayerLeft(const PlayerLeft& from);
+
+  inline PlayerLeft& operator=(const PlayerLeft& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PlayerLeft& default_instance();
+
+  void Swap(PlayerLeft* other);
+
+  // implements Message ----------------------------------------------
+
+  PlayerLeft* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PlayerLeft& from);
+  void MergeFrom(const PlayerLeft& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string name = 1;
+  inline bool has_name() const;
+  inline void clear_name();
+  static const int kNameFieldNumber = 1;
+  inline const ::std::string& name() const;
+  inline void set_name(const ::std::string& value);
+  inline void set_name(const char* value);
+  inline void set_name(const char* value, size_t size);
+  inline ::std::string* mutable_name();
+  inline ::std::string* release_name();
+  inline void set_allocated_name(::std::string* name);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.PlayerLeft)
+ private:
+  inline void set_has_name();
+  inline void clear_has_name();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* name_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static PlayerLeft* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -183,14 +407,14 @@ class Monster : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .Position pos = 1;
+  // optional .swarm.game.Position pos = 1;
   inline bool has_pos() const;
   inline void clear_pos();
   static const int kPosFieldNumber = 1;
-  inline const ::Position& pos() const;
-  inline ::Position* mutable_pos();
-  inline ::Position* release_pos();
-  inline void set_allocated_pos(::Position* pos);
+  inline const ::swarm::game::Position& pos() const;
+  inline ::swarm::game::Position* mutable_pos();
+  inline ::swarm::game::Position* release_pos();
+  inline void set_allocated_pos(::swarm::game::Position* pos);
 
   // optional float size = 2;
   inline bool has_size() const;
@@ -199,7 +423,7 @@ class Monster : public ::google::protobuf::Message {
   inline float size() const;
   inline void set_size(float value);
 
-  // @@protoc_insertion_point(class_scope:Monster)
+  // @@protoc_insertion_point(class_scope:swarm.game.Monster)
  private:
   inline void set_has_pos();
   inline void clear_has_pos();
@@ -208,7 +432,7 @@ class Monster : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Position* pos_;
+  ::swarm::game::Position* pos_;
   float size_;
 
   mutable int _cached_size_;
@@ -277,24 +501,24 @@ class SwarmState : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Monster monster = 1;
+  // repeated .swarm.game.Monster monster = 1;
   inline int monster_size() const;
   inline void clear_monster();
   static const int kMonsterFieldNumber = 1;
-  inline const ::Monster& monster(int index) const;
-  inline ::Monster* mutable_monster(int index);
-  inline ::Monster* add_monster();
-  inline const ::google::protobuf::RepeatedPtrField< ::Monster >&
+  inline const ::swarm::game::Monster& monster(int index) const;
+  inline ::swarm::game::Monster* mutable_monster(int index);
+  inline ::swarm::game::Monster* add_monster();
+  inline const ::google::protobuf::RepeatedPtrField< ::swarm::game::Monster >&
       monster() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Monster >*
+  inline ::google::protobuf::RepeatedPtrField< ::swarm::game::Monster >*
       mutable_monster();
 
-  // @@protoc_insertion_point(class_scope:SwarmState)
+  // @@protoc_insertion_point(class_scope:swarm.game.SwarmState)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Monster > monster_;
+  ::google::protobuf::RepeatedPtrField< ::swarm::game::Monster > monster_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -305,6 +529,542 @@ class SwarmState : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SwarmState* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Player : public ::google::protobuf::Message {
+ public:
+  Player();
+  virtual ~Player();
+
+  Player(const Player& from);
+
+  inline Player& operator=(const Player& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Player& default_instance();
+
+  void Swap(Player* other);
+
+  // implements Message ----------------------------------------------
+
+  Player* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Player& from);
+  void MergeFrom(const Player& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .swarm.game.Position pos = 1;
+  inline bool has_pos() const;
+  inline void clear_pos();
+  static const int kPosFieldNumber = 1;
+  inline const ::swarm::game::Position& pos() const;
+  inline ::swarm::game::Position* mutable_pos();
+  inline ::swarm::game::Position* release_pos();
+  inline void set_allocated_pos(::swarm::game::Position* pos);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.Player)
+ private:
+  inline void set_has_pos();
+  inline void clear_has_pos();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::swarm::game::Position* pos_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static Player* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class PlayerClick : public ::google::protobuf::Message {
+ public:
+  PlayerClick();
+  virtual ~PlayerClick();
+
+  PlayerClick(const PlayerClick& from);
+
+  inline PlayerClick& operator=(const PlayerClick& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PlayerClick& default_instance();
+
+  void Swap(PlayerClick* other);
+
+  // implements Message ----------------------------------------------
+
+  PlayerClick* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PlayerClick& from);
+  void MergeFrom(const PlayerClick& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .swarm.game.Position click_pos = 1;
+  inline bool has_click_pos() const;
+  inline void clear_click_pos();
+  static const int kClickPosFieldNumber = 1;
+  inline const ::swarm::game::Position& click_pos() const;
+  inline ::swarm::game::Position* mutable_click_pos();
+  inline ::swarm::game::Position* release_click_pos();
+  inline void set_allocated_click_pos(::swarm::game::Position* click_pos);
+
+  // optional float click_size = 2;
+  inline bool has_click_size() const;
+  inline void clear_click_size();
+  static const int kClickSizeFieldNumber = 2;
+  inline float click_size() const;
+  inline void set_click_size(float value);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.PlayerClick)
+ private:
+  inline void set_has_click_pos();
+  inline void clear_has_click_pos();
+  inline void set_has_click_size();
+  inline void clear_has_click_size();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::swarm::game::Position* click_pos_;
+  float click_size_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static PlayerClick* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class PlayerState : public ::google::protobuf::Message {
+ public:
+  PlayerState();
+  virtual ~PlayerState();
+
+  PlayerState(const PlayerState& from);
+
+  inline PlayerState& operator=(const PlayerState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PlayerState& default_instance();
+
+  void Swap(PlayerState* other);
+
+  // implements Message ----------------------------------------------
+
+  PlayerState* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PlayerState& from);
+  void MergeFrom(const PlayerState& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .swarm.game.Player player = 1;
+  inline int player_size() const;
+  inline void clear_player();
+  static const int kPlayerFieldNumber = 1;
+  inline const ::swarm::game::Player& player(int index) const;
+  inline ::swarm::game::Player* mutable_player(int index);
+  inline ::swarm::game::Player* add_player();
+  inline const ::google::protobuf::RepeatedPtrField< ::swarm::game::Player >&
+      player() const;
+  inline ::google::protobuf::RepeatedPtrField< ::swarm::game::Player >*
+      mutable_player();
+
+  // @@protoc_insertion_point(class_scope:swarm.game.PlayerState)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::swarm::game::Player > player_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static PlayerState* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ServerMessage : public ::google::protobuf::Message {
+ public:
+  ServerMessage();
+  virtual ~ServerMessage();
+
+  ServerMessage(const ServerMessage& from);
+
+  inline ServerMessage& operator=(const ServerMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ServerMessage& default_instance();
+
+  void Swap(ServerMessage* other);
+
+  // implements Message ----------------------------------------------
+
+  ServerMessage* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ServerMessage& from);
+  void MergeFrom(const ServerMessage& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  typedef ServerMessage_Type Type;
+  static const Type PLAYER_JOINED = ServerMessage_Type_PLAYER_JOINED;
+  static const Type PLAYER_LEFT = ServerMessage_Type_PLAYER_LEFT;
+  static const Type SWARM_STATE = ServerMessage_Type_SWARM_STATE;
+  static inline bool Type_IsValid(int value) {
+    return ServerMessage_Type_IsValid(value);
+  }
+  static const Type Type_MIN =
+    ServerMessage_Type_Type_MIN;
+  static const Type Type_MAX =
+    ServerMessage_Type_Type_MAX;
+  static const int Type_ARRAYSIZE =
+    ServerMessage_Type_Type_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor*
+  Type_descriptor() {
+    return ServerMessage_Type_descriptor();
+  }
+  static inline const ::std::string& Type_Name(Type value) {
+    return ServerMessage_Type_Name(value);
+  }
+  static inline bool Type_Parse(const ::std::string& name,
+      Type* value) {
+    return ServerMessage_Type_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+
+  // required .swarm.game.ServerMessage.Type type = 1;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::swarm::game::ServerMessage_Type type() const;
+  inline void set_type(::swarm::game::ServerMessage_Type value);
+
+  // optional .swarm.game.PlayerJoined player_joined = 2;
+  inline bool has_player_joined() const;
+  inline void clear_player_joined();
+  static const int kPlayerJoinedFieldNumber = 2;
+  inline const ::swarm::game::PlayerJoined& player_joined() const;
+  inline ::swarm::game::PlayerJoined* mutable_player_joined();
+  inline ::swarm::game::PlayerJoined* release_player_joined();
+  inline void set_allocated_player_joined(::swarm::game::PlayerJoined* player_joined);
+
+  // optional .swarm.game.PlayerLeft player_left = 3;
+  inline bool has_player_left() const;
+  inline void clear_player_left();
+  static const int kPlayerLeftFieldNumber = 3;
+  inline const ::swarm::game::PlayerLeft& player_left() const;
+  inline ::swarm::game::PlayerLeft* mutable_player_left();
+  inline ::swarm::game::PlayerLeft* release_player_left();
+  inline void set_allocated_player_left(::swarm::game::PlayerLeft* player_left);
+
+  // optional .swarm.game.SwarmState swarm_state = 4;
+  inline bool has_swarm_state() const;
+  inline void clear_swarm_state();
+  static const int kSwarmStateFieldNumber = 4;
+  inline const ::swarm::game::SwarmState& swarm_state() const;
+  inline ::swarm::game::SwarmState* mutable_swarm_state();
+  inline ::swarm::game::SwarmState* release_swarm_state();
+  inline void set_allocated_swarm_state(::swarm::game::SwarmState* swarm_state);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.ServerMessage)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_player_joined();
+  inline void clear_has_player_joined();
+  inline void set_has_player_left();
+  inline void clear_has_player_left();
+  inline void set_has_swarm_state();
+  inline void clear_has_swarm_state();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::swarm::game::PlayerJoined* player_joined_;
+  ::swarm::game::PlayerLeft* player_left_;
+  ::swarm::game::SwarmState* swarm_state_;
+  int type_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static ServerMessage* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class PlayerMessage : public ::google::protobuf::Message {
+ public:
+  PlayerMessage();
+  virtual ~PlayerMessage();
+
+  PlayerMessage(const PlayerMessage& from);
+
+  inline PlayerMessage& operator=(const PlayerMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PlayerMessage& default_instance();
+
+  void Swap(PlayerMessage* other);
+
+  // implements Message ----------------------------------------------
+
+  PlayerMessage* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PlayerMessage& from);
+  void MergeFrom(const PlayerMessage& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  typedef PlayerMessage_Type Type;
+  static const Type PLAYER_POS = PlayerMessage_Type_PLAYER_POS;
+  static const Type PLAYER_CLICK = PlayerMessage_Type_PLAYER_CLICK;
+  static inline bool Type_IsValid(int value) {
+    return PlayerMessage_Type_IsValid(value);
+  }
+  static const Type Type_MIN =
+    PlayerMessage_Type_Type_MIN;
+  static const Type Type_MAX =
+    PlayerMessage_Type_Type_MAX;
+  static const int Type_ARRAYSIZE =
+    PlayerMessage_Type_Type_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor*
+  Type_descriptor() {
+    return PlayerMessage_Type_descriptor();
+  }
+  static inline const ::std::string& Type_Name(Type value) {
+    return PlayerMessage_Type_Name(value);
+  }
+  static inline bool Type_Parse(const ::std::string& name,
+      Type* value) {
+    return PlayerMessage_Type_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+
+  // required .swarm.game.PlayerMessage.Type type = 1;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::swarm::game::PlayerMessage_Type type() const;
+  inline void set_type(::swarm::game::PlayerMessage_Type value);
+
+  // optional .swarm.game.Position pos = 2;
+  inline bool has_pos() const;
+  inline void clear_pos();
+  static const int kPosFieldNumber = 2;
+  inline const ::swarm::game::Position& pos() const;
+  inline ::swarm::game::Position* mutable_pos();
+  inline ::swarm::game::Position* release_pos();
+  inline void set_allocated_pos(::swarm::game::Position* pos);
+
+  // optional .swarm.game.PlayerClick click = 3;
+  inline bool has_click() const;
+  inline void clear_click();
+  static const int kClickFieldNumber = 3;
+  inline const ::swarm::game::PlayerClick& click() const;
+  inline ::swarm::game::PlayerClick* mutable_click();
+  inline ::swarm::game::PlayerClick* release_click();
+  inline void set_allocated_click(::swarm::game::PlayerClick* click);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.PlayerMessage)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_pos();
+  inline void clear_has_pos();
+  inline void set_has_click();
+  inline void clear_has_click();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::swarm::game::Position* pos_;
+  ::swarm::game::PlayerClick* click_;
+  int type_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static PlayerMessage* default_instance_;
 };
 // ===================================================================
 
@@ -359,9 +1119,157 @@ inline void Position::set_y(float value) {
 
 // -------------------------------------------------------------------
 
+// PlayerJoined
+
+// optional string name = 1;
+inline bool PlayerJoined::has_name() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void PlayerJoined::set_has_name() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void PlayerJoined::clear_has_name() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void PlayerJoined::clear_name() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    name_->clear();
+  }
+  clear_has_name();
+}
+inline const ::std::string& PlayerJoined::name() const {
+  return *name_;
+}
+inline void PlayerJoined::set_name(const ::std::string& value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void PlayerJoined::set_name(const char* value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void PlayerJoined::set_name(const char* value, size_t size) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* PlayerJoined::mutable_name() {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  return name_;
+}
+inline ::std::string* PlayerJoined::release_name() {
+  clear_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = name_;
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void PlayerJoined::set_allocated_name(::std::string* name) {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (name) {
+    set_has_name();
+    name_ = name;
+  } else {
+    clear_has_name();
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// PlayerLeft
+
+// optional string name = 1;
+inline bool PlayerLeft::has_name() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void PlayerLeft::set_has_name() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void PlayerLeft::clear_has_name() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void PlayerLeft::clear_name() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    name_->clear();
+  }
+  clear_has_name();
+}
+inline const ::std::string& PlayerLeft::name() const {
+  return *name_;
+}
+inline void PlayerLeft::set_name(const ::std::string& value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void PlayerLeft::set_name(const char* value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void PlayerLeft::set_name(const char* value, size_t size) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* PlayerLeft::mutable_name() {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  return name_;
+}
+inline ::std::string* PlayerLeft::release_name() {
+  clear_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = name_;
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void PlayerLeft::set_allocated_name(::std::string* name) {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (name) {
+    set_has_name();
+    name_ = name;
+  } else {
+    clear_has_name();
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
 // Monster
 
-// optional .Position pos = 1;
+// optional .swarm.game.Position pos = 1;
 inline bool Monster::has_pos() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -372,24 +1280,24 @@ inline void Monster::clear_has_pos() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void Monster::clear_pos() {
-  if (pos_ != NULL) pos_->::Position::Clear();
+  if (pos_ != NULL) pos_->::swarm::game::Position::Clear();
   clear_has_pos();
 }
-inline const ::Position& Monster::pos() const {
+inline const ::swarm::game::Position& Monster::pos() const {
   return pos_ != NULL ? *pos_ : *default_instance_->pos_;
 }
-inline ::Position* Monster::mutable_pos() {
+inline ::swarm::game::Position* Monster::mutable_pos() {
   set_has_pos();
-  if (pos_ == NULL) pos_ = new ::Position;
+  if (pos_ == NULL) pos_ = new ::swarm::game::Position;
   return pos_;
 }
-inline ::Position* Monster::release_pos() {
+inline ::swarm::game::Position* Monster::release_pos() {
   clear_has_pos();
-  ::Position* temp = pos_;
+  ::swarm::game::Position* temp = pos_;
   pos_ = NULL;
   return temp;
 }
-inline void Monster::set_allocated_pos(::Position* pos) {
+inline void Monster::set_allocated_pos(::swarm::game::Position* pos) {
   delete pos_;
   pos_ = pos;
   if (pos) {
@@ -425,38 +1333,428 @@ inline void Monster::set_size(float value) {
 
 // SwarmState
 
-// repeated .Monster monster = 1;
+// repeated .swarm.game.Monster monster = 1;
 inline int SwarmState::monster_size() const {
   return monster_.size();
 }
 inline void SwarmState::clear_monster() {
   monster_.Clear();
 }
-inline const ::Monster& SwarmState::monster(int index) const {
+inline const ::swarm::game::Monster& SwarmState::monster(int index) const {
   return monster_.Get(index);
 }
-inline ::Monster* SwarmState::mutable_monster(int index) {
+inline ::swarm::game::Monster* SwarmState::mutable_monster(int index) {
   return monster_.Mutable(index);
 }
-inline ::Monster* SwarmState::add_monster() {
+inline ::swarm::game::Monster* SwarmState::add_monster() {
   return monster_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Monster >&
+inline const ::google::protobuf::RepeatedPtrField< ::swarm::game::Monster >&
 SwarmState::monster() const {
   return monster_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Monster >*
+inline ::google::protobuf::RepeatedPtrField< ::swarm::game::Monster >*
 SwarmState::mutable_monster() {
   return &monster_;
+}
+
+// -------------------------------------------------------------------
+
+// Player
+
+// optional .swarm.game.Position pos = 1;
+inline bool Player::has_pos() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Player::set_has_pos() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Player::clear_has_pos() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Player::clear_pos() {
+  if (pos_ != NULL) pos_->::swarm::game::Position::Clear();
+  clear_has_pos();
+}
+inline const ::swarm::game::Position& Player::pos() const {
+  return pos_ != NULL ? *pos_ : *default_instance_->pos_;
+}
+inline ::swarm::game::Position* Player::mutable_pos() {
+  set_has_pos();
+  if (pos_ == NULL) pos_ = new ::swarm::game::Position;
+  return pos_;
+}
+inline ::swarm::game::Position* Player::release_pos() {
+  clear_has_pos();
+  ::swarm::game::Position* temp = pos_;
+  pos_ = NULL;
+  return temp;
+}
+inline void Player::set_allocated_pos(::swarm::game::Position* pos) {
+  delete pos_;
+  pos_ = pos;
+  if (pos) {
+    set_has_pos();
+  } else {
+    clear_has_pos();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// PlayerClick
+
+// optional .swarm.game.Position click_pos = 1;
+inline bool PlayerClick::has_click_pos() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void PlayerClick::set_has_click_pos() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void PlayerClick::clear_has_click_pos() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void PlayerClick::clear_click_pos() {
+  if (click_pos_ != NULL) click_pos_->::swarm::game::Position::Clear();
+  clear_has_click_pos();
+}
+inline const ::swarm::game::Position& PlayerClick::click_pos() const {
+  return click_pos_ != NULL ? *click_pos_ : *default_instance_->click_pos_;
+}
+inline ::swarm::game::Position* PlayerClick::mutable_click_pos() {
+  set_has_click_pos();
+  if (click_pos_ == NULL) click_pos_ = new ::swarm::game::Position;
+  return click_pos_;
+}
+inline ::swarm::game::Position* PlayerClick::release_click_pos() {
+  clear_has_click_pos();
+  ::swarm::game::Position* temp = click_pos_;
+  click_pos_ = NULL;
+  return temp;
+}
+inline void PlayerClick::set_allocated_click_pos(::swarm::game::Position* click_pos) {
+  delete click_pos_;
+  click_pos_ = click_pos;
+  if (click_pos) {
+    set_has_click_pos();
+  } else {
+    clear_has_click_pos();
+  }
+}
+
+// optional float click_size = 2;
+inline bool PlayerClick::has_click_size() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void PlayerClick::set_has_click_size() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void PlayerClick::clear_has_click_size() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void PlayerClick::clear_click_size() {
+  click_size_ = 0;
+  clear_has_click_size();
+}
+inline float PlayerClick::click_size() const {
+  return click_size_;
+}
+inline void PlayerClick::set_click_size(float value) {
+  set_has_click_size();
+  click_size_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// PlayerState
+
+// repeated .swarm.game.Player player = 1;
+inline int PlayerState::player_size() const {
+  return player_.size();
+}
+inline void PlayerState::clear_player() {
+  player_.Clear();
+}
+inline const ::swarm::game::Player& PlayerState::player(int index) const {
+  return player_.Get(index);
+}
+inline ::swarm::game::Player* PlayerState::mutable_player(int index) {
+  return player_.Mutable(index);
+}
+inline ::swarm::game::Player* PlayerState::add_player() {
+  return player_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::swarm::game::Player >&
+PlayerState::player() const {
+  return player_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::swarm::game::Player >*
+PlayerState::mutable_player() {
+  return &player_;
+}
+
+// -------------------------------------------------------------------
+
+// ServerMessage
+
+// required .swarm.game.ServerMessage.Type type = 1;
+inline bool ServerMessage::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ServerMessage::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ServerMessage::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ServerMessage::clear_type() {
+  type_ = 1;
+  clear_has_type();
+}
+inline ::swarm::game::ServerMessage_Type ServerMessage::type() const {
+  return static_cast< ::swarm::game::ServerMessage_Type >(type_);
+}
+inline void ServerMessage::set_type(::swarm::game::ServerMessage_Type value) {
+  assert(::swarm::game::ServerMessage_Type_IsValid(value));
+  set_has_type();
+  type_ = value;
+}
+
+// optional .swarm.game.PlayerJoined player_joined = 2;
+inline bool ServerMessage::has_player_joined() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ServerMessage::set_has_player_joined() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ServerMessage::clear_has_player_joined() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ServerMessage::clear_player_joined() {
+  if (player_joined_ != NULL) player_joined_->::swarm::game::PlayerJoined::Clear();
+  clear_has_player_joined();
+}
+inline const ::swarm::game::PlayerJoined& ServerMessage::player_joined() const {
+  return player_joined_ != NULL ? *player_joined_ : *default_instance_->player_joined_;
+}
+inline ::swarm::game::PlayerJoined* ServerMessage::mutable_player_joined() {
+  set_has_player_joined();
+  if (player_joined_ == NULL) player_joined_ = new ::swarm::game::PlayerJoined;
+  return player_joined_;
+}
+inline ::swarm::game::PlayerJoined* ServerMessage::release_player_joined() {
+  clear_has_player_joined();
+  ::swarm::game::PlayerJoined* temp = player_joined_;
+  player_joined_ = NULL;
+  return temp;
+}
+inline void ServerMessage::set_allocated_player_joined(::swarm::game::PlayerJoined* player_joined) {
+  delete player_joined_;
+  player_joined_ = player_joined;
+  if (player_joined) {
+    set_has_player_joined();
+  } else {
+    clear_has_player_joined();
+  }
+}
+
+// optional .swarm.game.PlayerLeft player_left = 3;
+inline bool ServerMessage::has_player_left() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ServerMessage::set_has_player_left() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ServerMessage::clear_has_player_left() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ServerMessage::clear_player_left() {
+  if (player_left_ != NULL) player_left_->::swarm::game::PlayerLeft::Clear();
+  clear_has_player_left();
+}
+inline const ::swarm::game::PlayerLeft& ServerMessage::player_left() const {
+  return player_left_ != NULL ? *player_left_ : *default_instance_->player_left_;
+}
+inline ::swarm::game::PlayerLeft* ServerMessage::mutable_player_left() {
+  set_has_player_left();
+  if (player_left_ == NULL) player_left_ = new ::swarm::game::PlayerLeft;
+  return player_left_;
+}
+inline ::swarm::game::PlayerLeft* ServerMessage::release_player_left() {
+  clear_has_player_left();
+  ::swarm::game::PlayerLeft* temp = player_left_;
+  player_left_ = NULL;
+  return temp;
+}
+inline void ServerMessage::set_allocated_player_left(::swarm::game::PlayerLeft* player_left) {
+  delete player_left_;
+  player_left_ = player_left;
+  if (player_left) {
+    set_has_player_left();
+  } else {
+    clear_has_player_left();
+  }
+}
+
+// optional .swarm.game.SwarmState swarm_state = 4;
+inline bool ServerMessage::has_swarm_state() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void ServerMessage::set_has_swarm_state() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void ServerMessage::clear_has_swarm_state() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void ServerMessage::clear_swarm_state() {
+  if (swarm_state_ != NULL) swarm_state_->::swarm::game::SwarmState::Clear();
+  clear_has_swarm_state();
+}
+inline const ::swarm::game::SwarmState& ServerMessage::swarm_state() const {
+  return swarm_state_ != NULL ? *swarm_state_ : *default_instance_->swarm_state_;
+}
+inline ::swarm::game::SwarmState* ServerMessage::mutable_swarm_state() {
+  set_has_swarm_state();
+  if (swarm_state_ == NULL) swarm_state_ = new ::swarm::game::SwarmState;
+  return swarm_state_;
+}
+inline ::swarm::game::SwarmState* ServerMessage::release_swarm_state() {
+  clear_has_swarm_state();
+  ::swarm::game::SwarmState* temp = swarm_state_;
+  swarm_state_ = NULL;
+  return temp;
+}
+inline void ServerMessage::set_allocated_swarm_state(::swarm::game::SwarmState* swarm_state) {
+  delete swarm_state_;
+  swarm_state_ = swarm_state;
+  if (swarm_state) {
+    set_has_swarm_state();
+  } else {
+    clear_has_swarm_state();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// PlayerMessage
+
+// required .swarm.game.PlayerMessage.Type type = 1;
+inline bool PlayerMessage::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void PlayerMessage::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void PlayerMessage::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void PlayerMessage::clear_type() {
+  type_ = 1;
+  clear_has_type();
+}
+inline ::swarm::game::PlayerMessage_Type PlayerMessage::type() const {
+  return static_cast< ::swarm::game::PlayerMessage_Type >(type_);
+}
+inline void PlayerMessage::set_type(::swarm::game::PlayerMessage_Type value) {
+  assert(::swarm::game::PlayerMessage_Type_IsValid(value));
+  set_has_type();
+  type_ = value;
+}
+
+// optional .swarm.game.Position pos = 2;
+inline bool PlayerMessage::has_pos() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void PlayerMessage::set_has_pos() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void PlayerMessage::clear_has_pos() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void PlayerMessage::clear_pos() {
+  if (pos_ != NULL) pos_->::swarm::game::Position::Clear();
+  clear_has_pos();
+}
+inline const ::swarm::game::Position& PlayerMessage::pos() const {
+  return pos_ != NULL ? *pos_ : *default_instance_->pos_;
+}
+inline ::swarm::game::Position* PlayerMessage::mutable_pos() {
+  set_has_pos();
+  if (pos_ == NULL) pos_ = new ::swarm::game::Position;
+  return pos_;
+}
+inline ::swarm::game::Position* PlayerMessage::release_pos() {
+  clear_has_pos();
+  ::swarm::game::Position* temp = pos_;
+  pos_ = NULL;
+  return temp;
+}
+inline void PlayerMessage::set_allocated_pos(::swarm::game::Position* pos) {
+  delete pos_;
+  pos_ = pos;
+  if (pos) {
+    set_has_pos();
+  } else {
+    clear_has_pos();
+  }
+}
+
+// optional .swarm.game.PlayerClick click = 3;
+inline bool PlayerMessage::has_click() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void PlayerMessage::set_has_click() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void PlayerMessage::clear_has_click() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void PlayerMessage::clear_click() {
+  if (click_ != NULL) click_->::swarm::game::PlayerClick::Clear();
+  clear_has_click();
+}
+inline const ::swarm::game::PlayerClick& PlayerMessage::click() const {
+  return click_ != NULL ? *click_ : *default_instance_->click_;
+}
+inline ::swarm::game::PlayerClick* PlayerMessage::mutable_click() {
+  set_has_click();
+  if (click_ == NULL) click_ = new ::swarm::game::PlayerClick;
+  return click_;
+}
+inline ::swarm::game::PlayerClick* PlayerMessage::release_click() {
+  clear_has_click();
+  ::swarm::game::PlayerClick* temp = click_;
+  click_ = NULL;
+  return temp;
+}
+inline void PlayerMessage::set_allocated_click(::swarm::game::PlayerClick* click) {
+  delete click_;
+  click_ = click;
+  if (click) {
+    set_has_click();
+  } else {
+    clear_has_click();
+  }
 }
 
 
 // @@protoc_insertion_point(namespace_scope)
 
+}  // namespace game
+}  // namespace swarm
+
 #ifndef SWIG
 namespace google {
 namespace protobuf {
 
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::swarm::game::ServerMessage_Type>() {
+  return ::swarm::game::ServerMessage_Type_descriptor();
+}
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::swarm::game::PlayerMessage_Type>() {
+  return ::swarm::game::PlayerMessage_Type_descriptor();
+}
 
 }  // namespace google
 }  // namespace protobuf

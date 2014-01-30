@@ -1,38 +1,87 @@
-message PlayerJoined
-{
-	optional string name = 1;
-}
+package swarm.game;
 
-message PlayerLeft
-{
-	optional string name = 1;
-}
-
+//-----------------------------------------------------------------------------
 message Position
 {
 	optional float x = 1;
 	optional float y = 2;
 }
 
+//-----------------------------------------------------------------------------
+message PlayerJoined
+{
+	optional string name = 1;
+}
+
+//-----------------------------------------------------------------------------
+message PlayerLeft
+{
+	optional string name = 1;
+}
+
+//-----------------------------------------------------------------------------
 message Monster
 {
 	optional Position pos = 1;
 	optional float size = 2;
 }
 
+//-----------------------------------------------------------------------------
 message SwarmState
 {
 	repeated Monster monster = 1;
 }
 
+//-----------------------------------------------------------------------------
 message Player
 {
 	optional Position pos = 1;
-	optional Position click_pos = 2;
-	optional float click_size = 3;
 }
 
+//-----------------------------------------------------------------------------
+message PlayerClick
+{
+	optional Position click_pos = 1;
+	optional float click_size = 2;
+}
+
+//-----------------------------------------------------------------------------
 message PlayerState
 {
 	repeated Player player = 1;
+}
+
+//-----------------------------------------------------------------------------
+message ServerMessage
+{
+	// wrapper message type. server -> player
+	
+	enum Type
+	{ 
+		PLAYER_JOINED 	= 1;
+		PLAYER_LEFT 	= 2;
+		SWARM_STATE 	= 3;
+	}
+	
+	required Type type = 1;
+	
+	optional PlayerJoined player_joined = 2;
+	optional PlayerLeft player_left = 3;
+	optional SwarmState swarm_state = 4;
+}
+
+//-----------------------------------------------------------------------------
+message PlayerMessage
+{
+	// wrapper for player -> server
+	enum Type
+	{
+		PLAYER_POS 		= 1;
+		PLAYER_CLICK	= 2;
+	}
+	
+	required Type type = 1;
+	
+	optional Position pos = 2;
+	optional PlayerClick click = 3;
 }

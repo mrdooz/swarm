@@ -5,6 +5,7 @@
 #include "rolling_average.hpp"
 #include "window_event_manager.hpp"
 #include "virtual_window_manager.hpp"
+#include "protocol/game.pb.h"
 
 using namespace sf;
 using namespace swarm;
@@ -33,6 +34,8 @@ bool MainWindow::OnMouseButtonPressed(const Event& event)
 //-----------------------------------------------------------------------------
 bool MainWindow::OnMouseButtonReleased(const Event& event)
 {
+  _game->_sendClick = true;
+  _game->_clickDuration = microsec_clock::local_time() - _clickStart;
   _clickStart = ptime();
   return true;
 }
@@ -46,7 +49,7 @@ void MainWindow::Draw()
   View view = _texture.getView();
   view.setCenter(_game->_renderPlayers[0]._pos);
   _texture.setView(view);
-  _texture.draw(_game->_level->_sprite);
+  _texture.draw(_game->_world._level->_sprite);
 
   CircleShape circle;
   for (const RenderPlayer& player : _game->_renderPlayers)
@@ -71,7 +74,6 @@ void MainWindow::Draw()
     _texture.draw(circle);
   }
 
-  _clickRadius = -1.0f;
   if (!_clickStart.is_not_a_date_time())
   {
     time_duration delta = microsec_clock::local_time() - _clickStart;
@@ -80,7 +82,6 @@ void MainWindow::Draw()
     circle.setPosition(_clickPos - r * Vector2f(1,1));
     circle.setRadius(r);
     _texture.draw(circle);
-    _clickRadius = r;
   }
 
   _texture.display();
@@ -118,20 +119,21 @@ void DebugWindow::Draw()
 }
 
 //----------------------------------------------------------------------------------
-Game::Game()
+Game::Game(u16 serverPort, const string& serverAddr)
   : _done(false)
   , _frameTime(100)
-  , _level(nullptr)
   , _mainWindow(nullptr)
   , _playerWindow(nullptr)
   , _debugWindow(nullptr)
+  , _sendClick(false)
+  , _serverPort(serverPort)
+  , _serverAddr(serverAddr)
 {
 }
 
 //----------------------------------------------------------------------------------
 Game::~Game()
 {
-  delete exch_null(_level);
   delete exch_null(_mainWindow);
   delete exch_null(_playerWindow);
   delete exch_null(_debugWindow);
@@ -158,13 +160,11 @@ bool Game::Init()
   _renderWindow->setFramerateLimit(60);
   _eventManager.reset(new WindowEventManager(_renderWindow.get()));
   _windowManager.reset(new VirtualWindowManager(_renderWindow.get(), _eventManager.get()));
-  //_world.reset(World::Create());
-  _level = new Level();
-  if (!_level->Load("data/pacman.png"))
+
+  if (!_world._level->Load("data/pacman.png"))
     return false;
 
-  //_world->AddPlayer();
-  //_world->AddMonsters();
+  _world.AddPlayer();
 
   if (!_font.loadFromFile("gfx/wscsnrg.ttf"))
     return false;
@@ -177,12 +177,15 @@ bool Game::Init()
   _windowManager->AddWindow(_debugWindow);
   _windowManager->AddWindow(_mainWindow);
 
-  if (!_server.Init())
-    return false;
+  // Only run a local server if one wasn't specified
+  if (_serverAddr.empty())
+  {
+    if (!_server.Init())
+      return false;
+  }
 
-  TcpSocket socket;
-  socket.connect(IpAddress("localhost"), 50000);
-  socket.setBlocking(false);
+  _socket.connect(IpAddress(_serverAddr.empty() ? "localhost" : _serverAddr), _serverPort);
+  _socket.setBlocking(false);
 
   _renderPlayers.push_back(RenderPlayer());
 
@@ -222,21 +225,22 @@ void Game::UpdatePlayers()
 {
   float s = 20;
 
-  _player._acc = Vector2f(0,0);
+  Player& player = *_world._players[0];
+  player._acc = Vector2f(0,0);
 
   if (Keyboard::isKeyPressed(Keyboard::Left) || Keyboard::isKeyPressed(Keyboard::A))
-    _player._acc += Vector2f(-s, 0);
+    player._acc += Vector2f(-s, 0);
 
   if (Keyboard::isKeyPressed(Keyboard::Right) || Keyboard::isKeyPressed(Keyboard::D))
-    _player._acc += Vector2f(+s, 0);
+    player._acc += Vector2f(+s, 0);
 
   if (Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W))
-    _player._acc += Vector2f(0, -s);
+    player._acc += Vector2f(0, -s);
 
   if (Keyboard::isKeyPressed(Keyboard::Down) || Keyboard::isKeyPressed(Keyboard::S))
-    _player._acc += Vector2f(0, +s);
+    player._acc += Vector2f(0, +s);
 
-  _renderPlayers[0]._pos = _player._pos;
+  _renderPlayers[0]._pos = player._pos;
 }
 
 //----------------------------------------------------------------------------------
@@ -244,7 +248,7 @@ void Game::UpdateEntity(Entity& entity, float dt)
 {
   // Velocity Verlet integration
   float friction = 0.99f;
-  float scale = _level->_scale;
+  float scale = _world._level->_scale;
   Vector2f oldVel = entity._vel;
   Vector2f p = entity._pos;
   Vector2f v = friction * (entity._vel + entity._acc * dt);
@@ -253,14 +257,14 @@ void Game::UpdateEntity(Entity& entity, float dt)
 
   u8 b;
   // check horizontal collisions
-  if (!(_level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
+  if (!(_world._level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
   {
     newPos.x = p.x;
     v.x = -v.x;
   }
 
   // check vertical
-  if (!(_level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
+  if (!(_world._level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
   {
     newPos.y = p.y;
     v.y = -v.y;
@@ -271,12 +275,38 @@ void Game::UpdateEntity(Entity& entity, float dt)
 }
 
 //----------------------------------------------------------------------------------
+void Game::HandlePlayerJoined(const game::PlayerJoined& msg)
+{
+
+}
+
+//----------------------------------------------------------------------------------
+void Game::HandlePlayerLeft(const game::PlayerLeft& msg)
+{
+
+}
+
+//----------------------------------------------------------------------------------
+void Game::HandleSwarmState(const game::SwarmState& msg)
+{
+  if (_renderMonsters.size() != msg.monster_size())
+    _renderMonsters.resize(msg.monster_size());
+
+  for (int i = 0; i < msg.monster_size(); ++i)
+  {
+    const game::Monster& m = msg.monster(i);
+    _renderMonsters[i]._pos = Vector2f(m.pos().x(), m.pos().y());
+    _renderMonsters[i]._size = m.size();
+  }
+}
+
+//----------------------------------------------------------------------------------
 void Game::Update(const time_duration& delta)
 {
   UpdatePlayers();
 
   float dt = delta.total_milliseconds() / 1000.0f;
-  UpdateEntity(_player, dt);
+  UpdateEntity(*_world._players[0], dt);
 }
 
 //----------------------------------------------------------------------------------
@@ -284,6 +314,8 @@ void Game::Run()
 {
   Clock clock;
   clock.restart();
+
+  vector<char> buf(16 * 1024);
 
   RollingAverage<s64> avg(100);
 
@@ -294,6 +326,51 @@ void Game::Run()
     _renderWindow->clear();
     _eventManager->Poll();
     _windowManager->Update();
+
+    // check for network packets
+    size_t bytesRecieved = 0;
+    Socket::Status status = _socket.receive(buf.data(), buf.size(), bytesRecieved);
+    if (status == Socket::Done)
+    {
+      game::ServerMessage msg;
+      if (msg.ParseFromArray(buf.data(), bytesRecieved))
+      {
+        switch (msg.type())
+        {
+        case game::ServerMessage_Type_PLAYER_JOINED:
+          HandlePlayerJoined(msg.player_joined());
+          break;
+
+        case game::ServerMessage_Type_PLAYER_LEFT:
+          HandlePlayerLeft(msg.player_left());
+          break;
+
+        case game::ServerMessage_Type_SWARM_STATE:
+          HandleSwarmState(msg.swarm_state());
+          break;
+        }
+      }
+    }
+
+    // check if we should send click state
+    if (_sendClick)
+    {
+      _sendClick = false;
+      float r = 0.25f * _clickDuration.total_microseconds() / 1000.0;
+      game::PlayerMessage msg;
+      msg.set_type(game::PlayerMessage_Type_PLAYER_CLICK);
+      game::PlayerClick* click = msg.mutable_click();
+      game::Position* pos = click->mutable_click_pos();
+      pos->set_x(_mainWindow->_clickPos.x);
+      pos->set_x(_mainWindow->_clickPos.y);
+      click->set_click_size(r);
+
+      string str;
+      if (msg.SerializePartialToString(&str))
+      {
+        _socket.send(str.data(), str.size());
+      }
+    }
 
     Time end = clock.getElapsedTime();
     Time computeTime = end - start;
@@ -308,8 +385,21 @@ void Game::Run()
 //----------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
+  u16 serverPort = 50000;
+  string serverAddr;
+
+  for (int i = 1; i < argc; ++i)
+  {
+    if (strcmp(argv[i], "-p") == 0 && i < argc - 1)
+      serverPort = atoi(argv[i+1]);
+
+    if (strcmp(argv[i], "-s") == 0  && i < argc - 1)
+      serverAddr = argv[i+1];
+  }
+
   srand(1337);
-  Game game;
+  Game game(serverPort, serverAddr);
+
   if (!game.Init())
     return 1;
 
