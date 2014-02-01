@@ -48,6 +48,10 @@ void Server::HandleClientMessages()
           break;
 
         case game::PlayerMessage_Type_PLAYER_CLICK:
+          {
+            Vector2f pos(playerMsg.click().click_pos().x(), playerMsg.click().click_pos().y());
+            ApplyAttractor(pos, playerMsg.click().click_size());
+          }
           break;
         }
       }
@@ -76,6 +80,9 @@ void Server::ThreadProc()
     Socket::Status status = listener.accept(*socket);
     if (status == Socket::Done)
     {
+      LOG_INFO("Player connected"
+        << LogKeyValue("addr", socket->getRemoteAddress().toString())
+        << LogKeyValue("port", socket->getRemotePort()));
       _connectedClients.push_back(socket);
       u16 port = socket->getRemotePort();
       u32 addr = socket->getRemoteAddress().toInteger();
@@ -147,30 +154,6 @@ bool Server::Close()
 }
 
 //----------------------------------------------------------------------------------
-void Server::UpdateMonsters()
-{
-  for (auto* monster : _world._monsters)
-  {
-    for (const MonsterAttractor& a : _monsterAttractors)
-    {
-      float r = a.radius;
-      Vector2f pos = a.pos;
-      // Set acceleration for any mobs inside the click radius
-      if (r > 0)
-      {
-        Vector2f dir = pos - monster->_pos;
-        float d = Length(dir);
-        if (d < r)
-        {
-          monster->_acc -= 10.0f * Normalize(dir);
-        }
-      }
-
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------
 void Server::UpdateEntity(Entity& entity, float dt)
 {
   // Velocity Verlet integration
@@ -216,6 +199,7 @@ void Server::SendToClients(const string& str)
     }
     else
     {
+      LOG_INFO("Send to client" << LogKeyValue("num_bytes", str.size()));
       ++it;
     }
   }
@@ -249,10 +233,26 @@ void Server::SendPlayerState()
 }
 
 //----------------------------------------------------------------------------------
+void Server::ApplyAttractor(const Vector2f& pos, float radius)
+{
+  for (auto* monster : _world._monsters)
+  {
+    // Set acceleration for any mobs inside the click radius
+    if (radius > 0)
+    {
+      Vector2f dir = pos - monster->_pos;
+      float d = Length(dir);
+      if (d < radius)
+      {
+        monster->_acc -= 10.0f * Normalize(dir);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------
 void Server::Update(const time_duration& delta)
 {
-  UpdateMonsters();
-
   game::ServerMessage msg;
   msg.set_type(game::ServerMessage_Type_SWARM_STATE);
   game::SwarmState& state = *msg.mutable_swarm_state();

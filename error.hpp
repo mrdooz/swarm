@@ -79,8 +79,6 @@ namespace swarm
   extern LogSinkFile g_logSinkFile;
   extern LogLevel g_logLevel;
 
-// think about: encase x in an extra set of parens, to make the macro self contained (to be able
-// to add start/end tags)
 #define LOG_DEBUG(x) \
   swarm::LogStream GEN_NAME(s, __LINE__)(&swarm::g_logSinkFile, swarm::LogLevel::Debug); GEN_NAME(s, __LINE__) << x
 #define LOG_INFO(x) \

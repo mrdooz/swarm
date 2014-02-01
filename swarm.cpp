@@ -257,8 +257,6 @@ void Game::UpdatePlayers()
 
   if (Keyboard::isKeyPressed(Keyboard::Down) || Keyboard::isKeyPressed(Keyboard::S))
     player._acc += Vector2f(0, +s);
-
-  //_renderPlayers[0]._pos = player._pos;
 }
 
 //----------------------------------------------------------------------------------
@@ -327,6 +325,7 @@ void Game::HandlePlayerState(const game::PlayerState& msg)
 //----------------------------------------------------------------------------------
 void Game::HandleSwarmState(const game::SwarmState& msg)
 {
+  LOG_INFO(__FUNCTION__ << LogKeyValue("num_monsters", msg.monster_size()));
   if (_renderMonsters.size() != msg.monster_size())
     _renderMonsters.resize(msg.monster_size());
 
@@ -371,25 +370,35 @@ void Game::Run()
     Socket::Status status = _socket.receive(buf.data(), buf.size(), bytesRecieved);
     if (status == Socket::Done)
     {
-      game::ServerMessage msg;
-      if (msg.ParseFromArray(buf.data(), bytesRecieved))
+      LOG_INFO("recieved from server" << LogKeyValue("num_bytes", bytesRecieved));
+      size_t bytesParsed = 0;
+      while (bytesParsed < bytesRecieved)
       {
-        switch (msg.type())
+        game::ServerMessage msg;
+        if (msg.ParseFromArray(buf.data() + bytesParsed, bytesRecieved))
         {
-        case game::ServerMessage_Type_PLAYER_JOINED:
-          HandlePlayerJoined(msg.player_joined());
-          break;
+          bytesParsed += msg.ByteSize();
+          switch (msg.type())
+          {
+          case game::ServerMessage_Type_PLAYER_JOINED:
+            HandlePlayerJoined(msg.player_joined());
+            break;
 
-        case game::ServerMessage_Type_PLAYER_LEFT:
-          HandlePlayerLeft(msg.player_left());
-          break;
+          case game::ServerMessage_Type_PLAYER_LEFT:
+            HandlePlayerLeft(msg.player_left());
+            break;
 
-        case game::ServerMessage_Type_SWARM_STATE:
-          HandleSwarmState(msg.swarm_state());
-          break;
+          case game::ServerMessage_Type_SWARM_STATE:
+            HandleSwarmState(msg.swarm_state());
+            break;
 
-        case game::ServerMessage_Type_PLAYER_STATE:
-          HandlePlayerState(msg.player_state());
+          case game::ServerMessage_Type_PLAYER_STATE:
+            HandlePlayerState(msg.player_state());
+            break;
+          }
+        }
+        else
+        {
           break;
         }
       }

@@ -14,7 +14,6 @@ namespace swarm
     bool Close();
 
   private:
-    void UpdateMonsters();
     void UpdateEntity(Entity& entity, float dt);
     void Update(const time_duration& delta);
 
@@ -22,6 +21,7 @@ namespace swarm
     void SendToClients(const string& str);
 
     void HandleClientMessages();
+    void ApplyAttractor(const Vector2f& pos, float radius);
 
     void ThreadProc();
 

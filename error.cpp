@@ -36,19 +36,25 @@ void LogSinkFile::Log(LogLevel level, const vector<pair<string, string> >& msg)
 {
   static char levelPrefix[] = { '-', 'D', 'I', 'W', 'E' };
 
-  if (!_log)
-    return;
-
   ptime now = microsec_clock::local_time();
-  fprintf(_log, "[%c] %s - ", levelPrefix[(int)level], boost::posix_time::to_iso_extended_string(now).c_str());
+  string str = toString("[%c] %s - ", levelPrefix[(int)level],
+    boost::posix_time::to_iso_extended_string(now).c_str());
+
+  if (_log)
+    fprintf(_log, str.c_str());
+  OutputDebugStringA(str.c_str());
 
   for (size_t i = 0; i < msg.size(); ++i)
   {
     auto& p = msg[i];
     bool last = i == msg.size() - 1;
-    fprintf(_log, "%s=%s%c", p.first.c_str(), p.second.c_str(), last ? '\n' : '|');
+    str = toString("%s=%s%c", p.first.c_str(), p.second.c_str(), last ? '\n' : '|');
+    if (_log)
+      fprintf(_log, str.c_str());
+    OutputDebugStringA(str.c_str());
   }
-  fflush(_log);
+  if (_log)
+    fflush(_log);
 }
 
 //-----------------------------------------------------------------------------
