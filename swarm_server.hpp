@@ -18,12 +18,15 @@ namespace swarm
     void Update(const time_duration& delta);
 
     void SendPlayerState();
-    void SendToClients(const string& str);
+    void SendToClients(const vector<char>& buf);
 
     void HandleClientMessages();
     void ApplyAttractor(const Vector2f& pos, float radius);
 
     void ThreadProc();
+
+    template <typename T>
+    bool PackMessage(vector<char>& buf, const T& msg);
 
     struct MonsterAttractor
     {

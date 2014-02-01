@@ -374,10 +374,11 @@ void Game::Run()
       size_t bytesParsed = 0;
       while (bytesParsed < bytesRecieved)
       {
+        u32 msgSize = ntohl(*(u32*)&buf[bytesParsed]);
         game::ServerMessage msg;
-        if (msg.ParseFromArray(buf.data() + bytesParsed, bytesRecieved))
+        if (msg.ParseFromArray(buf.data() + bytesParsed, msgSize))
         {
-          bytesParsed += msg.ByteSize();
+          bytesParsed += msgSize;
           switch (msg.type())
           {
           case game::ServerMessage_Type_PLAYER_JOINED:

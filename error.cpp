@@ -41,8 +41,8 @@ void LogSinkFile::Log(LogLevel level, const vector<pair<string, string> >& msg)
     boost::posix_time::to_iso_extended_string(now).c_str());
 
   if (_log)
-    fprintf(_log, str.c_str());
-  OutputDebugStringA(str.c_str());
+    fprintf(_log, "%s", str.c_str());
+  DebugOutput("%s", str.c_str());
 
   for (size_t i = 0; i < msg.size(); ++i)
   {
@@ -50,8 +50,8 @@ void LogSinkFile::Log(LogLevel level, const vector<pair<string, string> >& msg)
     bool last = i == msg.size() - 1;
     str = toString("%s=%s%c", p.first.c_str(), p.second.c_str(), last ? '\n' : '|');
     if (_log)
-      fprintf(_log, str.c_str());
-    OutputDebugStringA(str.c_str());
+      fprintf(_log, "%s", str.c_str());
+    DebugOutput("%s", str.c_str());
   }
   if (_log)
     fflush(_log);

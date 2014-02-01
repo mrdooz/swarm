@@ -185,12 +185,12 @@ void Server::UpdateEntity(Entity& entity, float dt)
 }
 
 //----------------------------------------------------------------------------------
-void Server::SendToClients(const string& str)
+void Server::SendToClients(const vector<char>& buf)
 {
   for (auto it = _connectedClients.begin(); it != _connectedClients.end(); )
   {
     TcpSocket* socket = *it;
-    Socket::Status status = socket->send(str.data(), str.size());
+    Socket::Status status = socket->send(buf.data(), buf.size());
     if (status != Socket::Done)
     {
       // unable to send, so remove the client
@@ -199,11 +199,26 @@ void Server::SendToClients(const string& str)
     }
     else
     {
-      LOG_INFO("Send to client" << LogKeyValue("num_bytes", str.size()));
+      LOG_INFO("Send to client" << LogKeyValue("num_bytes", buf.size()));
       ++it;
     }
   }
 }
+
+//----------------------------------------------------------------------------------
+template <typename T>
+bool Server::PackMessage(vector<char>& buf, const T& msg)
+{
+  buf.resize(msg.ByteSize() + sizeof(u32));
+  *(u32*)buf.data() = htonl(msg.ByteSize());
+  if (!msg.SerializeToArray(&buf[4], buf.size() - sizeof(u32)))
+  {
+    LOG_WARN("Unable to serialize state");
+    return false;
+  }
+  return true;
+}
+
 
 //----------------------------------------------------------------------------------
 void Server::SendPlayerState()
@@ -222,14 +237,11 @@ void Server::SendPlayerState()
     pos->set_y(data.pos.y);
   }
 
-  string str;
-  if (!msg.SerializeToString(&str))
+  vector<char> buf;
+  if (PackMessage(buf, msg))
   {
-    LOG_WARN("Unable to serialize state");
-    return;
+    SendToClients(buf);
   }
-
-  SendToClients(str);
 }
 
 //----------------------------------------------------------------------------------
@@ -271,12 +283,9 @@ void Server::Update(const time_duration& delta)
   }
 
   // Send state to all connected clients
-  string str;
-  if (!msg.SerializeToString(&str))
+  vector<char> buf;
+  if (PackMessage(buf, msg))
   {
-    LOG_WARN("Unable to serialize state");
-    return;
+    SendToClients(buf);
   }
-
-  SendToClients(str);
 }

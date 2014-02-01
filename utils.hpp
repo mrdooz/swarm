@@ -117,6 +117,8 @@ namespace swarm
     return max(minValue, min(maxValue, v));
   }
 
+  void DebugOutput(const char* fmt, ...);
+
   string FindAppRoot();
 
   // Macro for creating "local" names
