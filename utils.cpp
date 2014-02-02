@@ -198,6 +198,18 @@ namespace swarm
 
 
 #ifdef _WIN32
+  void DebugOutput(const char* fmt, ...)
+  {
+    va_list args;
+    va_start(args, fmt);
+
+    const int len = _vscprintf(fmt, args) + 1;
+
+    char* buf = (char*)_alloca(len);
+    vsprintf_s(buf, len, fmt, args);
+    OutputDebugStringA(buf);
+    va_end(args);
+  }
 #else
   bool IsDebuggerPresent()
   {

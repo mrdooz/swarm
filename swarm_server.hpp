@@ -48,5 +48,8 @@ namespace swarm
     map<int, PlayerData> _playerData;
 
     thread* _serverThread;
+    u8 _networkBuffer[32*1024];
+
+    atomic<bool> _done;
   };
 }

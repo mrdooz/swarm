@@ -9,6 +9,7 @@ using namespace swarm;
 //-----------------------------------------------------------------------------
 Server::Server()
   : _serverThread(nullptr)
+  , _done(false)
 {
 
 }
@@ -23,15 +24,14 @@ Server::~Server()
 //-----------------------------------------------------------------------------
 void Server::HandleClientMessages()
 {
-  vector<u8> buf(16*1024);
   for (TcpSocket* s : _connectedClients)
   {
     size_t recievedSize = 0;
-    Socket::Status status = s->receive(buf.data(), buf.size(), recievedSize);
+    Socket::Status status = s->receive(_networkBuffer, sizeof(_networkBuffer), recievedSize);
     if (status == Socket::Done)
     {
       game::PlayerMessage playerMsg;
-      if (playerMsg.ParseFromArray(buf.data(), recievedSize))
+      if (playerMsg.ParseFromArray(_networkBuffer, recievedSize))
       {
         auto it = _addrToId.find(make_pair(s->getRemoteAddress().toInteger(), s->getRemotePort()));
         if (it == _addrToId.end())
@@ -74,7 +74,7 @@ void Server::ThreadProc()
   Clock clock;
   clock.restart();
   Time lastUpdate = clock.getElapsedTime();
-  while (true)
+  while (!_done)
   {
     // Check for connected players
     Socket::Status status = listener.accept(*socket);
@@ -147,6 +147,8 @@ bool Server::Init()
 //-----------------------------------------------------------------------------
 bool Server::Close()
 {
+  _done = true;
+
   if (_serverThread)
     _serverThread->join();
 
@@ -256,7 +258,7 @@ void Server::ApplyAttractor(const Vector2f& pos, float radius)
       float d = Length(dir);
       if (d < radius)
       {
-        monster->_acc -= 10.0f * Normalize(dir);
+        monster->_acc += 10.0f * Normalize(dir);
       }
     }
   }

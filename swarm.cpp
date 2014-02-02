@@ -15,7 +15,13 @@ using namespace swarm;
 MainWindow::MainWindow(const string& title, const Vector2f& pos, const Vector2f& size, Game* game)
   : VirtualWindow(title, pos, size)
   , _game(game)
+  , _playerCircle(5, 100)
+  , _monsterCircle(5, 50)
 {
+  _playerCircle.setFillColor(Color::Green);
+  _monsterCircle.setFillColor(Color::Red);
+  _selectionCircle.setFillColor(Color(0xcc, 0xcc, 0, 0x80));
+
   game->_windowManager->RegisterHandler(Event::MouseButtonReleased, this, bind(&MainWindow::OnMouseButtonReleased, this, _1));
   game->_windowManager->RegisterHandler(Event::MouseButtonPressed, this, bind(&MainWindow::OnMouseButtonPressed, this, _1));
 }
@@ -45,44 +51,38 @@ bool MainWindow::OnMouseButtonReleased(const Event& event)
 void MainWindow::Draw()
 {
   _texture.clear();
-  //auto* world = _game->_world.get();
   
   View view = _texture.getView();
   view.setCenter(_game->_world._players[0]->_pos);
-  _texture.setView(view);
+  //_texture.setView(view);
   _texture.draw(_game->_world._level->_sprite);
 
-  CircleShape circle;
   for (const RenderPlayer& player : _game->_renderPlayers)
   {
-    circle.setFillColor(Color::Green);
-    Vector2f p(VectorCast<float>(player._pos));
+    Vector2f p(player._pos);
     p.x -= 5;
     p.y -= 5;
-    circle.setPosition(p);
-    circle.setRadius(5);
-    _texture.draw(circle);
+    _playerCircle.setPosition(p);
+    _texture.draw(_playerCircle);
   }
 
   for (const RenderMonster& monster : _game->_renderMonsters)
   {
-    circle.setFillColor(Color::Red);
-    Vector2f p(VectorCast<float>(monster._pos));
+    Vector2f p(monster._pos);
     p.x -= monster._size;
     p.y -= monster._size;
-    circle.setPosition(p);
-    circle.setRadius(monster._size);
-    _texture.draw(circle);
+    _monsterCircle.setPosition(p);
+    _monsterCircle.setRadius(monster._size);
+    _texture.draw(_monsterCircle);
   }
 
   if (!_clickStart.is_not_a_date_time())
   {
     time_duration delta = microsec_clock::local_time() - _clickStart;
-    circle.setFillColor(Color(0xcc, 0xcc, 0, 0x80));
     float r = 0.25f * delta.total_microseconds() / 1000.0;
-    circle.setPosition(_clickPos - r * Vector2f(1,1));
-    circle.setRadius(r);
-    _texture.draw(circle);
+    _selectionCircle.setPosition(_clickPos - r * Vector2f(1,1));
+    _selectionCircle.setRadius(r);
+    _texture.draw(_selectionCircle);
   }
 
   _texture.display();
@@ -108,7 +108,7 @@ void DebugWindow::Draw()
   Text frameTime("", _game->_font, 10);
   frameTime.setColor(Color::Blue);
 
-  frameTime.setString(toString("%.2f ms", _game->_frameTime.GetAverage() / 1000.0));
+  frameTime.setString(toString("%.2f ms", _game->_frameTime.GetAverage() / 1000.0f));
   frameTime.setPosition(20, 20);
   _texture.draw(frameTime);
 
@@ -135,9 +135,6 @@ Game::Game(u16 serverPort, const string& serverAddr)
 //----------------------------------------------------------------------------------
 Game::~Game()
 {
-  delete exch_null(_mainWindow);
-  delete exch_null(_playerWindow);
-  delete exch_null(_debugWindow);
 }
 
 //----------------------------------------------------------------------------------
@@ -157,7 +154,9 @@ bool Game::Init()
   height = CGDisplayPixelsHigh(displayId);
 #endif
 
-  _renderWindow.reset(new RenderWindow(sf::VideoMode(8 * width / 10, 8 * height / 10), "..."));
+  sf::ContextSettings settings;
+  settings.antialiasingLevel = 8;
+  _renderWindow.reset(new RenderWindow(sf::VideoMode(8 * width / 10, 8 * height / 10), "...", sf::Style::Default, settings));
   _renderWindow->setFramerateLimit(60);
   _eventManager.reset(new WindowEventManager(_renderWindow.get()));
   _windowManager.reset(new VirtualWindowManager(_renderWindow.get(), _eventManager.get()));
@@ -188,9 +187,8 @@ bool Game::Init()
   _socket.connect(IpAddress(_serverAddr.empty() ? "localhost" : _serverAddr), _serverPort);
 
   // wait for connection ack
-  vector<u8> buf(16*1024);
   size_t recv;
-  Socket::Status status = _socket.receive(buf.data(), buf.size(), recv);
+  Socket::Status status = _socket.receive(_networkBuffer, sizeof(_networkBuffer), recv);
   if (status != Socket::Done)
   {
     LOG_WARN("No ack recieved");
@@ -198,14 +196,13 @@ bool Game::Init()
   }
 
   game::ServerMessage msg;
-  if (!msg.ParseFromArray(buf.data(), recv) || msg.type() != game::ServerMessage_Type_CONNECTION_ACK)
+  if (!msg.ParseFromArray(_networkBuffer, recv) || msg.type() != game::ServerMessage_Type_CONNECTION_ACK)
     return false;
 
   _playerId = msg.connection_ack().player_id();
+  _renderPlayers.push_back(RenderPlayer());
 
   _socket.setBlocking(false);
-
-  _renderPlayers.push_back(RenderPlayer());
 
   return true;
 }
@@ -241,7 +238,7 @@ bool Game::OnMouseReleased(const Event& event)
 //----------------------------------------------------------------------------------
 void Game::UpdatePlayers()
 {
-  float s = 20;
+  float s = 30;
 
   Player& player = *_world._players[0];
   player._acc = Vector2f(0,0);
@@ -305,7 +302,9 @@ void Game::HandlePlayerLeft(const game::PlayerLeft& msg)
 //----------------------------------------------------------------------------------
 void Game::HandlePlayerState(const game::PlayerState& msg)
 {
-  if (_renderPlayers.size() != msg.player_size())
+  //LOG_INFO(__FUNCTION__ << LogKeyValue("num_players", msg.player_size()));
+
+  if (_renderPlayers.size() != msg.player_size() && msg.player_size() > 0)
     _renderPlayers.resize(msg.player_size());
 
   for (int i = 0; i < msg.player_size(); ++i)
@@ -325,7 +324,7 @@ void Game::HandlePlayerState(const game::PlayerState& msg)
 //----------------------------------------------------------------------------------
 void Game::HandleSwarmState(const game::SwarmState& msg)
 {
-  LOG_INFO(__FUNCTION__ << LogKeyValue("num_monsters", msg.monster_size()));
+  //LOG_INFO(__FUNCTION__ << LogKeyValue("num_monsters", msg.monster_size()));
   if (_renderMonsters.size() != msg.monster_size())
     _renderMonsters.resize(msg.monster_size());
 
@@ -338,15 +337,6 @@ void Game::HandleSwarmState(const game::SwarmState& msg)
 }
 
 //----------------------------------------------------------------------------------
-void Game::Update(const time_duration& delta)
-{
-  UpdatePlayers();
-
-  float dt = delta.total_milliseconds() / 1000.0f;
-  UpdateEntity(*_world._players[0], dt);
-}
-
-//----------------------------------------------------------------------------------
 void Game::Run()
 {
   Clock clock;
@@ -354,10 +344,15 @@ void Game::Run()
 
   vector<char> buf(16 * 1024);
 
-  RollingAverage<s64> avg(100);
-
   Time lastUpdate = clock.getElapsedTime();
   Time lastSend = clock.getElapsedTime();
+
+  // rendering time adds to the accumulator, and the physics update
+  // subracts from it (using a fixed timestep)
+  double timestep = 1/50.0;
+  double accumulator = 0;
+  Vector2f lastPos(_world._players[0]->_pos);
+
   while (_renderWindow->isOpen() && !_done)
   {
     Time start = clock.getElapsedTime();
@@ -371,14 +366,15 @@ void Game::Run()
     if (status == Socket::Done)
     {
       LOG_INFO("recieved from server" << LogKeyValue("num_bytes", bytesRecieved));
-      size_t bytesParsed = 0;
-      while (bytesParsed < bytesRecieved)
+      char *ptr = buf.data();
+      while (ptr < buf.data() + bytesRecieved)
       {
-        u32 msgSize = ntohl(*(u32*)&buf[bytesParsed]);
+        u32 msgSize = ntohl(*(u32*)ptr);
+        ptr += sizeof(u32);
         game::ServerMessage msg;
-        if (msg.ParseFromArray(buf.data() + bytesParsed, msgSize))
+        if (msg.ParseFromArray(ptr, msgSize))
         {
-          bytesParsed += msgSize;
+          ptr += msgSize;
           switch (msg.type())
           {
           case game::ServerMessage_Type_PLAYER_JOINED:
@@ -429,7 +425,19 @@ void Game::Run()
     Time computeTime = end - start;
     Time delta = end - lastUpdate;
     lastUpdate = end;
-    Update(milliseconds(delta.asMilliseconds()));
+
+    UpdatePlayers();
+
+    accumulator += delta.asMicroseconds() / 1e6;
+    while (accumulator >= timestep)
+    {
+      lastPos = _world._players[0]->_pos;
+      UpdateEntity(*_world._players[0], (float)timestep);
+      accumulator -= timestep;
+    }
+
+    float alpha = (double)accumulator / timestep;
+    _renderPlayers[0]._pos = lerp(lastPos, _world._players[0]->_pos, alpha);
 
     if ((end - lastSend).asMilliseconds() > 100)
     {
@@ -445,11 +453,18 @@ void Game::Run()
       {
         _socket.send(str.data(), str.size());
       }
+      lastSend = end;
     }
 
-    avg.AddSample(computeTime.asMicroseconds());
+    _frameTime.AddSample(computeTime.asMicroseconds());
     _renderWindow->display();
   }
+}
+
+//----------------------------------------------------------------------------------
+void Game::Close()
+{
+  _server.Close();
 }
 
 //----------------------------------------------------------------------------------
@@ -474,6 +489,8 @@ int main(int argc, char** argv)
     return 1;
 
   game.Run();
+
+  game.Close();
 
   return 0;
 }

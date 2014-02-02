@@ -2,6 +2,8 @@
 #include <SFML/Window.hpp>
 #include <SFML/Network.hpp>
 
+#include <atomic>
+#include <condition_variable>
 #include <algorithm>
 #include <deque>
 #include <functional>
@@ -43,6 +45,8 @@ typedef int64_t s64;
 
 namespace swarm
 {
+  using std::atomic;
+  using std::condition_variable;
   using std::bind;
   using std::function;
   using std::placeholders::_1;

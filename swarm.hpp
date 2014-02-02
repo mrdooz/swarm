@@ -31,6 +31,9 @@ namespace swarm
     Game* _game;
     Vector2f _clickPos;
     ptime _clickStart;
+    CircleShape _playerCircle;
+    CircleShape _monsterCircle;
+    CircleShape _selectionCircle;
   };
 
   class PlayerWindow : public VirtualWindow
@@ -72,16 +75,14 @@ namespace swarm
     
     bool Init();
     void Run();
+    void Close();
 
     private:
-    void Update(const time_duration& delta);
-
     bool OnKeyPressed(const Event& event);
     bool OnKeyReleased(const Event& event);
     bool OnMouseReleased(const Event& event);
 
     void UpdatePlayers();
-
     void UpdateEntity(Entity& entity, float dt);
 
     void HandlePlayerJoined(const game::PlayerJoined& msg);
@@ -114,5 +115,6 @@ namespace swarm
     u32 _playerId;
     u16 _serverPort;
     string _serverAddr;
+    u8 _networkBuffer[32*1024];
   };
 }
