@@ -102,6 +102,8 @@ namespace swarm
 
     Vector2f _mousePos;
 
+    //Player _player;
+    //Level* _level;
     World _world;
     MainWindow* _mainWindow;
     PlayerWindow* _playerWindow;

@@ -1,6 +1,8 @@
 #include "level.hpp"
 #include "utils.hpp"
 #include "error.hpp"
+#include "player.hpp"
+#include "monster.hpp"
 
 using namespace swarm;
 
@@ -48,3 +50,41 @@ bool Level::PosToBackground(const Vector2f& p, u8* out)
   return true;
 }
 
+//-----------------------------------------------------------------------------
+void Level::AddMonsters(vector<Monster* >* monsters)
+{
+  float scale = _scale;
+  for (size_t i = 0; i < 10; ++i)
+  {
+    while (true)
+    {
+      int x = rand() % _width;
+      int y = rand() % _height;
+      float s = 5 + rand() % 5;
+      if (_background[y*_width+x] == 0)
+      {
+        monsters->push_back(new Monster(scale * Vector2f(x, y), s));
+        break;
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+Player* Level::AddPlayer()
+{
+  Player* player(new Player);
+
+  float scale = _scale;
+  // find a free spot to put the player in
+  while (true)
+  {
+    int x = rand() % _width/4;
+    int y = rand() % _height/4;
+    if (_background[y*_width+x] == 0)
+    {
+      player->_pos = scale * Vector2f(x, y);
+      return player;
+    }
+  }
+}

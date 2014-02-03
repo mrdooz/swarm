@@ -1,8 +1,17 @@
 #include "world.hpp"
+#include "level.hpp"
 
 namespace swarm
 {
   class Entity;
+
+  struct PhysicsState
+  {
+    PhysicsState() : _acc(0,0), _vel(0,0), _pos(0,0) {}
+    Vector2f _acc;
+    Vector2f _vel;
+    Vector2f _pos;
+  };
 
   class Server
   {
@@ -14,7 +23,7 @@ namespace swarm
     bool Close();
 
   private:
-    void UpdateEntity(Entity& entity, float dt);
+    void UpdateState(PhysicsState& state, float dt);
     void Update(const time_duration& delta);
 
     void SendPlayerState();
@@ -39,10 +48,24 @@ namespace swarm
       Vector2f pos;
     };
 
-    World _world;
-    vector<MonsterAttractor> _monsterAttractors;
-    vector<TcpSocket *> _connectedClients;
+    struct MonsterState
+    {
+      PhysicsState _curState;
+      PhysicsState _prevState;
+    };
 
+    struct MonsterData
+    {
+      float _size;
+      int _health;
+    };
+
+    vector<MonsterState> _monsterState;
+    vector<MonsterData> _monsterData;
+
+    Level _level;
+
+    vector<TcpSocket *> _connectedClients;
     map<pair<u32, u16>, int> _addrToId;
 
     map<int, PlayerData> _playerData;

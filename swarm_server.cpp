@@ -74,6 +74,10 @@ void Server::ThreadProc()
   Clock clock;
   clock.restart();
   Time lastUpdate = clock.getElapsedTime();
+  Time lastSend = lastUpdate;
+  double timestep = 1/50.0;
+  double accumulator = 0;
+
   while (!_done)
   {
     // Check for connected players
@@ -118,13 +122,56 @@ void Server::ThreadProc()
 
     Time end = clock.getElapsedTime();
     Time delta = end - lastUpdate;
+    lastUpdate = end;
 
-    // update 10 times/sec
-    if (delta.asMilliseconds() > 100)
+    // apply attractors..
+    //UpdatePlayers();
+
+    accumulator += delta.asMicroseconds() / 1e6;
+    while (accumulator >= timestep)
     {
-      lastUpdate = end;
-      Update(milliseconds(delta.asMilliseconds()));
+      for (MonsterState& state : _monsterState)
+      {
+        state._prevState = state._curState;
+        UpdateState(state._curState, (float)timestep);
+      }
+      accumulator -= timestep;
+    }
+
+    float alpha = (double)accumulator / timestep;
+
+    // send state 10 times/sec
+    Time sendDelta = end - lastSend;
+    if (sendDelta.asMilliseconds() > 100)
+    {
+      game::ServerMessage msg;
+      msg.set_type(game::ServerMessage_Type_SWARM_STATE);
+      game::SwarmState& swarmState = *msg.mutable_swarm_state();
+
+      float dt = delta.asMilliseconds() / 1000.0f;
+      for (size_t i = 0; i < _monsterState.size(); ++i)
+      {
+        MonsterState& state = _monsterState[i];
+        MonsterData& data = _monsterData[i];
+
+        // add monster to state
+        game::Monster* m = swarmState.add_monster();
+        auto* p = m->mutable_pos();
+        Vector2f pos = lerp(state._prevState._pos, state._curState._pos, alpha);
+        p->set_x(pos.x);
+        p->set_y(pos.y);
+        m->set_size(data._size);
+      }
+
+      // Send state to all connected clients
+      vector<char> buf;
+      if (PackMessage(buf, msg))
+      {
+        SendToClients(buf);
+      }
+
       SendPlayerState();
+      lastSend = end;
     }
 
     HandleClientMessages();
@@ -136,9 +183,33 @@ void Server::ThreadProc()
 //-----------------------------------------------------------------------------
 bool Server::Init()
 {
-  if (!_world._level->Load("data/pacman.png"))
+  if (!_level.Load("data/pacman.png"))
     return false;
-  _world.AddMonsters();
+
+  float scale = _level._scale;
+  for (size_t i = 0; i < 10; ++i)
+  {
+    while (true)
+    {
+      int x = rand() % _level._width;
+      int y = rand() % _level._height;
+      float s = 5 + rand() % 5;
+      if (_level._background[y*_level._width+x] == 0)
+      {
+        Vector2f pos(scale * Vector2f(x, y));
+
+        _monsterState.push_back(MonsterState());
+        MonsterState& state = _monsterState.back();
+        state._curState._pos = pos;
+        state._prevState._pos = pos;
+
+        _monsterData.push_back(MonsterData());
+        MonsterData& data  = _monsterData.back();
+        data._size = s;
+        break;
+      }
+    }
+  }
 
   _serverThread = new thread(bind(&Server::ThreadProc, this));
   return true;
@@ -156,34 +227,34 @@ bool Server::Close()
 }
 
 //----------------------------------------------------------------------------------
-void Server::UpdateEntity(Entity& entity, float dt)
+void Server::UpdateState(PhysicsState& state, float dt)
 {
   // Velocity Verlet integration
   float friction = 0.99f;
-  float scale = _world._level->_scale;
-  Vector2f oldVel = entity._vel;
-  Vector2f p = entity._pos;
-  Vector2f v = friction * (entity._vel + entity._acc * dt);
+  float scale = _level._scale;
+  Vector2f oldVel = state._vel;
+  Vector2f p = state._pos;
+  Vector2f v = friction * (state._vel + state._acc * dt);
 
-  Vector2f newPos = entity._pos + (oldVel + entity._vel) * 0.5f * dt;
+  Vector2f newPos = state._pos + (oldVel + state._vel) * 0.5f * dt;
 
   u8 b;
   // check horizontal collisions
-  if (!(_world._level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
+  if (!(_level.PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
   {
     newPos.x = p.x;
     v.x = -v.x;
   }
 
   // check vertical
-  if (!(_world._level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
+  if (!(_level.PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
   {
     newPos.y = p.y;
     v.y = -v.y;
   }
 
-  entity._vel = v;
-  entity._pos = newPos;
+  state._vel = v;
+  state._pos = newPos;
 }
 
 //----------------------------------------------------------------------------------
@@ -249,16 +320,16 @@ void Server::SendPlayerState()
 //----------------------------------------------------------------------------------
 void Server::ApplyAttractor(const Vector2f& pos, float radius)
 {
-  for (auto* monster : _world._monsters)
+  for (MonsterState& state : _monsterState)
   {
     // Set acceleration for any mobs inside the click radius
     if (radius > 0)
     {
-      Vector2f dir = pos - monster->_pos;
+      Vector2f dir = pos - state._curState._pos;
       float d = Length(dir);
       if (d < radius)
       {
-        monster->_acc += 10.0f * Normalize(dir);
+        state._curState._acc += 10.0f * Normalize(dir);
       }
     }
   }
@@ -269,19 +340,21 @@ void Server::Update(const time_duration& delta)
 {
   game::ServerMessage msg;
   msg.set_type(game::ServerMessage_Type_SWARM_STATE);
-  game::SwarmState& state = *msg.mutable_swarm_state();
+  game::SwarmState& swarmState = *msg.mutable_swarm_state();
 
   float dt = delta.total_milliseconds() / 1000.0f;
-  for (Monster* monster : _world._monsters)
+  for (size_t i = 0; i < _monsterState.size(); ++i)
   {
-    UpdateEntity(*monster, dt);
+    MonsterState& state = _monsterState[i];
+    MonsterData& data = _monsterData[i];
+    UpdateState(state._curState, dt);
 
     // add monster to state
-    game::Monster* m = state.add_monster();
+    game::Monster* m = swarmState.add_monster();
     auto* p = m->mutable_pos();
-    p->set_x(monster->_pos.x);
-    p->set_y(monster->_pos.y);
-    m->set_size(monster->_size);
+    p->set_x(state._curState._pos.x);
+    p->set_y(state._curState._pos.y);
+    m->set_size(data._size);
   }
 
   // Send state to all connected clients
