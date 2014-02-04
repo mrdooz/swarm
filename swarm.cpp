@@ -66,9 +66,13 @@ void MainWindow::Draw()
     _texture.draw(_playerCircle);
   }
 
+  ptime now = microsec_clock::local_time();
+
   for (const RenderMonster& monster : _game->_renderMonsters)
   {
-    Vector2f p(monster._pos);
+    // interpolate the position
+    float delta = (monster._lastUpdate - now).total_microseconds() / 1e6;
+    Vector2f p(monster._orgPos + delta * monster._vel);
     p.x -= monster._size;
     p.y -= monster._size;
     _monsterCircle.setPosition(p);
@@ -324,15 +328,23 @@ void Game::HandlePlayerState(const game::PlayerState& msg)
 //----------------------------------------------------------------------------------
 void Game::HandleSwarmState(const game::SwarmState& msg)
 {
+  ptime now = microsec_clock::local_time();
+
   //LOG_INFO(__FUNCTION__ << LogKeyValue("num_monsters", msg.monster_size()));
   if (_renderMonsters.size() != msg.monster_size())
     _renderMonsters.resize(msg.monster_size());
 
+  RenderMonster* monster = _renderMonsters.data();
   for (int i = 0; i < msg.monster_size(); ++i)
   {
     const game::Monster& m = msg.monster(i);
-    _renderMonsters[i]._pos = Vector2f(m.pos().x(), m.pos().y());
-    _renderMonsters[i]._size = m.size();
+    monster->_pos = Vector2f(m.pos().x(), m.pos().y());
+    monster->_orgPos = monster->_pos;
+    monster->_vel = Vector2f(m.velocity().x(), m.velocity().y());
+    monster->_lastUpdate = now;
+    monster->_size = m.size();
+
+    monster++;
   }
 }
 
@@ -409,7 +421,7 @@ void Game::Run()
       game::PlayerMessage msg;
       msg.set_type(game::PlayerMessage_Type_PLAYER_CLICK);
       game::PlayerClick* click = msg.mutable_click();
-      game::Position* pos = click->mutable_click_pos();
+      game::Vector2* pos = click->mutable_click_pos();
       pos->set_x(_mainWindow->_clickPos.x);
       pos->set_y(_mainWindow->_clickPos.y);
       click->set_click_size(r);
@@ -444,7 +456,7 @@ void Game::Run()
       // send player state
       game::PlayerMessage msg;
       msg.set_type(game::PlayerMessage_Type_PLAYER_POS);
-      game::Position* pos = msg.mutable_pos();
+      game::Vector2* pos = msg.mutable_pos();
       pos->set_x(_world._players[0]->_pos.x);
       pos->set_y(_world._players[0]->_pos.y);
 

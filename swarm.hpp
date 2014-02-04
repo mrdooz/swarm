@@ -61,6 +61,9 @@ namespace swarm
   struct RenderMonster
   {
     Vector2f _pos;
+    Vector2f _orgPos;
+    Vector2f _vel;
+    ptime _lastUpdate;
     float _size;
   };
 

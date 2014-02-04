@@ -39,6 +39,7 @@ namespace swarm
 
     struct MonsterAttractor
     {
+      MonsterAttractor(const Vector2f& pos, float radius) : pos(pos), radius(radius) {}
       Vector2f pos;
       float radius;
     };
@@ -62,6 +63,7 @@ namespace swarm
 
     vector<MonsterState> _monsterState;
     vector<MonsterData> _monsterData;
+    vector<MonsterAttractor> _attractors;
 
     Level _level;
 

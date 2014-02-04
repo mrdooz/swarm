@@ -35,7 +35,7 @@ void  protobuf_AddDesc_game_2eproto();
 void protobuf_AssignDesc_game_2eproto();
 void protobuf_ShutdownFile_game_2eproto();
 
-class Position;
+class Vector2;
 class ConnectionAck;
 class PlayerJoined;
 class PlayerLeft;
@@ -90,14 +90,14 @@ inline bool PlayerMessage_Type_Parse(
 }
 // ===================================================================
 
-class Position : public ::google::protobuf::Message {
+class Vector2 : public ::google::protobuf::Message {
  public:
-  Position();
-  virtual ~Position();
+  Vector2();
+  virtual ~Vector2();
 
-  Position(const Position& from);
+  Vector2(const Vector2& from);
 
-  inline Position& operator=(const Position& from) {
+  inline Vector2& operator=(const Vector2& from) {
     CopyFrom(from);
     return *this;
   }
@@ -111,17 +111,17 @@ class Position : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const Position& default_instance();
+  static const Vector2& default_instance();
 
-  void Swap(Position* other);
+  void Swap(Vector2* other);
 
   // implements Message ----------------------------------------------
 
-  Position* New() const;
+  Vector2* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const Position& from);
-  void MergeFrom(const Position& from);
+  void CopyFrom(const Vector2& from);
+  void MergeFrom(const Vector2& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -158,7 +158,7 @@ class Position : public ::google::protobuf::Message {
   inline float y() const;
   inline void set_y(float value);
 
-  // @@protoc_insertion_point(class_scope:swarm.game.Position)
+  // @@protoc_insertion_point(class_scope:swarm.game.Vector2)
  private:
   inline void set_has_x();
   inline void clear_has_x();
@@ -178,7 +178,7 @@ class Position : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_game_2eproto();
 
   void InitAsDefaultInstance();
-  static Position* default_instance_;
+  static Vector2* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -492,19 +492,28 @@ class Monster : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .swarm.game.Position pos = 1;
+  // optional .swarm.game.Vector2 pos = 1;
   inline bool has_pos() const;
   inline void clear_pos();
   static const int kPosFieldNumber = 1;
-  inline const ::swarm::game::Position& pos() const;
-  inline ::swarm::game::Position* mutable_pos();
-  inline ::swarm::game::Position* release_pos();
-  inline void set_allocated_pos(::swarm::game::Position* pos);
+  inline const ::swarm::game::Vector2& pos() const;
+  inline ::swarm::game::Vector2* mutable_pos();
+  inline ::swarm::game::Vector2* release_pos();
+  inline void set_allocated_pos(::swarm::game::Vector2* pos);
 
-  // optional float size = 2;
+  // optional .swarm.game.Vector2 velocity = 2;
+  inline bool has_velocity() const;
+  inline void clear_velocity();
+  static const int kVelocityFieldNumber = 2;
+  inline const ::swarm::game::Vector2& velocity() const;
+  inline ::swarm::game::Vector2* mutable_velocity();
+  inline ::swarm::game::Vector2* release_velocity();
+  inline void set_allocated_velocity(::swarm::game::Vector2* velocity);
+
+  // optional float size = 3;
   inline bool has_size() const;
   inline void clear_size();
-  static const int kSizeFieldNumber = 2;
+  static const int kSizeFieldNumber = 3;
   inline float size() const;
   inline void set_size(float value);
 
@@ -512,16 +521,19 @@ class Monster : public ::google::protobuf::Message {
  private:
   inline void set_has_pos();
   inline void clear_has_pos();
+  inline void set_has_velocity();
+  inline void clear_has_velocity();
   inline void set_has_size();
   inline void clear_has_size();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::swarm::game::Position* pos_;
+  ::swarm::game::Vector2* pos_;
+  ::swarm::game::Vector2* velocity_;
   float size_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
@@ -678,14 +690,14 @@ class Player : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 id() const;
   inline void set_id(::google::protobuf::uint32 value);
 
-  // optional .swarm.game.Position pos = 2;
+  // optional .swarm.game.Vector2 pos = 2;
   inline bool has_pos() const;
   inline void clear_pos();
   static const int kPosFieldNumber = 2;
-  inline const ::swarm::game::Position& pos() const;
-  inline ::swarm::game::Position* mutable_pos();
-  inline ::swarm::game::Position* release_pos();
-  inline void set_allocated_pos(::swarm::game::Position* pos);
+  inline const ::swarm::game::Vector2& pos() const;
+  inline ::swarm::game::Vector2* mutable_pos();
+  inline ::swarm::game::Vector2* release_pos();
+  inline void set_allocated_pos(::swarm::game::Vector2* pos);
 
   // @@protoc_insertion_point(class_scope:swarm.game.Player)
  private:
@@ -696,7 +708,7 @@ class Player : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::swarm::game::Position* pos_;
+  ::swarm::game::Vector2* pos_;
   ::google::protobuf::uint32 id_;
 
   mutable int _cached_size_;
@@ -765,14 +777,14 @@ class PlayerClick : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .swarm.game.Position click_pos = 1;
+  // optional .swarm.game.Vector2 click_pos = 1;
   inline bool has_click_pos() const;
   inline void clear_click_pos();
   static const int kClickPosFieldNumber = 1;
-  inline const ::swarm::game::Position& click_pos() const;
-  inline ::swarm::game::Position* mutable_click_pos();
-  inline ::swarm::game::Position* release_click_pos();
-  inline void set_allocated_click_pos(::swarm::game::Position* click_pos);
+  inline const ::swarm::game::Vector2& click_pos() const;
+  inline ::swarm::game::Vector2* mutable_click_pos();
+  inline ::swarm::game::Vector2* release_click_pos();
+  inline void set_allocated_click_pos(::swarm::game::Vector2* click_pos);
 
   // optional float click_size = 2;
   inline bool has_click_size() const;
@@ -790,7 +802,7 @@ class PlayerClick : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::swarm::game::Position* click_pos_;
+  ::swarm::game::Vector2* click_pos_;
   float click_size_;
 
   mutable int _cached_size_;
@@ -1144,14 +1156,14 @@ class PlayerMessage : public ::google::protobuf::Message {
   inline ::swarm::game::PlayerMessage_Type type() const;
   inline void set_type(::swarm::game::PlayerMessage_Type value);
 
-  // optional .swarm.game.Position pos = 2;
+  // optional .swarm.game.Vector2 pos = 2;
   inline bool has_pos() const;
   inline void clear_pos();
   static const int kPosFieldNumber = 2;
-  inline const ::swarm::game::Position& pos() const;
-  inline ::swarm::game::Position* mutable_pos();
-  inline ::swarm::game::Position* release_pos();
-  inline void set_allocated_pos(::swarm::game::Position* pos);
+  inline const ::swarm::game::Vector2& pos() const;
+  inline ::swarm::game::Vector2* mutable_pos();
+  inline ::swarm::game::Vector2* release_pos();
+  inline void set_allocated_pos(::swarm::game::Vector2* pos);
 
   // optional .swarm.game.PlayerClick click = 3;
   inline bool has_click() const;
@@ -1173,7 +1185,7 @@ class PlayerMessage : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::swarm::game::Position* pos_;
+  ::swarm::game::Vector2* pos_;
   ::swarm::game::PlayerClick* click_;
   int type_;
 
@@ -1192,48 +1204,48 @@ class PlayerMessage : public ::google::protobuf::Message {
 
 // ===================================================================
 
-// Position
+// Vector2
 
 // optional float x = 1;
-inline bool Position::has_x() const {
+inline bool Vector2::has_x() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void Position::set_has_x() {
+inline void Vector2::set_has_x() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void Position::clear_has_x() {
+inline void Vector2::clear_has_x() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void Position::clear_x() {
+inline void Vector2::clear_x() {
   x_ = 0;
   clear_has_x();
 }
-inline float Position::x() const {
+inline float Vector2::x() const {
   return x_;
 }
-inline void Position::set_x(float value) {
+inline void Vector2::set_x(float value) {
   set_has_x();
   x_ = value;
 }
 
 // optional float y = 2;
-inline bool Position::has_y() const {
+inline bool Vector2::has_y() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Position::set_has_y() {
+inline void Vector2::set_has_y() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Position::clear_has_y() {
+inline void Vector2::clear_has_y() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void Position::clear_y() {
+inline void Vector2::clear_y() {
   y_ = 0;
   clear_has_y();
 }
-inline float Position::y() const {
+inline float Vector2::y() const {
   return y_;
 }
-inline void Position::set_y(float value) {
+inline void Vector2::set_y(float value) {
   set_has_y();
   y_ = value;
 }
@@ -1416,7 +1428,7 @@ inline void PlayerLeft::set_allocated_name(::std::string* name) {
 
 // Monster
 
-// optional .swarm.game.Position pos = 1;
+// optional .swarm.game.Vector2 pos = 1;
 inline bool Monster::has_pos() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -1427,24 +1439,24 @@ inline void Monster::clear_has_pos() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void Monster::clear_pos() {
-  if (pos_ != NULL) pos_->::swarm::game::Position::Clear();
+  if (pos_ != NULL) pos_->::swarm::game::Vector2::Clear();
   clear_has_pos();
 }
-inline const ::swarm::game::Position& Monster::pos() const {
+inline const ::swarm::game::Vector2& Monster::pos() const {
   return pos_ != NULL ? *pos_ : *default_instance_->pos_;
 }
-inline ::swarm::game::Position* Monster::mutable_pos() {
+inline ::swarm::game::Vector2* Monster::mutable_pos() {
   set_has_pos();
-  if (pos_ == NULL) pos_ = new ::swarm::game::Position;
+  if (pos_ == NULL) pos_ = new ::swarm::game::Vector2;
   return pos_;
 }
-inline ::swarm::game::Position* Monster::release_pos() {
+inline ::swarm::game::Vector2* Monster::release_pos() {
   clear_has_pos();
-  ::swarm::game::Position* temp = pos_;
+  ::swarm::game::Vector2* temp = pos_;
   pos_ = NULL;
   return temp;
 }
-inline void Monster::set_allocated_pos(::swarm::game::Position* pos) {
+inline void Monster::set_allocated_pos(::swarm::game::Vector2* pos) {
   delete pos_;
   pos_ = pos;
   if (pos) {
@@ -1454,15 +1466,53 @@ inline void Monster::set_allocated_pos(::swarm::game::Position* pos) {
   }
 }
 
-// optional float size = 2;
-inline bool Monster::has_size() const {
+// optional .swarm.game.Vector2 velocity = 2;
+inline bool Monster::has_velocity() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Monster::set_has_size() {
+inline void Monster::set_has_velocity() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Monster::clear_has_size() {
+inline void Monster::clear_has_velocity() {
   _has_bits_[0] &= ~0x00000002u;
+}
+inline void Monster::clear_velocity() {
+  if (velocity_ != NULL) velocity_->::swarm::game::Vector2::Clear();
+  clear_has_velocity();
+}
+inline const ::swarm::game::Vector2& Monster::velocity() const {
+  return velocity_ != NULL ? *velocity_ : *default_instance_->velocity_;
+}
+inline ::swarm::game::Vector2* Monster::mutable_velocity() {
+  set_has_velocity();
+  if (velocity_ == NULL) velocity_ = new ::swarm::game::Vector2;
+  return velocity_;
+}
+inline ::swarm::game::Vector2* Monster::release_velocity() {
+  clear_has_velocity();
+  ::swarm::game::Vector2* temp = velocity_;
+  velocity_ = NULL;
+  return temp;
+}
+inline void Monster::set_allocated_velocity(::swarm::game::Vector2* velocity) {
+  delete velocity_;
+  velocity_ = velocity;
+  if (velocity) {
+    set_has_velocity();
+  } else {
+    clear_has_velocity();
+  }
+}
+
+// optional float size = 3;
+inline bool Monster::has_size() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Monster::set_has_size() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Monster::clear_has_size() {
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void Monster::clear_size() {
   size_ = 0;
@@ -1531,7 +1581,7 @@ inline void Player::set_id(::google::protobuf::uint32 value) {
   id_ = value;
 }
 
-// optional .swarm.game.Position pos = 2;
+// optional .swarm.game.Vector2 pos = 2;
 inline bool Player::has_pos() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -1542,24 +1592,24 @@ inline void Player::clear_has_pos() {
   _has_bits_[0] &= ~0x00000002u;
 }
 inline void Player::clear_pos() {
-  if (pos_ != NULL) pos_->::swarm::game::Position::Clear();
+  if (pos_ != NULL) pos_->::swarm::game::Vector2::Clear();
   clear_has_pos();
 }
-inline const ::swarm::game::Position& Player::pos() const {
+inline const ::swarm::game::Vector2& Player::pos() const {
   return pos_ != NULL ? *pos_ : *default_instance_->pos_;
 }
-inline ::swarm::game::Position* Player::mutable_pos() {
+inline ::swarm::game::Vector2* Player::mutable_pos() {
   set_has_pos();
-  if (pos_ == NULL) pos_ = new ::swarm::game::Position;
+  if (pos_ == NULL) pos_ = new ::swarm::game::Vector2;
   return pos_;
 }
-inline ::swarm::game::Position* Player::release_pos() {
+inline ::swarm::game::Vector2* Player::release_pos() {
   clear_has_pos();
-  ::swarm::game::Position* temp = pos_;
+  ::swarm::game::Vector2* temp = pos_;
   pos_ = NULL;
   return temp;
 }
-inline void Player::set_allocated_pos(::swarm::game::Position* pos) {
+inline void Player::set_allocated_pos(::swarm::game::Vector2* pos) {
   delete pos_;
   pos_ = pos;
   if (pos) {
@@ -1573,7 +1623,7 @@ inline void Player::set_allocated_pos(::swarm::game::Position* pos) {
 
 // PlayerClick
 
-// optional .swarm.game.Position click_pos = 1;
+// optional .swarm.game.Vector2 click_pos = 1;
 inline bool PlayerClick::has_click_pos() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -1584,24 +1634,24 @@ inline void PlayerClick::clear_has_click_pos() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void PlayerClick::clear_click_pos() {
-  if (click_pos_ != NULL) click_pos_->::swarm::game::Position::Clear();
+  if (click_pos_ != NULL) click_pos_->::swarm::game::Vector2::Clear();
   clear_has_click_pos();
 }
-inline const ::swarm::game::Position& PlayerClick::click_pos() const {
+inline const ::swarm::game::Vector2& PlayerClick::click_pos() const {
   return click_pos_ != NULL ? *click_pos_ : *default_instance_->click_pos_;
 }
-inline ::swarm::game::Position* PlayerClick::mutable_click_pos() {
+inline ::swarm::game::Vector2* PlayerClick::mutable_click_pos() {
   set_has_click_pos();
-  if (click_pos_ == NULL) click_pos_ = new ::swarm::game::Position;
+  if (click_pos_ == NULL) click_pos_ = new ::swarm::game::Vector2;
   return click_pos_;
 }
-inline ::swarm::game::Position* PlayerClick::release_click_pos() {
+inline ::swarm::game::Vector2* PlayerClick::release_click_pos() {
   clear_has_click_pos();
-  ::swarm::game::Position* temp = click_pos_;
+  ::swarm::game::Vector2* temp = click_pos_;
   click_pos_ = NULL;
   return temp;
 }
-inline void PlayerClick::set_allocated_click_pos(::swarm::game::Position* click_pos) {
+inline void PlayerClick::set_allocated_click_pos(::swarm::game::Vector2* click_pos) {
   delete click_pos_;
   click_pos_ = click_pos;
   if (click_pos) {
@@ -1906,7 +1956,7 @@ inline void PlayerMessage::set_type(::swarm::game::PlayerMessage_Type value) {
   type_ = value;
 }
 
-// optional .swarm.game.Position pos = 2;
+// optional .swarm.game.Vector2 pos = 2;
 inline bool PlayerMessage::has_pos() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -1917,24 +1967,24 @@ inline void PlayerMessage::clear_has_pos() {
   _has_bits_[0] &= ~0x00000002u;
 }
 inline void PlayerMessage::clear_pos() {
-  if (pos_ != NULL) pos_->::swarm::game::Position::Clear();
+  if (pos_ != NULL) pos_->::swarm::game::Vector2::Clear();
   clear_has_pos();
 }
-inline const ::swarm::game::Position& PlayerMessage::pos() const {
+inline const ::swarm::game::Vector2& PlayerMessage::pos() const {
   return pos_ != NULL ? *pos_ : *default_instance_->pos_;
 }
-inline ::swarm::game::Position* PlayerMessage::mutable_pos() {
+inline ::swarm::game::Vector2* PlayerMessage::mutable_pos() {
   set_has_pos();
-  if (pos_ == NULL) pos_ = new ::swarm::game::Position;
+  if (pos_ == NULL) pos_ = new ::swarm::game::Vector2;
   return pos_;
 }
-inline ::swarm::game::Position* PlayerMessage::release_pos() {
+inline ::swarm::game::Vector2* PlayerMessage::release_pos() {
   clear_has_pos();
-  ::swarm::game::Position* temp = pos_;
+  ::swarm::game::Vector2* temp = pos_;
   pos_ = NULL;
   return temp;
 }
-inline void PlayerMessage::set_allocated_pos(::swarm::game::Position* pos) {
+inline void PlayerMessage::set_allocated_pos(::swarm::game::Vector2* pos) {
   delete pos_;
   pos_ = pos;
   if (pos) {

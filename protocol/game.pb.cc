@@ -21,9 +21,9 @@ namespace game {
 
 namespace {
 
-const ::google::protobuf::Descriptor* Position_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* Vector2_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  Position_reflection_ = NULL;
+  Vector2_reflection_ = NULL;
 const ::google::protobuf::Descriptor* ConnectionAck_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ConnectionAck_reflection_ = NULL;
@@ -66,22 +66,22 @@ void protobuf_AssignDesc_game_2eproto() {
     ::google::protobuf::DescriptorPool::generated_pool()->FindFileByName(
       "game.proto");
   GOOGLE_CHECK(file != NULL);
-  Position_descriptor_ = file->message_type(0);
-  static const int Position_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Position, x_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Position, y_),
+  Vector2_descriptor_ = file->message_type(0);
+  static const int Vector2_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Vector2, x_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Vector2, y_),
   };
-  Position_reflection_ =
+  Vector2_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      Position_descriptor_,
-      Position::default_instance_,
-      Position_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Position, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Position, _unknown_fields_),
+      Vector2_descriptor_,
+      Vector2::default_instance_,
+      Vector2_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Vector2, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Vector2, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(Position));
+      sizeof(Vector2));
   ConnectionAck_descriptor_ = file->message_type(1);
   static const int ConnectionAck_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConnectionAck, player_id_),
@@ -128,8 +128,9 @@ void protobuf_AssignDesc_game_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PlayerLeft));
   Monster_descriptor_ = file->message_type(4);
-  static const int Monster_offsets_[2] = {
+  static const int Monster_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Monster, pos_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Monster, velocity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Monster, size_),
   };
   Monster_reflection_ =
@@ -257,7 +258,7 @@ inline void protobuf_AssignDescriptorsOnce() {
 void protobuf_RegisterTypes(const ::std::string&) {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    Position_descriptor_, &Position::default_instance());
+    Vector2_descriptor_, &Vector2::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ConnectionAck_descriptor_, &ConnectionAck::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -283,8 +284,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
 }  // namespace
 
 void protobuf_ShutdownFile_game_2eproto() {
-  delete Position::default_instance_;
-  delete Position_reflection_;
+  delete Vector2::default_instance_;
+  delete Vector2_reflection_;
   delete ConnectionAck::default_instance_;
   delete ConnectionAck_reflection_;
   delete PlayerJoined::default_instance_;
@@ -314,35 +315,36 @@ void protobuf_AddDesc_game_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\ngame.proto\022\nswarm.game\" \n\010Position\022\t\n\001"
-    "x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\"\"\n\rConnectionAck\022\021\n\tp"
-    "layer_id\030\001 \001(\r\"\034\n\014PlayerJoined\022\014\n\004name\030\001"
-    " \001(\t\"\032\n\nPlayerLeft\022\014\n\004name\030\001 \001(\t\":\n\007Mons"
-    "ter\022!\n\003pos\030\001 \001(\0132\024.swarm.game.Position\022\014"
-    "\n\004size\030\002 \001(\002\"2\n\nSwarmState\022$\n\007monster\030\001 "
-    "\003(\0132\023.swarm.game.Monster\"7\n\006Player\022\n\n\002id"
-    "\030\001 \001(\r\022!\n\003pos\030\002 \001(\0132\024.swarm.game.Positio"
-    "n\"J\n\013PlayerClick\022\'\n\tclick_pos\030\001 \001(\0132\024.sw"
-    "arm.game.Position\022\022\n\nclick_size\030\002 \001(\002\"1\n"
-    "\013PlayerState\022\"\n\006player\030\001 \003(\0132\022.swarm.gam"
-    "e.Player\"\215\003\n\rServerMessage\022,\n\004type\030\001 \002(\016"
-    "2\036.swarm.game.ServerMessage.Type\0221\n\016conn"
-    "ection_ack\030\002 \001(\0132\031.swarm.game.Connection"
-    "Ack\022/\n\rplayer_joined\030\003 \001(\0132\030.swarm.game."
-    "PlayerJoined\022+\n\013player_left\030\004 \001(\0132\026.swar"
-    "m.game.PlayerLeft\022+\n\013swarm_state\030\005 \001(\0132\026"
-    ".swarm.game.SwarmState\022-\n\014player_state\030\006"
-    " \001(\0132\027.swarm.game.PlayerState\"a\n\004Type\022\022\n"
-    "\016CONNECTION_ACK\020\000\022\021\n\rPLAYER_JOINED\020\001\022\017\n\013"
-    "PLAYER_LEFT\020\002\022\017\n\013SWARM_STATE\020\003\022\020\n\014PLAYER"
-    "_STATE\020\004\"\262\001\n\rPlayerMessage\022,\n\004type\030\001 \002(\016"
-    "2\036.swarm.game.PlayerMessage.Type\022!\n\003pos\030"
-    "\002 \001(\0132\024.swarm.game.Position\022&\n\005click\030\003 \001"
-    "(\0132\027.swarm.game.PlayerClick\"(\n\004Type\022\016\n\nP"
-    "LAYER_POS\020\001\022\020\n\014PLAYER_CLICK\020\002", 1029);
+    "\n\ngame.proto\022\nswarm.game\"\037\n\007Vector2\022\t\n\001x"
+    "\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\"\"\n\rConnectionAck\022\021\n\tpl"
+    "ayer_id\030\001 \001(\r\"\034\n\014PlayerJoined\022\014\n\004name\030\001 "
+    "\001(\t\"\032\n\nPlayerLeft\022\014\n\004name\030\001 \001(\t\"`\n\007Monst"
+    "er\022 \n\003pos\030\001 \001(\0132\023.swarm.game.Vector2\022%\n\010"
+    "velocity\030\002 \001(\0132\023.swarm.game.Vector2\022\014\n\004s"
+    "ize\030\003 \001(\002\"2\n\nSwarmState\022$\n\007monster\030\001 \003(\013"
+    "2\023.swarm.game.Monster\"6\n\006Player\022\n\n\002id\030\001 "
+    "\001(\r\022 \n\003pos\030\002 \001(\0132\023.swarm.game.Vector2\"I\n"
+    "\013PlayerClick\022&\n\tclick_pos\030\001 \001(\0132\023.swarm."
+    "game.Vector2\022\022\n\nclick_size\030\002 \001(\002\"1\n\013Play"
+    "erState\022\"\n\006player\030\001 \003(\0132\022.swarm.game.Pla"
+    "yer\"\215\003\n\rServerMessage\022,\n\004type\030\001 \002(\0162\036.sw"
+    "arm.game.ServerMessage.Type\0221\n\016connectio"
+    "n_ack\030\002 \001(\0132\031.swarm.game.ConnectionAck\022/"
+    "\n\rplayer_joined\030\003 \001(\0132\030.swarm.game.Playe"
+    "rJoined\022+\n\013player_left\030\004 \001(\0132\026.swarm.gam"
+    "e.PlayerLeft\022+\n\013swarm_state\030\005 \001(\0132\026.swar"
+    "m.game.SwarmState\022-\n\014player_state\030\006 \001(\0132"
+    "\027.swarm.game.PlayerState\"a\n\004Type\022\022\n\016CONN"
+    "ECTION_ACK\020\000\022\021\n\rPLAYER_JOINED\020\001\022\017\n\013PLAYE"
+    "R_LEFT\020\002\022\017\n\013SWARM_STATE\020\003\022\020\n\014PLAYER_STAT"
+    "E\020\004\"\261\001\n\rPlayerMessage\022,\n\004type\030\001 \002(\0162\036.sw"
+    "arm.game.PlayerMessage.Type\022 \n\003pos\030\002 \001(\013"
+    "2\023.swarm.game.Vector2\022&\n\005click\030\003 \001(\0132\027.s"
+    "warm.game.PlayerClick\"(\n\004Type\022\016\n\nPLAYER_"
+    "POS\020\001\022\020\n\014PLAYER_CLICK\020\002", 1063);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "game.proto", &protobuf_RegisterTypes);
-  Position::default_instance_ = new Position();
+  Vector2::default_instance_ = new Vector2();
   ConnectionAck::default_instance_ = new ConnectionAck();
   PlayerJoined::default_instance_ = new PlayerJoined();
   PlayerLeft::default_instance_ = new PlayerLeft();
@@ -353,7 +355,7 @@ void protobuf_AddDesc_game_2eproto() {
   PlayerState::default_instance_ = new PlayerState();
   ServerMessage::default_instance_ = new ServerMessage();
   PlayerMessage::default_instance_ = new PlayerMessage();
-  Position::default_instance_->InitAsDefaultInstance();
+  Vector2::default_instance_->InitAsDefaultInstance();
   ConnectionAck::default_instance_->InitAsDefaultInstance();
   PlayerJoined::default_instance_->InitAsDefaultInstance();
   PlayerLeft::default_instance_->InitAsDefaultInstance();
@@ -377,62 +379,62 @@ struct StaticDescriptorInitializer_game_2eproto {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int Position::kXFieldNumber;
-const int Position::kYFieldNumber;
+const int Vector2::kXFieldNumber;
+const int Vector2::kYFieldNumber;
 #endif  // !_MSC_VER
 
-Position::Position()
+Vector2::Vector2()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void Position::InitAsDefaultInstance() {
+void Vector2::InitAsDefaultInstance() {
 }
 
-Position::Position(const Position& from)
+Vector2::Vector2(const Vector2& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void Position::SharedCtor() {
+void Vector2::SharedCtor() {
   _cached_size_ = 0;
   x_ = 0;
   y_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-Position::~Position() {
+Vector2::~Vector2() {
   SharedDtor();
 }
 
-void Position::SharedDtor() {
+void Vector2::SharedDtor() {
   if (this != default_instance_) {
   }
 }
 
-void Position::SetCachedSize(int size) const {
+void Vector2::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* Position::descriptor() {
+const ::google::protobuf::Descriptor* Vector2::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return Position_descriptor_;
+  return Vector2_descriptor_;
 }
 
-const Position& Position::default_instance() {
+const Vector2& Vector2::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_game_2eproto();
   return *default_instance_;
 }
 
-Position* Position::default_instance_ = NULL;
+Vector2* Vector2::default_instance_ = NULL;
 
-Position* Position::New() const {
-  return new Position;
+Vector2* Vector2::New() const {
+  return new Vector2;
 }
 
-void Position::Clear() {
+void Vector2::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     x_ = 0;
     y_ = 0;
@@ -441,7 +443,7 @@ void Position::Clear() {
   mutable_unknown_fields()->Clear();
 }
 
-bool Position::MergePartialFromCodedStream(
+bool Vector2::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -494,7 +496,7 @@ bool Position::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void Position::SerializeWithCachedSizes(
+void Vector2::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // optional float x = 1;
   if (has_x()) {
@@ -512,7 +514,7 @@ void Position::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* Position::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* Vector2::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // optional float x = 1;
   if (has_x()) {
@@ -531,7 +533,7 @@ void Position::SerializeWithCachedSizes(
   return target;
 }
 
-int Position::ByteSize() const {
+int Vector2::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -557,10 +559,10 @@ int Position::ByteSize() const {
   return total_size;
 }
 
-void Position::MergeFrom(const ::google::protobuf::Message& from) {
+void Vector2::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const Position* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const Position*>(
+  const Vector2* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const Vector2*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -569,7 +571,7 @@ void Position::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void Position::MergeFrom(const Position& from) {
+void Vector2::MergeFrom(const Vector2& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_x()) {
@@ -582,24 +584,24 @@ void Position::MergeFrom(const Position& from) {
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void Position::CopyFrom(const ::google::protobuf::Message& from) {
+void Vector2::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void Position::CopyFrom(const Position& from) {
+void Vector2::CopyFrom(const Vector2& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool Position::IsInitialized() const {
+bool Vector2::IsInitialized() const {
 
   return true;
 }
 
-void Position::Swap(Position* other) {
+void Vector2::Swap(Vector2* other) {
   if (other != this) {
     std::swap(x_, other->x_);
     std::swap(y_, other->y_);
@@ -609,11 +611,11 @@ void Position::Swap(Position* other) {
   }
 }
 
-::google::protobuf::Metadata Position::GetMetadata() const {
+::google::protobuf::Metadata Vector2::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = Position_descriptor_;
-  metadata.reflection = Position_reflection_;
+  metadata.descriptor = Vector2_descriptor_;
+  metadata.reflection = Vector2_reflection_;
   return metadata;
 }
 
@@ -1280,6 +1282,7 @@ void PlayerLeft::Swap(PlayerLeft* other) {
 
 #ifndef _MSC_VER
 const int Monster::kPosFieldNumber;
+const int Monster::kVelocityFieldNumber;
 const int Monster::kSizeFieldNumber;
 #endif  // !_MSC_VER
 
@@ -1289,7 +1292,8 @@ Monster::Monster()
 }
 
 void Monster::InitAsDefaultInstance() {
-  pos_ = const_cast< ::swarm::game::Position*>(&::swarm::game::Position::default_instance());
+  pos_ = const_cast< ::swarm::game::Vector2*>(&::swarm::game::Vector2::default_instance());
+  velocity_ = const_cast< ::swarm::game::Vector2*>(&::swarm::game::Vector2::default_instance());
 }
 
 Monster::Monster(const Monster& from)
@@ -1301,6 +1305,7 @@ Monster::Monster(const Monster& from)
 void Monster::SharedCtor() {
   _cached_size_ = 0;
   pos_ = NULL;
+  velocity_ = NULL;
   size_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -1312,6 +1317,7 @@ Monster::~Monster() {
 void Monster::SharedDtor() {
   if (this != default_instance_) {
     delete pos_;
+    delete velocity_;
   }
 }
 
@@ -1339,7 +1345,10 @@ Monster* Monster::New() const {
 void Monster::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (has_pos()) {
-      if (pos_ != NULL) pos_->::swarm::game::Position::Clear();
+      if (pos_ != NULL) pos_->::swarm::game::Vector2::Clear();
+    }
+    if (has_velocity()) {
+      if (velocity_ != NULL) velocity_->::swarm::game::Vector2::Clear();
     }
     size_ = 0;
   }
@@ -1353,7 +1362,7 @@ bool Monster::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional .swarm.game.Position pos = 1;
+      // optional .swarm.game.Vector2 pos = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -1362,12 +1371,26 @@ bool Monster::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(21)) goto parse_size;
+        if (input->ExpectTag(18)) goto parse_velocity;
         break;
       }
 
-      // optional float size = 2;
+      // optional .swarm.game.Vector2 velocity = 2;
       case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_velocity:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_velocity()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(29)) goto parse_size;
+        break;
+      }
+
+      // optional float size = 3;
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
          parse_size:
@@ -1400,15 +1423,21 @@ bool Monster::MergePartialFromCodedStream(
 
 void Monster::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional .swarm.game.Position pos = 1;
+  // optional .swarm.game.Vector2 pos = 1;
   if (has_pos()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       1, this->pos(), output);
   }
 
-  // optional float size = 2;
+  // optional .swarm.game.Vector2 velocity = 2;
+  if (has_velocity()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->velocity(), output);
+  }
+
+  // optional float size = 3;
   if (has_size()) {
-    ::google::protobuf::internal::WireFormatLite::WriteFloat(2, this->size(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(3, this->size(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -1419,16 +1448,23 @@ void Monster::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* Monster::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional .swarm.game.Position pos = 1;
+  // optional .swarm.game.Vector2 pos = 1;
   if (has_pos()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         1, this->pos(), target);
   }
 
-  // optional float size = 2;
+  // optional .swarm.game.Vector2 velocity = 2;
+  if (has_velocity()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        2, this->velocity(), target);
+  }
+
+  // optional float size = 3;
   if (has_size()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(2, this->size(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(3, this->size(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -1442,14 +1478,21 @@ int Monster::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional .swarm.game.Position pos = 1;
+    // optional .swarm.game.Vector2 pos = 1;
     if (has_pos()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->pos());
     }
 
-    // optional float size = 2;
+    // optional .swarm.game.Vector2 velocity = 2;
+    if (has_velocity()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->velocity());
+    }
+
+    // optional float size = 3;
     if (has_size()) {
       total_size += 1 + 4;
     }
@@ -1482,7 +1525,10 @@ void Monster::MergeFrom(const Monster& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_pos()) {
-      mutable_pos()->::swarm::game::Position::MergeFrom(from.pos());
+      mutable_pos()->::swarm::game::Vector2::MergeFrom(from.pos());
+    }
+    if (from.has_velocity()) {
+      mutable_velocity()->::swarm::game::Vector2::MergeFrom(from.velocity());
     }
     if (from.has_size()) {
       set_size(from.size());
@@ -1511,6 +1557,7 @@ bool Monster::IsInitialized() const {
 void Monster::Swap(Monster* other) {
   if (other != this) {
     std::swap(pos_, other->pos_);
+    std::swap(velocity_, other->velocity_);
     std::swap(size_, other->size_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
@@ -1743,7 +1790,7 @@ Player::Player()
 }
 
 void Player::InitAsDefaultInstance() {
-  pos_ = const_cast< ::swarm::game::Position*>(&::swarm::game::Position::default_instance());
+  pos_ = const_cast< ::swarm::game::Vector2*>(&::swarm::game::Vector2::default_instance());
 }
 
 Player::Player(const Player& from)
@@ -1794,7 +1841,7 @@ void Player::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     id_ = 0u;
     if (has_pos()) {
-      if (pos_ != NULL) pos_->::swarm::game::Position::Clear();
+      if (pos_ != NULL) pos_->::swarm::game::Vector2::Clear();
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -1822,7 +1869,7 @@ bool Player::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .swarm.game.Position pos = 2;
+      // optional .swarm.game.Vector2 pos = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -1859,7 +1906,7 @@ void Player::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->id(), output);
   }
 
-  // optional .swarm.game.Position pos = 2;
+  // optional .swarm.game.Vector2 pos = 2;
   if (has_pos()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       2, this->pos(), output);
@@ -1878,7 +1925,7 @@ void Player::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->id(), target);
   }
 
-  // optional .swarm.game.Position pos = 2;
+  // optional .swarm.game.Vector2 pos = 2;
   if (has_pos()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
@@ -1903,7 +1950,7 @@ int Player::ByteSize() const {
           this->id());
     }
 
-    // optional .swarm.game.Position pos = 2;
+    // optional .swarm.game.Vector2 pos = 2;
     if (has_pos()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
@@ -1941,7 +1988,7 @@ void Player::MergeFrom(const Player& from) {
       set_id(from.id());
     }
     if (from.has_pos()) {
-      mutable_pos()->::swarm::game::Position::MergeFrom(from.pos());
+      mutable_pos()->::swarm::game::Vector2::MergeFrom(from.pos());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -1996,7 +2043,7 @@ PlayerClick::PlayerClick()
 }
 
 void PlayerClick::InitAsDefaultInstance() {
-  click_pos_ = const_cast< ::swarm::game::Position*>(&::swarm::game::Position::default_instance());
+  click_pos_ = const_cast< ::swarm::game::Vector2*>(&::swarm::game::Vector2::default_instance());
 }
 
 PlayerClick::PlayerClick(const PlayerClick& from)
@@ -2046,7 +2093,7 @@ PlayerClick* PlayerClick::New() const {
 void PlayerClick::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (has_click_pos()) {
-      if (click_pos_ != NULL) click_pos_->::swarm::game::Position::Clear();
+      if (click_pos_ != NULL) click_pos_->::swarm::game::Vector2::Clear();
     }
     click_size_ = 0;
   }
@@ -2060,7 +2107,7 @@ bool PlayerClick::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional .swarm.game.Position click_pos = 1;
+      // optional .swarm.game.Vector2 click_pos = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -2107,7 +2154,7 @@ bool PlayerClick::MergePartialFromCodedStream(
 
 void PlayerClick::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional .swarm.game.Position click_pos = 1;
+  // optional .swarm.game.Vector2 click_pos = 1;
   if (has_click_pos()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       1, this->click_pos(), output);
@@ -2126,7 +2173,7 @@ void PlayerClick::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* PlayerClick::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional .swarm.game.Position click_pos = 1;
+  // optional .swarm.game.Vector2 click_pos = 1;
   if (has_click_pos()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
@@ -2149,7 +2196,7 @@ int PlayerClick::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional .swarm.game.Position click_pos = 1;
+    // optional .swarm.game.Vector2 click_pos = 1;
     if (has_click_pos()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
@@ -2189,7 +2236,7 @@ void PlayerClick::MergeFrom(const PlayerClick& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_click_pos()) {
-      mutable_click_pos()->::swarm::game::Position::MergeFrom(from.click_pos());
+      mutable_click_pos()->::swarm::game::Vector2::MergeFrom(from.click_pos());
     }
     if (from.has_click_size()) {
       set_click_size(from.click_size());
@@ -2939,7 +2986,7 @@ PlayerMessage::PlayerMessage()
 }
 
 void PlayerMessage::InitAsDefaultInstance() {
-  pos_ = const_cast< ::swarm::game::Position*>(&::swarm::game::Position::default_instance());
+  pos_ = const_cast< ::swarm::game::Vector2*>(&::swarm::game::Vector2::default_instance());
   click_ = const_cast< ::swarm::game::PlayerClick*>(&::swarm::game::PlayerClick::default_instance());
 }
 
@@ -2993,7 +3040,7 @@ void PlayerMessage::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     type_ = 1;
     if (has_pos()) {
-      if (pos_ != NULL) pos_->::swarm::game::Position::Clear();
+      if (pos_ != NULL) pos_->::swarm::game::Vector2::Clear();
     }
     if (has_click()) {
       if (click_ != NULL) click_->::swarm::game::PlayerClick::Clear();
@@ -3029,7 +3076,7 @@ bool PlayerMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .swarm.game.Position pos = 2;
+      // optional .swarm.game.Vector2 pos = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -3081,7 +3128,7 @@ void PlayerMessage::SerializeWithCachedSizes(
       1, this->type(), output);
   }
 
-  // optional .swarm.game.Position pos = 2;
+  // optional .swarm.game.Vector2 pos = 2;
   if (has_pos()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       2, this->pos(), output);
@@ -3107,7 +3154,7 @@ void PlayerMessage::SerializeWithCachedSizes(
       1, this->type(), target);
   }
 
-  // optional .swarm.game.Position pos = 2;
+  // optional .swarm.game.Vector2 pos = 2;
   if (has_pos()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
@@ -3138,7 +3185,7 @@ int PlayerMessage::ByteSize() const {
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
     }
 
-    // optional .swarm.game.Position pos = 2;
+    // optional .swarm.game.Vector2 pos = 2;
     if (has_pos()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
@@ -3183,7 +3230,7 @@ void PlayerMessage::MergeFrom(const PlayerMessage& from) {
       set_type(from.type());
     }
     if (from.has_pos()) {
-      mutable_pos()->::swarm::game::Position::MergeFrom(from.pos());
+      mutable_pos()->::swarm::game::Vector2::MergeFrom(from.pos());
     }
     if (from.has_click()) {
       mutable_click()->::swarm::game::PlayerClick::MergeFrom(from.click());

@@ -6,6 +6,16 @@
 
 using namespace swarm;
 
+namespace swarm
+{
+  //-----------------------------------------------------------------------------
+  void ToProtocol(game::Vector2* lhs, const Vector2f& rhs)
+  {
+    lhs->set_x(rhs.x);
+    lhs->set_y(rhs.y);
+  }
+}
+
 //-----------------------------------------------------------------------------
 Server::Server()
   : _serverThread(nullptr)
@@ -50,7 +60,7 @@ void Server::HandleClientMessages()
         case game::PlayerMessage_Type_PLAYER_CLICK:
           {
             Vector2f pos(playerMsg.click().click_pos().x(), playerMsg.click().click_pos().y());
-            ApplyAttractor(pos, playerMsg.click().click_size());
+            _attractors.push_back(MonsterAttractor(pos, playerMsg.click().click_size()));
           }
           break;
         }
@@ -125,9 +135,21 @@ void Server::ThreadProc()
     lastUpdate = end;
 
     // apply attractors..
-    //UpdatePlayers();
+    for (MonsterState& state : _monsterState)
+    {
+      state._curState._acc = Vector2f(0,0);
+    }
+
+    for (const MonsterAttractor& a : _attractors)
+    {
+      ApplyAttractor(a.pos, a.radius);
+    }
 
     accumulator += delta.asMicroseconds() / 1e6;
+
+    if (accumulator >= timestep)
+      _attractors.clear();
+
     while (accumulator >= timestep)
     {
       for (MonsterState& state : _monsterState)
@@ -156,10 +178,10 @@ void Server::ThreadProc()
 
         // add monster to state
         game::Monster* m = swarmState.add_monster();
-        auto* p = m->mutable_pos();
         Vector2f pos = lerp(state._prevState._pos, state._curState._pos, alpha);
-        p->set_x(pos.x);
-        p->set_y(pos.y);
+        Vector2f vel = lerp(state._prevState._vel, state._curState._vel, alpha);
+        ToProtocol(m->mutable_pos(), pos);
+        ToProtocol(m->mutable_velocity(), vel);
         m->set_size(data._size);
       }
 
@@ -230,7 +252,7 @@ bool Server::Close()
 void Server::UpdateState(PhysicsState& state, float dt)
 {
   // Velocity Verlet integration
-  float friction = 0.99f;
+  float friction = 0.999f;
   float scale = _level._scale;
   Vector2f oldVel = state._vel;
   Vector2f p = state._pos;
@@ -305,9 +327,7 @@ void Server::SendPlayerState()
     const PlayerData& data = it->second;
     game::Player* player = state->add_player();
     player->set_id(it->first);
-    game::Position* pos = player->mutable_pos();
-    pos->set_x(data.pos.x);
-    pos->set_y(data.pos.y);
+    ToProtocol(player->mutable_pos(), data.pos);
   }
 
   vector<char> buf;
@@ -329,7 +349,7 @@ void Server::ApplyAttractor(const Vector2f& pos, float radius)
       float d = Length(dir);
       if (d < radius)
       {
-        state._curState._acc += 10.0f * Normalize(dir);
+        state._curState._acc += 250.0f * Normalize(dir);
       }
     }
   }
@@ -351,10 +371,9 @@ void Server::Update(const time_duration& delta)
 
     // add monster to state
     game::Monster* m = swarmState.add_monster();
-    auto* p = m->mutable_pos();
-    p->set_x(state._curState._pos.x);
-    p->set_y(state._curState._pos.y);
     m->set_size(data._size);
+    ToProtocol(m->mutable_pos(), state._curState._pos);
+    ToProtocol(m->mutable_velocity(), state._curState._vel);
   }
 
   // Send state to all connected clients
