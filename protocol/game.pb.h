@@ -492,48 +492,60 @@ class Monster : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .swarm.game.Vector2 pos = 1;
+  // optional .swarm.game.Vector2 acc = 1;
+  inline bool has_acc() const;
+  inline void clear_acc();
+  static const int kAccFieldNumber = 1;
+  inline const ::swarm::game::Vector2& acc() const;
+  inline ::swarm::game::Vector2* mutable_acc();
+  inline ::swarm::game::Vector2* release_acc();
+  inline void set_allocated_acc(::swarm::game::Vector2* acc);
+
+  // optional .swarm.game.Vector2 vel = 2;
+  inline bool has_vel() const;
+  inline void clear_vel();
+  static const int kVelFieldNumber = 2;
+  inline const ::swarm::game::Vector2& vel() const;
+  inline ::swarm::game::Vector2* mutable_vel();
+  inline ::swarm::game::Vector2* release_vel();
+  inline void set_allocated_vel(::swarm::game::Vector2* vel);
+
+  // optional .swarm.game.Vector2 pos = 3;
   inline bool has_pos() const;
   inline void clear_pos();
-  static const int kPosFieldNumber = 1;
+  static const int kPosFieldNumber = 3;
   inline const ::swarm::game::Vector2& pos() const;
   inline ::swarm::game::Vector2* mutable_pos();
   inline ::swarm::game::Vector2* release_pos();
   inline void set_allocated_pos(::swarm::game::Vector2* pos);
 
-  // optional .swarm.game.Vector2 velocity = 2;
-  inline bool has_velocity() const;
-  inline void clear_velocity();
-  static const int kVelocityFieldNumber = 2;
-  inline const ::swarm::game::Vector2& velocity() const;
-  inline ::swarm::game::Vector2* mutable_velocity();
-  inline ::swarm::game::Vector2* release_velocity();
-  inline void set_allocated_velocity(::swarm::game::Vector2* velocity);
-
-  // optional float size = 3;
+  // optional float size = 4;
   inline bool has_size() const;
   inline void clear_size();
-  static const int kSizeFieldNumber = 3;
+  static const int kSizeFieldNumber = 4;
   inline float size() const;
   inline void set_size(float value);
 
   // @@protoc_insertion_point(class_scope:swarm.game.Monster)
  private:
+  inline void set_has_acc();
+  inline void clear_has_acc();
+  inline void set_has_vel();
+  inline void clear_has_vel();
   inline void set_has_pos();
   inline void clear_has_pos();
-  inline void set_has_velocity();
-  inline void clear_has_velocity();
   inline void set_has_size();
   inline void clear_has_size();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::swarm::game::Vector2* acc_;
+  ::swarm::game::Vector2* vel_;
   ::swarm::game::Vector2* pos_;
-  ::swarm::game::Vector2* velocity_;
   float size_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
@@ -699,20 +711,30 @@ class Player : public ::google::protobuf::Message {
   inline ::swarm::game::Vector2* release_pos();
   inline void set_allocated_pos(::swarm::game::Vector2* pos);
 
+  // optional int32 health = 3;
+  inline bool has_health() const;
+  inline void clear_health();
+  static const int kHealthFieldNumber = 3;
+  inline ::google::protobuf::int32 health() const;
+  inline void set_health(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:swarm.game.Player)
  private:
   inline void set_has_id();
   inline void clear_has_id();
   inline void set_has_pos();
   inline void clear_has_pos();
+  inline void set_has_health();
+  inline void clear_has_health();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::swarm::game::Vector2* pos_;
   ::google::protobuf::uint32 id_;
+  ::google::protobuf::int32 health_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
@@ -1428,15 +1450,91 @@ inline void PlayerLeft::set_allocated_name(::std::string* name) {
 
 // Monster
 
-// optional .swarm.game.Vector2 pos = 1;
-inline bool Monster::has_pos() const {
+// optional .swarm.game.Vector2 acc = 1;
+inline bool Monster::has_acc() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void Monster::set_has_pos() {
+inline void Monster::set_has_acc() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void Monster::clear_has_pos() {
+inline void Monster::clear_has_acc() {
   _has_bits_[0] &= ~0x00000001u;
+}
+inline void Monster::clear_acc() {
+  if (acc_ != NULL) acc_->::swarm::game::Vector2::Clear();
+  clear_has_acc();
+}
+inline const ::swarm::game::Vector2& Monster::acc() const {
+  return acc_ != NULL ? *acc_ : *default_instance_->acc_;
+}
+inline ::swarm::game::Vector2* Monster::mutable_acc() {
+  set_has_acc();
+  if (acc_ == NULL) acc_ = new ::swarm::game::Vector2;
+  return acc_;
+}
+inline ::swarm::game::Vector2* Monster::release_acc() {
+  clear_has_acc();
+  ::swarm::game::Vector2* temp = acc_;
+  acc_ = NULL;
+  return temp;
+}
+inline void Monster::set_allocated_acc(::swarm::game::Vector2* acc) {
+  delete acc_;
+  acc_ = acc;
+  if (acc) {
+    set_has_acc();
+  } else {
+    clear_has_acc();
+  }
+}
+
+// optional .swarm.game.Vector2 vel = 2;
+inline bool Monster::has_vel() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Monster::set_has_vel() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Monster::clear_has_vel() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Monster::clear_vel() {
+  if (vel_ != NULL) vel_->::swarm::game::Vector2::Clear();
+  clear_has_vel();
+}
+inline const ::swarm::game::Vector2& Monster::vel() const {
+  return vel_ != NULL ? *vel_ : *default_instance_->vel_;
+}
+inline ::swarm::game::Vector2* Monster::mutable_vel() {
+  set_has_vel();
+  if (vel_ == NULL) vel_ = new ::swarm::game::Vector2;
+  return vel_;
+}
+inline ::swarm::game::Vector2* Monster::release_vel() {
+  clear_has_vel();
+  ::swarm::game::Vector2* temp = vel_;
+  vel_ = NULL;
+  return temp;
+}
+inline void Monster::set_allocated_vel(::swarm::game::Vector2* vel) {
+  delete vel_;
+  vel_ = vel;
+  if (vel) {
+    set_has_vel();
+  } else {
+    clear_has_vel();
+  }
+}
+
+// optional .swarm.game.Vector2 pos = 3;
+inline bool Monster::has_pos() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Monster::set_has_pos() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Monster::clear_has_pos() {
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void Monster::clear_pos() {
   if (pos_ != NULL) pos_->::swarm::game::Vector2::Clear();
@@ -1466,53 +1564,15 @@ inline void Monster::set_allocated_pos(::swarm::game::Vector2* pos) {
   }
 }
 
-// optional .swarm.game.Vector2 velocity = 2;
-inline bool Monster::has_velocity() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void Monster::set_has_velocity() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void Monster::clear_has_velocity() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void Monster::clear_velocity() {
-  if (velocity_ != NULL) velocity_->::swarm::game::Vector2::Clear();
-  clear_has_velocity();
-}
-inline const ::swarm::game::Vector2& Monster::velocity() const {
-  return velocity_ != NULL ? *velocity_ : *default_instance_->velocity_;
-}
-inline ::swarm::game::Vector2* Monster::mutable_velocity() {
-  set_has_velocity();
-  if (velocity_ == NULL) velocity_ = new ::swarm::game::Vector2;
-  return velocity_;
-}
-inline ::swarm::game::Vector2* Monster::release_velocity() {
-  clear_has_velocity();
-  ::swarm::game::Vector2* temp = velocity_;
-  velocity_ = NULL;
-  return temp;
-}
-inline void Monster::set_allocated_velocity(::swarm::game::Vector2* velocity) {
-  delete velocity_;
-  velocity_ = velocity;
-  if (velocity) {
-    set_has_velocity();
-  } else {
-    clear_has_velocity();
-  }
-}
-
-// optional float size = 3;
+// optional float size = 4;
 inline bool Monster::has_size() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void Monster::set_has_size() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void Monster::clear_has_size() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void Monster::clear_size() {
   size_ = 0;
@@ -1617,6 +1677,28 @@ inline void Player::set_allocated_pos(::swarm::game::Vector2* pos) {
   } else {
     clear_has_pos();
   }
+}
+
+// optional int32 health = 3;
+inline bool Player::has_health() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Player::set_has_health() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Player::clear_has_health() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void Player::clear_health() {
+  health_ = 0;
+  clear_has_health();
+}
+inline ::google::protobuf::int32 Player::health() const {
+  return health_;
+}
+inline void Player::set_health(::google::protobuf::int32 value) {
+  set_has_health();
+  health_ = value;
 }
 
 // -------------------------------------------------------------------

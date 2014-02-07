@@ -1,17 +1,11 @@
 #include "world.hpp"
 #include "level.hpp"
+#include "physics.hpp"
+#include "shared.hpp"
 
 namespace swarm
 {
   class Entity;
-
-  struct PhysicsState
-  {
-    PhysicsState() : _acc(0,0), _vel(0,0), _pos(0,0) {}
-    Vector2f _acc;
-    Vector2f _vel;
-    Vector2f _pos;
-  };
 
   class Server
   {
@@ -24,7 +18,6 @@ namespace swarm
 
   private:
     void UpdateState(PhysicsState& state, float dt);
-    void Update(const time_duration& delta);
 
     void SendPlayerState();
     void SendToClients(const vector<char>& buf);
@@ -47,12 +40,6 @@ namespace swarm
     struct PlayerData
     {
       Vector2f pos;
-    };
-
-    struct MonsterState
-    {
-      PhysicsState _curState;
-      PhysicsState _prevState;
     };
 
     struct MonsterData

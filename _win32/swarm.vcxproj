@@ -15,6 +15,7 @@
     <ClCompile Include="..\error.cpp" />
     <ClCompile Include="..\level.cpp" />
     <ClCompile Include="..\monster.cpp" />
+    <ClCompile Include="..\physics.cpp" />
     <ClCompile Include="..\player.cpp" />
     <ClCompile Include="..\precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -23,9 +24,11 @@
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4996; 4244</DisableSpecificWarnings>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">precompiled.hpp</ForcedIncludeFiles>
     </ClCompile>
+    <ClCompile Include="..\protocol.cpp" />
     <ClCompile Include="..\protocol\game.pb.cc" />
     <ClCompile Include="..\protocol\settings.pb.cc" />
     <ClCompile Include="..\sfml_helpers.cpp" />
+    <ClCompile Include="..\shared.cpp" />
     <ClCompile Include="..\standard_cursor.cpp" />
     <ClCompile Include="..\swarm.cpp" />
     <ClCompile Include="..\swarm_server.cpp" />
@@ -40,12 +43,15 @@
     <ClInclude Include="..\error.hpp" />
     <ClInclude Include="..\level.hpp" />
     <ClInclude Include="..\monster.hpp" />
+    <ClInclude Include="..\physics.hpp" />
     <ClInclude Include="..\player.hpp" />
     <ClInclude Include="..\precompiled.hpp" />
+    <ClInclude Include="..\protocol.hpp" />
     <ClInclude Include="..\protocol\game.pb.h" />
     <ClInclude Include="..\protocol\settings.pb.h" />
     <ClInclude Include="..\rolling_average.hpp" />
     <ClInclude Include="..\sfml_helpers.hpp" />
+    <ClInclude Include="..\shared.hpp" />
     <ClInclude Include="..\standard_cursor.hpp" />
     <ClInclude Include="..\swarm.hpp" />
     <ClInclude Include="..\swarm_server.hpp" />
@@ -70,7 +76,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v110_xp</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>

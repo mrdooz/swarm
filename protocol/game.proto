@@ -29,9 +29,10 @@ message PlayerLeft
 //-----------------------------------------------------------------------------
 message Monster
 {
-	optional Vector2 pos = 1;
-	optional Vector2 velocity = 2;
-	optional float size = 3;
+	optional Vector2 acc = 1;
+	optional Vector2 vel = 2;
+	optional Vector2 pos = 3;
+	optional float size = 4;
 }
 
 //-----------------------------------------------------------------------------
@@ -46,6 +47,7 @@ message Player
 	// message about a generic player (from server -> client)
 	optional uint32 id = 1;
 	optional Vector2 pos = 2;
+	optional int32 health = 3;
 }
 
 //-----------------------------------------------------------------------------

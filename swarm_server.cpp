@@ -3,18 +3,9 @@
 #include "entity.hpp"
 #include "protocol/game.pb.h"
 #include "error.hpp"
+#include "protocol.hpp"
 
 using namespace swarm;
-
-namespace swarm
-{
-  //-----------------------------------------------------------------------------
-  void ToProtocol(game::Vector2* lhs, const Vector2f& rhs)
-  {
-    lhs->set_x(rhs.x);
-    lhs->set_y(rhs.y);
-  }
-}
 
 //-----------------------------------------------------------------------------
 Server::Server()
@@ -94,9 +85,6 @@ void Server::ThreadProc()
     Socket::Status status = listener.accept(*socket);
     if (status == Socket::Done)
     {
-      LOG_INFO("Player connected"
-        << LogKeyValue("addr", socket->getRemoteAddress().toString())
-        << LogKeyValue("port", socket->getRemotePort()));
       _connectedClients.push_back(socket);
       u16 port = socket->getRemotePort();
       u32 addr = socket->getRemoteAddress().toInteger();
@@ -105,15 +93,21 @@ void Server::ThreadProc()
       auto key = make_pair(addr, port);
       int id;
       auto it = _addrToId.find(key);
+      bool newPlayer = false;
       if (it != _addrToId.end())
       {
         id = it->second;
       }
       else
       {
+        newPlayer = true;
         id = _addrToId.size();
         _addrToId[key] = id;
       }
+
+      LOG_INFO((newPlayer ? "New player connected" : "Existing player connected")
+        << LogKeyValue("addr", socket->getRemoteAddress().toString())
+        << LogKeyValue("port", socket->getRemotePort()));
 
       // send the ack to the client
       game::ServerMessage msg;
@@ -178,10 +172,13 @@ void Server::ThreadProc()
 
         // add monster to state
         game::Monster* m = swarmState.add_monster();
-        Vector2f pos = lerp(state._prevState._pos, state._curState._pos, alpha);
+        Vector2f acc = lerp(state._prevState._acc, state._curState._acc, alpha);
         Vector2f vel = lerp(state._prevState._vel, state._curState._vel, alpha);
+        Vector2f pos = lerp(state._prevState._pos, state._curState._pos, alpha);
+
+        ToProtocol(m->mutable_acc(), acc);
+        ToProtocol(m->mutable_vel(), vel);
         ToProtocol(m->mutable_pos(), pos);
-        ToProtocol(m->mutable_velocity(), vel);
         m->set_size(data._size);
       }
 
@@ -209,7 +206,7 @@ bool Server::Init()
     return false;
 
   float scale = _level._scale;
-  for (size_t i = 0; i < 10; ++i)
+  for (size_t i = 0; i < 20; ++i)
   {
     while (true)
     {
@@ -286,9 +283,17 @@ void Server::SendToClients(const vector<char>& buf)
   {
     TcpSocket* socket = *it;
     Socket::Status status = socket->send(buf.data(), buf.size());
-    if (status != Socket::Done)
+    if (status == Socket::Disconnected)
     {
       // unable to send, so remove the client
+      auto idIt = _addrToId.find(
+          make_pair(socket->getRemoteAddress().toInteger(), socket->getRemotePort()));
+      if (idIt != _addrToId.end())
+      {
+        int id = idIt->second;
+        _playerData.erase(id);
+      }
+
       delete socket;
       it = _connectedClients.erase(it);
     }
@@ -352,34 +357,5 @@ void Server::ApplyAttractor(const Vector2f& pos, float radius)
         state._curState._acc += 250.0f * Normalize(dir);
       }
     }
-  }
-}
-
-//----------------------------------------------------------------------------------
-void Server::Update(const time_duration& delta)
-{
-  game::ServerMessage msg;
-  msg.set_type(game::ServerMessage_Type_SWARM_STATE);
-  game::SwarmState& swarmState = *msg.mutable_swarm_state();
-
-  float dt = delta.total_milliseconds() / 1000.0f;
-  for (size_t i = 0; i < _monsterState.size(); ++i)
-  {
-    MonsterState& state = _monsterState[i];
-    MonsterData& data = _monsterData[i];
-    UpdateState(state._curState, dt);
-
-    // add monster to state
-    game::Monster* m = swarmState.add_monster();
-    m->set_size(data._size);
-    ToProtocol(m->mutable_pos(), state._curState._pos);
-    ToProtocol(m->mutable_velocity(), state._curState._vel);
-  }
-
-  // Send state to all connected clients
-  vector<char> buf;
-  if (PackMessage(buf, msg))
-  {
-    SendToClients(buf);
   }
 }

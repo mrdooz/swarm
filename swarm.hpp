@@ -40,7 +40,7 @@ namespace swarm
   {
     public:
     PlayerWindow(const string& title, const Vector2f& pos, const Vector2f& size, Game* game);
-
+    virtual void Draw();
     Game* _game;
   };
 
@@ -55,21 +55,21 @@ namespace swarm
   struct RenderPlayer
   {
     Vector2f _pos;
+    int _id;
+    int _health;
     float _size;
   };
 
   struct RenderMonster
   {
     Vector2f _pos;
-    Vector2f _orgPos;
-    Vector2f _vel;
-    ptime _lastUpdate;
     float _size;
   };
 
   class Game
   {
     friend class MainWindow;
+    friend class PlayerWindow;
     friend class DebugWindow;
     
     public:
@@ -85,8 +85,12 @@ namespace swarm
     bool OnKeyReleased(const Event& event);
     bool OnMouseReleased(const Event& event);
 
+    bool OnLostFocus(const Event& event);
+    bool OnGainedFocus(const Event& event);
+
     void UpdatePlayers();
     void UpdateEntity(Entity& entity, float dt);
+    void UpdateState(PhysicsState& state, float dt);
 
     void HandlePlayerJoined(const game::PlayerJoined& msg);
     void HandlePlayerLeft(const game::PlayerLeft& msg);
@@ -105,8 +109,8 @@ namespace swarm
 
     Vector2f _mousePos;
 
-    //Player _player;
-    //Level* _level;
+    vector<MonsterState> _monsterState;
+
     World _world;
     MainWindow* _mainWindow;
     PlayerWindow* _playerWindow;
@@ -121,5 +125,6 @@ namespace swarm
     u16 _serverPort;
     string _serverAddr;
     u8 _networkBuffer[32*1024];
+    bool _focus;
   };
 }

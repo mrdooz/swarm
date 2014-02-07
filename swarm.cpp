@@ -7,9 +7,52 @@
 #include "window_event_manager.hpp"
 #include "virtual_window_manager.hpp"
 #include "protocol/game.pb.h"
+#include "protocol.hpp"
 
 using namespace sf;
 using namespace swarm;
+
+//-----------------------------------------------------------------------------
+PlayerWindow::PlayerWindow(const string& title, const Vector2f& pos, const Vector2f& size, Game* game)
+  : VirtualWindow(title, pos, size)
+  , _game(game)
+{
+}
+//-----------------------------------------------------------------------------
+void PlayerWindow::Draw()
+{
+  _texture.clear();
+
+  Text header("", _game->_font, 30);
+  Text text("", _game->_font, 20);
+
+  Vector2f pos(10, 10);
+  for (const RenderPlayer& player : _game->_renderPlayers)
+  {
+    if (player._id == _game->_playerId)
+    {
+      text.setColor(Color::Yellow);
+      header.setColor(Color::Yellow);
+    }
+    else
+    {
+      text.setColor(Color::White);
+      header.setColor(Color::White);
+    }
+
+    header.setString(toString("Player %d", player._id));
+    header.setPosition(pos);
+    _texture.draw(header);
+    pos.y += 35;
+
+    text.setPosition(pos);
+    text.setString(toString("Health: %d", player._health));
+    _texture.draw(text);
+    pos.y += 20;
+  }
+
+  _texture.display();
+}
 
 //-----------------------------------------------------------------------------
 MainWindow::MainWindow(const string& title, const Vector2f& pos, const Vector2f& size, Game* game)
@@ -66,18 +109,19 @@ void MainWindow::Draw()
     _texture.draw(_playerCircle);
   }
 
-  ptime now = microsec_clock::local_time();
-
-  for (const RenderMonster& monster : _game->_renderMonsters)
+  RenderMonster* monster = _game->_renderMonsters.data();
+  MonsterState* state = _game->_monsterState.data();
+  for (size_t i = 0; i < _game->_renderMonsters.size(); ++i)
   {
-    // interpolate the position
-    float delta = (monster._lastUpdate - now).total_microseconds() / 1e6;
-    Vector2f p(monster._orgPos + delta * monster._vel);
-    p.x -= monster._size;
-    p.y -= monster._size;
+    Vector2f p(monster->_pos);
+    p.x -= monster->_size;
+    p.y -= monster->_size;
     _monsterCircle.setPosition(p);
-    _monsterCircle.setRadius(monster._size);
+    _monsterCircle.setRadius(monster->_size);
     _texture.draw(_monsterCircle);
+
+    ++monster;
+    ++state;
   }
 
   if (!_clickStart.is_not_a_date_time())
@@ -90,12 +134,6 @@ void MainWindow::Draw()
   }
 
   _texture.display();
-}
-
-//-----------------------------------------------------------------------------
-PlayerWindow::PlayerWindow(const string& title, const Vector2f& pos, const Vector2f& size, Game* game)
-  : VirtualWindow(title, pos, size)
-{
 }
 
 //-----------------------------------------------------------------------------
@@ -133,6 +171,7 @@ Game::Game(u16 serverPort, const string& serverAddr)
   , _sendClick(false)
   , _serverPort(serverPort)
   , _serverAddr(serverAddr)
+  , _focus(true)
 {
 }
 
@@ -175,9 +214,13 @@ bool Game::Init()
 
   _eventManager->RegisterHandler(Event::KeyPressed, bind(&Game::OnKeyPressed, this, _1));
   _eventManager->RegisterHandler(Event::KeyReleased, bind(&Game::OnKeyReleased, this, _1));
+  _eventManager->RegisterHandler(Event::LostFocus, bind(&Game::OnLostFocus, this, _1));
+  _eventManager->RegisterHandler(Event::GainedFocus, bind(&Game::OnGainedFocus, this, _1));
 
-  _debugWindow = new DebugWindow("DEBUG", Vector2f(0,0), Vector2f(200, _renderWindow->getSize().y), this);
+  _playerWindow = new PlayerWindow("PLAYER", Vector2f(0,0), Vector2f(200, _renderWindow->getSize().y), this);
+  _debugWindow = new DebugWindow("DEBUG", Vector2f(0,500), Vector2f(200, _renderWindow->getSize().y), this);
   _mainWindow = new MainWindow("MAIN", Vector2f(200,0), Vector2f(_renderWindow->getSize().x-200, _renderWindow->getSize().y), this);
+  _windowManager->AddWindow(_playerWindow);
   _windowManager->AddWindow(_debugWindow);
   _windowManager->AddWindow(_mainWindow);
 
@@ -212,6 +255,20 @@ bool Game::Init()
 }
 
 //----------------------------------------------------------------------------------
+bool Game::OnLostFocus(const Event& event)
+{
+  _focus = false;
+  return true;
+}
+
+//----------------------------------------------------------------------------------
+bool Game::OnGainedFocus(const Event& event)
+{
+  _focus = true;
+  return true;
+}
+
+//----------------------------------------------------------------------------------
 bool Game::OnKeyPressed(const Event& event)
 {
   Keyboard::Key key = event.key.code;
@@ -242,6 +299,9 @@ bool Game::OnMouseReleased(const Event& event)
 //----------------------------------------------------------------------------------
 void Game::UpdatePlayers()
 {
+  if (!_focus)
+    return;
+
   float s = 30;
 
   Player& player = *_world._players[0];
@@ -315,13 +375,14 @@ void Game::HandlePlayerState(const game::PlayerState& msg)
   {
     const game::Player& player = msg.player(i);
 
-    // Skip local player info
-    if (player.id() == _playerId)
-    {
+    _renderPlayers[i]._id = player.id();
+    _renderPlayers[i]._health = player.health();
+
+    // Don't update position of local player..
+    if (player.id() != _playerId)
+      FromProtocol(&_renderPlayers[i]._pos, player.pos());
+    else
       _renderPlayers[i]._pos = _world._players[0]->_pos;
-      continue;
-    }
-    _renderPlayers[i]._pos = Vector2f(player.pos().x(), player.pos().y());
   }
 }
 
@@ -330,22 +391,59 @@ void Game::HandleSwarmState(const game::SwarmState& msg)
 {
   ptime now = microsec_clock::local_time();
 
-  //LOG_INFO(__FUNCTION__ << LogKeyValue("num_monsters", msg.monster_size()));
   if (_renderMonsters.size() != msg.monster_size())
+  {
     _renderMonsters.resize(msg.monster_size());
+    _monsterState.resize(msg.monster_size());
+  }
 
   RenderMonster* monster = _renderMonsters.data();
+  MonsterState* state = _monsterState.data();
   for (int i = 0; i < msg.monster_size(); ++i)
   {
     const game::Monster& m = msg.monster(i);
-    monster->_pos = Vector2f(m.pos().x(), m.pos().y());
-    monster->_orgPos = monster->_pos;
-    monster->_vel = Vector2f(m.velocity().x(), m.velocity().y());
-    monster->_lastUpdate = now;
+    FromProtocol(&monster->_pos, m.pos());
     monster->_size = m.size();
 
+    FromProtocol(&state->_curState._acc, m.acc());
+    FromProtocol(&state->_curState._vel, m.vel());
+    FromProtocol(&state->_curState._pos, m.pos());
+    state->_prevState = state->_curState;
+
     monster++;
+    state++;
   }
+}
+
+//----------------------------------------------------------------------------------
+void Game::UpdateState(PhysicsState& state, float dt)
+{
+  // Velocity Verlet integration
+  float friction = 0.999f;
+  float scale = _world._level->_scale;
+  Vector2f oldVel = state._vel;
+  Vector2f p = state._pos;
+  Vector2f v = friction * (state._vel + state._acc * dt);
+
+  Vector2f newPos = state._pos + (oldVel + state._vel) * 0.5f * dt;
+
+  u8 b;
+  // check horizontal collisions
+  if (!(_world._level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
+  {
+    newPos.x = p.x;
+    v.x = -v.x;
+  }
+
+  // check vertical
+  if (!(_world._level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
+  {
+    newPos.y = p.y;
+    v.y = -v.y;
+  }
+
+  state._vel = v;
+  state._pos = newPos;
 }
 
 //----------------------------------------------------------------------------------
@@ -445,11 +543,25 @@ void Game::Run()
     {
       lastPos = _world._players[0]->_pos;
       UpdateEntity(*_world._players[0], (float)timestep);
+
+      for (MonsterState& state : _monsterState)
+      {
+        state._prevState = state._curState;
+        UpdateState(state._curState, (float)timestep);
+      }
+
       accumulator -= timestep;
     }
 
     float alpha = (double)accumulator / timestep;
     _renderPlayers[0]._pos = lerp(lastPos, _world._players[0]->_pos, alpha);
+
+    float dt = delta.asMilliseconds() / 1000.0f;
+    for (size_t i = 0; i < _monsterState.size(); ++i)
+    {
+      MonsterState& state = _monsterState[i];
+      _renderMonsters[i]._pos = lerp(state._prevState._pos, state._curState._pos, alpha);
+    }
 
     if ((end - lastSend).asMilliseconds() > 100)
     {
