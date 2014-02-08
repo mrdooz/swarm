@@ -95,10 +95,10 @@ void MainWindow::Draw()
 {
   _texture.clear();
   
-  View view = _texture.getView();
-  view.setCenter(_game->_world._players[0]->_pos);
+//  View view = _texture.getView();
+//  view.setCenter(_game->_world._players[0]->_pos);
   //_texture.setView(view);
-  _texture.draw(_game->_world._level->_sprite);
+  _texture.draw(_game->_level._sprite);
 
   for (const RenderPlayer& player : _game->_renderPlayers)
   {
@@ -169,6 +169,8 @@ Game::Game(u16 serverPort, const string& serverAddr)
   , _playerWindow(nullptr)
   , _debugWindow(nullptr)
   , _sendClick(false)
+  , _playerIdx(0)
+  , _playerId(0)
   , _serverPort(serverPort)
   , _serverAddr(serverAddr)
   , _focus(true)
@@ -204,10 +206,11 @@ bool Game::Init()
   _eventManager.reset(new WindowEventManager(_renderWindow.get()));
   _windowManager.reset(new VirtualWindowManager(_renderWindow.get(), _eventManager.get()));
 
-  if (!_world._level->Load("data/pacman.png"))
+  if (!_level.Load("data/pacman.png"))
     return false;
 
-  _world.AddPlayer();
+  _renderPlayers.push_back(RenderPlayer());
+  _localPlayer._state._pos = _level.GetPlayerPos();
 
   if (!_font.loadFromFile("gfx/wscsnrg.ttf"))
     return false;
@@ -304,51 +307,20 @@ void Game::UpdatePlayers()
 
   float s = 30;
 
-  Player& player = *_world._players[0];
-  player._acc = Vector2f(0,0);
+  Vector2f& acc = _localPlayer._state._acc;
+  acc = Vector2f(0,0);
 
   if (Keyboard::isKeyPressed(Keyboard::Left) || Keyboard::isKeyPressed(Keyboard::A))
-    player._acc += Vector2f(-s, 0);
+    acc += Vector2f(-s, 0);
 
   if (Keyboard::isKeyPressed(Keyboard::Right) || Keyboard::isKeyPressed(Keyboard::D))
-    player._acc += Vector2f(+s, 0);
+    acc += Vector2f(+s, 0);
 
   if (Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::W))
-    player._acc += Vector2f(0, -s);
+    acc += Vector2f(0, -s);
 
   if (Keyboard::isKeyPressed(Keyboard::Down) || Keyboard::isKeyPressed(Keyboard::S))
-    player._acc += Vector2f(0, +s);
-}
-
-//----------------------------------------------------------------------------------
-void Game::UpdateEntity(Entity& entity, float dt)
-{
-  // Velocity Verlet integration
-  float friction = 0.99f;
-  float scale = _world._level->_scale;
-  Vector2f oldVel = entity._vel;
-  Vector2f p = entity._pos;
-  Vector2f v = friction * (entity._vel + entity._acc * dt);
-
-  Vector2f newPos = entity._pos + (oldVel + entity._vel) * 0.5f * dt;
-
-  u8 b;
-  // check horizontal collisions
-  if (!(_world._level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
-  {
-    newPos.x = p.x;
-    v.x = -v.x;
-  }
-
-  // check vertical
-  if (!(_world._level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
-  {
-    newPos.y = p.y;
-    v.y = -v.y;
-  }
-
-  entity._vel = v;
-  entity._pos = newPos;
+    acc += Vector2f(0, +s);
 }
 
 //----------------------------------------------------------------------------------
@@ -380,17 +352,22 @@ void Game::HandlePlayerState(const game::PlayerState& msg)
 
     // Don't update position of local player..
     if (player.id() != _playerId)
-      FromProtocol(&_renderPlayers[i]._pos, player.pos());
+    {
+      FromProtocol(&_renderPlayers[i]._state._acc, player.acc());
+      FromProtocol(&_renderPlayers[i]._state._vel, player.vel());
+      FromProtocol(&_renderPlayers[i]._state._pos, player.pos());
+    }
     else
-      _renderPlayers[i]._pos = _world._players[0]->_pos;
+    {
+      _playerIdx = i;
+      _renderPlayers[i] = _localPlayer;
+    }
   }
 }
 
 //----------------------------------------------------------------------------------
 void Game::HandleSwarmState(const game::SwarmState& msg)
 {
-  ptime now = microsec_clock::local_time();
-
   if (_renderMonsters.size() != msg.monster_size())
   {
     _renderMonsters.resize(msg.monster_size());
@@ -419,8 +396,8 @@ void Game::HandleSwarmState(const game::SwarmState& msg)
 void Game::UpdateState(PhysicsState& state, float dt)
 {
   // Velocity Verlet integration
-  float friction = 0.999f;
-  float scale = _world._level->_scale;
+  float friction = 0.99f;
+  float scale = _level._scale;
   Vector2f oldVel = state._vel;
   Vector2f p = state._pos;
   Vector2f v = friction * (state._vel + state._acc * dt);
@@ -429,14 +406,14 @@ void Game::UpdateState(PhysicsState& state, float dt)
 
   u8 b;
   // check horizontal collisions
-  if (!(_world._level->PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
+  if (!(_level.PosToBackground(1/scale * (p + dt * Vector2f(v.x, 0)), &b) && b == 0))
   {
     newPos.x = p.x;
     v.x = -v.x;
   }
 
   // check vertical
-  if (!(_world._level->PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
+  if (!(_level.PosToBackground(1/scale * (p + dt * Vector2f(0, v.y)), &b) && b == 0))
   {
     newPos.y = p.y;
     v.y = -v.y;
@@ -461,7 +438,6 @@ void Game::Run()
   // subracts from it (using a fixed timestep)
   double timestep = 1/50.0;
   double accumulator = 0;
-  Vector2f lastPos(_world._players[0]->_pos);
 
   while (_renderWindow->isOpen() && !_done)
   {
@@ -475,7 +451,7 @@ void Game::Run()
     Socket::Status status = _socket.receive(buf.data(), buf.size(), bytesRecieved);
     if (status == Socket::Done)
     {
-      LOG_INFO("recieved from server" << LogKeyValue("num_bytes", bytesRecieved));
+      // LOG_INFO("recieved from server" << LogKeyValue("num_bytes", bytesRecieved));
       char *ptr = buf.data();
       while (ptr < buf.data() + bytesRecieved)
       {
@@ -541,8 +517,16 @@ void Game::Run()
     accumulator += delta.asMicroseconds() / 1e6;
     while (accumulator >= timestep)
     {
-      lastPos = _world._players[0]->_pos;
-      UpdateEntity(*_world._players[0], (float)timestep);
+      for (RenderPlayer& player : _renderPlayers)
+      {
+        player._prevState = player._state;
+        UpdateState(player._state, (float)timestep);
+      }
+
+      _localPlayer._prevState = _localPlayer._state;
+      UpdateState(_localPlayer._state, (float)timestep);
+      _renderPlayers[_playerIdx]._state = _localPlayer._state;
+      _renderPlayers[_playerIdx]._prevState = _localPlayer._prevState;
 
       for (MonsterState& state : _monsterState)
       {
@@ -554,9 +538,13 @@ void Game::Run()
     }
 
     float alpha = (double)accumulator / timestep;
-    _renderPlayers[0]._pos = lerp(lastPos, _world._players[0]->_pos, alpha);
 
-    float dt = delta.asMilliseconds() / 1000.0f;
+    for (RenderPlayer& player : _renderPlayers)
+    {
+      player._pos = lerp(player._prevState._pos, player._state._pos, alpha);
+    }
+
+
     for (size_t i = 0; i < _monsterState.size(); ++i)
     {
       MonsterState& state = _monsterState[i];
@@ -569,8 +557,7 @@ void Game::Run()
       game::PlayerMessage msg;
       msg.set_type(game::PlayerMessage_Type_PLAYER_POS);
       game::Vector2* pos = msg.mutable_pos();
-      pos->set_x(_world._players[0]->_pos.x);
-      pos->set_y(_world._players[0]->_pos.y);
+      ToProtocol(pos, _renderPlayers[_playerIdx]._pos);
 
       string str;
       if (msg.SerializePartialToString(&str))

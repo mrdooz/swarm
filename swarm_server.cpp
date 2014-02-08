@@ -164,7 +164,6 @@ void Server::ThreadProc()
       msg.set_type(game::ServerMessage_Type_SWARM_STATE);
       game::SwarmState& swarmState = *msg.mutable_swarm_state();
 
-      float dt = delta.asMilliseconds() / 1000.0f;
       for (size_t i = 0; i < _monsterState.size(); ++i)
       {
         MonsterState& state = _monsterState[i];

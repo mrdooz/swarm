@@ -71,6 +71,26 @@ void Level::AddMonsters(vector<Monster* >* monsters)
 }
 
 //-----------------------------------------------------------------------------
+Vector2f Level::GetPlayerPos()
+{
+  Vector2f pos;
+  float scale = _scale;
+  // find a free spot to put the player in
+  while (true)
+  {
+    int x = rand() % _width/4;
+    int y = rand() % _height/4;
+    if (_background[y*_width+x] == 0)
+    {
+      pos = scale * Vector2f(x, y);
+      break;
+    }
+  }
+
+  return pos;
+}
+
+//-----------------------------------------------------------------------------
 Player* Level::AddPlayer()
 {
   Player* player(new Player);

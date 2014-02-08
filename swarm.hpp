@@ -54,6 +54,8 @@ namespace swarm
 
   struct RenderPlayer
   {
+    PhysicsState _prevState;
+    PhysicsState _state;
     Vector2f _pos;
     int _id;
     int _health;
@@ -89,7 +91,6 @@ namespace swarm
     bool OnGainedFocus(const Event& event);
 
     void UpdatePlayers();
-    void UpdateEntity(Entity& entity, float dt);
     void UpdateState(PhysicsState& state, float dt);
 
     void HandlePlayerJoined(const game::PlayerJoined& msg);
@@ -111,7 +112,8 @@ namespace swarm
 
     vector<MonsterState> _monsterState;
 
-    World _world;
+    RenderPlayer _localPlayer;
+    Level _level;
     MainWindow* _mainWindow;
     PlayerWindow* _playerWindow;
     DebugWindow* _debugWindow;
@@ -121,6 +123,7 @@ namespace swarm
     time_duration _clickDuration;
     bool _sendClick;
 
+    u32 _playerIdx;
     u32 _playerId;
     u16 _serverPort;
     string _serverAddr;

@@ -10,4 +10,10 @@ namespace swarm
     PhysicsState _prevState;
   };
 
+  struct PlayerState
+  {
+    PhysicsState _curState;
+    PhysicsState _prevState;
+  };
+
 }

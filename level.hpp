@@ -13,6 +13,7 @@ namespace swarm
 
     Player* AddPlayer();
     void AddMonsters(vector<Monster* >* monsters);
+    Vector2f GetPlayerPos();
 
     float _scale;
     int _width, _height;
