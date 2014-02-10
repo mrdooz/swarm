@@ -27,12 +27,12 @@ void Server::HandleClientMessages()
 {
   for (TcpSocket* s : _connectedClients)
   {
-    size_t recievedSize = 0;
-    Socket::Status status = s->receive(_networkBuffer, sizeof(_networkBuffer), recievedSize);
+    size_t receivedBytes = 0;
+    Socket::Status status = s->receive(_networkBuffer, sizeof(_networkBuffer), receivedBytes);
     if (status == Socket::Done)
     {
       game::PlayerMessage playerMsg;
-      if (playerMsg.ParseFromArray(_networkBuffer, recievedSize))
+      if (playerMsg.ParseFromArray(_networkBuffer, receivedBytes))
       {
         auto it = _addrToId.find(make_pair(s->getRemoteAddress().toInteger(), s->getRemotePort()));
         if (it == _addrToId.end())
@@ -65,10 +65,6 @@ void Server::HandleClientMessages()
 //-----------------------------------------------------------------------------
 void Server::ThreadProc()
 {
-  TcpListener listener;
-  listener.setBlocking(false);
-  listener.listen(50000);
-
   TcpSocket *socket = new TcpSocket();
   socket->setBlocking(false);
 
@@ -82,7 +78,7 @@ void Server::ThreadProc()
   while (!_done)
   {
     // Check for connected players
-    Socket::Status status = listener.accept(*socket);
+    Socket::Status status = _listener.accept(*socket);
     if (status == Socket::Done)
     {
       _connectedClients.push_back(socket);
@@ -229,6 +225,15 @@ bool Server::Init()
     }
   }
 
+  _listener.setBlocking(false);
+  _port = 50000;
+  Socket::Status status = _listener.listen(_port);
+  while (status != Socket::Done)
+  {
+    (_port)++;
+    status = _listener.listen(_port);
+  }
+
   _serverThread = new thread(bind(&Server::ThreadProc, this));
   return true;
 }
@@ -298,7 +303,7 @@ void Server::SendToClients(const vector<char>& buf)
     }
     else
     {
-      LOG_INFO("Send to client" << LogKeyValue("num_bytes", buf.size()));
+      //LOG_INFO("Send to client" << LogKeyValue("num_bytes", buf.size()));
       ++it;
     }
   }

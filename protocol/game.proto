@@ -103,3 +103,11 @@ message PlayerMessage
 	optional Vector2 pos = 2;
 	optional PlayerClick click = 3;
 }
+
+//-----------------------------------------------------------------------------
+message GameStarted
+{
+	optional uint32 player_id = 1;
+	optional PlayerState player_state = 2;
+	optional SwarmState swarm_state = 3;
+}

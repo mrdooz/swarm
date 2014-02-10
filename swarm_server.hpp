@@ -16,6 +16,8 @@ namespace swarm
     bool Init();
     bool Close();
 
+    u16 GetPort() const { return _port; }
+
   private:
     void UpdateState(PhysicsState& state, float dt);
 
@@ -62,6 +64,8 @@ namespace swarm
     thread* _serverThread;
     u8 _networkBuffer[32*1024];
 
+    TcpListener _listener;
+    u16 _port;
     atomic<bool> _done;
   };
 }

@@ -56,6 +56,9 @@ const ::google::protobuf::Descriptor* PlayerMessage_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   PlayerMessage_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* PlayerMessage_Type_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* GameStarted_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  GameStarted_reflection_ = NULL;
 
 }  // namespace
 
@@ -249,6 +252,23 @@ void protobuf_AssignDesc_game_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PlayerMessage));
   PlayerMessage_Type_descriptor_ = PlayerMessage_descriptor_->enum_type(0);
+  GameStarted_descriptor_ = file->message_type(11);
+  static const int GameStarted_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameStarted, player_id_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameStarted, player_state_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameStarted, swarm_state_),
+  };
+  GameStarted_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      GameStarted_descriptor_,
+      GameStarted::default_instance_,
+      GameStarted_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameStarted, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameStarted, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(GameStarted));
 }
 
 namespace {
@@ -283,6 +303,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
     ServerMessage_descriptor_, &ServerMessage::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     PlayerMessage_descriptor_, &PlayerMessage::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    GameStarted_descriptor_, &GameStarted::default_instance());
 }
 
 }  // namespace
@@ -310,6 +332,8 @@ void protobuf_ShutdownFile_game_2eproto() {
   delete ServerMessage_reflection_;
   delete PlayerMessage::default_instance_;
   delete PlayerMessage_reflection_;
+  delete GameStarted::default_instance_;
+  delete GameStarted_reflection_;
 }
 
 void protobuf_AddDesc_game_2eproto() {
@@ -348,7 +372,10 @@ void protobuf_AddDesc_game_2eproto() {
     "me.PlayerMessage.Type\022 \n\003pos\030\002 \001(\0132\023.swa"
     "rm.game.Vector2\022&\n\005click\030\003 \001(\0132\027.swarm.g"
     "ame.PlayerClick\"(\n\004Type\022\016\n\nPLAYER_POS\020\001\022"
-    "\020\n\014PLAYER_CLICK\020\002", 1177);
+    "\020\n\014PLAYER_CLICK\020\002\"|\n\013GameStarted\022\021\n\tplay"
+    "er_id\030\001 \001(\r\022-\n\014player_state\030\002 \001(\0132\027.swar"
+    "m.game.PlayerState\022+\n\013swarm_state\030\003 \001(\0132"
+    "\026.swarm.game.SwarmState", 1303);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "game.proto", &protobuf_RegisterTypes);
   Vector2::default_instance_ = new Vector2();
@@ -362,6 +389,7 @@ void protobuf_AddDesc_game_2eproto() {
   PlayerState::default_instance_ = new PlayerState();
   ServerMessage::default_instance_ = new ServerMessage();
   PlayerMessage::default_instance_ = new PlayerMessage();
+  GameStarted::default_instance_ = new GameStarted();
   Vector2::default_instance_->InitAsDefaultInstance();
   ConnectionAck::default_instance_->InitAsDefaultInstance();
   PlayerJoined::default_instance_->InitAsDefaultInstance();
@@ -373,6 +401,7 @@ void protobuf_AddDesc_game_2eproto() {
   PlayerState::default_instance_->InitAsDefaultInstance();
   ServerMessage::default_instance_->InitAsDefaultInstance();
   PlayerMessage::default_instance_->InitAsDefaultInstance();
+  GameStarted::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_game_2eproto);
 }
 
@@ -3455,6 +3484,304 @@ void PlayerMessage::Swap(PlayerMessage* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = PlayerMessage_descriptor_;
   metadata.reflection = PlayerMessage_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int GameStarted::kPlayerIdFieldNumber;
+const int GameStarted::kPlayerStateFieldNumber;
+const int GameStarted::kSwarmStateFieldNumber;
+#endif  // !_MSC_VER
+
+GameStarted::GameStarted()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void GameStarted::InitAsDefaultInstance() {
+  player_state_ = const_cast< ::swarm::game::PlayerState*>(&::swarm::game::PlayerState::default_instance());
+  swarm_state_ = const_cast< ::swarm::game::SwarmState*>(&::swarm::game::SwarmState::default_instance());
+}
+
+GameStarted::GameStarted(const GameStarted& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void GameStarted::SharedCtor() {
+  _cached_size_ = 0;
+  player_id_ = 0u;
+  player_state_ = NULL;
+  swarm_state_ = NULL;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+GameStarted::~GameStarted() {
+  SharedDtor();
+}
+
+void GameStarted::SharedDtor() {
+  if (this != default_instance_) {
+    delete player_state_;
+    delete swarm_state_;
+  }
+}
+
+void GameStarted::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* GameStarted::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return GameStarted_descriptor_;
+}
+
+const GameStarted& GameStarted::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_game_2eproto();
+  return *default_instance_;
+}
+
+GameStarted* GameStarted::default_instance_ = NULL;
+
+GameStarted* GameStarted::New() const {
+  return new GameStarted;
+}
+
+void GameStarted::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    player_id_ = 0u;
+    if (has_player_state()) {
+      if (player_state_ != NULL) player_state_->::swarm::game::PlayerState::Clear();
+    }
+    if (has_swarm_state()) {
+      if (swarm_state_ != NULL) swarm_state_->::swarm::game::SwarmState::Clear();
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool GameStarted::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional uint32 player_id = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &player_id_)));
+          set_has_player_id();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_player_state;
+        break;
+      }
+
+      // optional .swarm.game.PlayerState player_state = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_player_state:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_player_state()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(26)) goto parse_swarm_state;
+        break;
+      }
+
+      // optional .swarm.game.SwarmState swarm_state = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_swarm_state:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_swarm_state()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void GameStarted::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional uint32 player_id = 1;
+  if (has_player_id()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->player_id(), output);
+  }
+
+  // optional .swarm.game.PlayerState player_state = 2;
+  if (has_player_state()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->player_state(), output);
+  }
+
+  // optional .swarm.game.SwarmState swarm_state = 3;
+  if (has_swarm_state()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      3, this->swarm_state(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* GameStarted::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional uint32 player_id = 1;
+  if (has_player_id()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->player_id(), target);
+  }
+
+  // optional .swarm.game.PlayerState player_state = 2;
+  if (has_player_state()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        2, this->player_state(), target);
+  }
+
+  // optional .swarm.game.SwarmState swarm_state = 3;
+  if (has_swarm_state()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        3, this->swarm_state(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int GameStarted::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional uint32 player_id = 1;
+    if (has_player_id()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->player_id());
+    }
+
+    // optional .swarm.game.PlayerState player_state = 2;
+    if (has_player_state()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->player_state());
+    }
+
+    // optional .swarm.game.SwarmState swarm_state = 3;
+    if (has_swarm_state()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->swarm_state());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void GameStarted::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const GameStarted* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const GameStarted*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void GameStarted::MergeFrom(const GameStarted& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_player_id()) {
+      set_player_id(from.player_id());
+    }
+    if (from.has_player_state()) {
+      mutable_player_state()->::swarm::game::PlayerState::MergeFrom(from.player_state());
+    }
+    if (from.has_swarm_state()) {
+      mutable_swarm_state()->::swarm::game::SwarmState::MergeFrom(from.swarm_state());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void GameStarted::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void GameStarted::CopyFrom(const GameStarted& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GameStarted::IsInitialized() const {
+
+  return true;
+}
+
+void GameStarted::Swap(GameStarted* other) {
+  if (other != this) {
+    std::swap(player_id_, other->player_id_);
+    std::swap(player_state_, other->player_state_);
+    std::swap(swarm_state_, other->swarm_state_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata GameStarted::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = GameStarted_descriptor_;
+  metadata.reflection = GameStarted_reflection_;
   return metadata;
 }
 

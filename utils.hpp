@@ -119,6 +119,8 @@ namespace swarm
 
   void DebugOutput(const char* fmt, ...);
 
+  void Split(const string& str, const string& delim, vector<string>* splits);
+
   string FindAppRoot();
 
   // Macro for creating "local" names

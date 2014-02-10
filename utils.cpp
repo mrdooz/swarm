@@ -107,6 +107,21 @@ namespace swarm
     return sf::Vertex(sf::Vector2f((float)x, (float)y), color);
   }
 
+  //-----------------------------------------------------------------------------
+  void Split(const string& str, const string& delim, vector<string>* splits)
+  {
+    string::size_type lastPos = 0;
+    string::size_type pos = str.find_first_of(delim);
+    while (true)
+    {
+      splits->push_back(str.substr(lastPos, pos - lastPos));
+      if (pos == string::npos)
+        break;
+      lastPos = pos + 1;
+      pos = str.find_first_of(delim, lastPos);
+    }
+  }
+
 
   //-----------------------------------------------------------------------------
   bool LoadFile(const char* filename, vector<char>* buf)

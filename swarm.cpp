@@ -1,9 +1,6 @@
 #include "swarm.hpp"
-#include "utils.hpp"
-#include "world.hpp"
 #include "player.hpp"
 #include "error.hpp"
-#include "rolling_average.hpp"
 #include "window_event_manager.hpp"
 #include "virtual_window_manager.hpp"
 #include "protocol/game.pb.h"
@@ -11,6 +8,112 @@
 
 using namespace sf;
 using namespace swarm;
+
+void FontPrint(const char* msg)
+{
+  while (*msg)
+  {
+    u8 ch = (u8)*msg;
+    ++msg;
+
+    if (ch > 127)
+      continue;
+
+    char buf[8*9+1];
+    memset(buf, 0, sizeof(buf));
+    for (int y = 0; y < 8; ++y)
+    {
+      u8 b = vincent_data[ch][y];
+
+      for (int x = 0; x < 8; ++x)
+      {
+        u8 a = (b >> (7 - x)) & 1;
+        buf[y*9+x] = a ? 'X' : ' ';
+      }
+
+      buf[y*9+8] = '\n';
+
+    }
+    printf("%s", buf);
+  }
+}
+
+//----------------------------------------------------------------------------------
+void CreateTextRects(const char* str, const Vector2f& center, float scale, vector<RectangleShape>* out)
+{
+  out->clear();
+  if (!str)
+    return;
+
+  Vector2f size(scale, scale);
+  size_t numChars = strlen(str);
+  vector<u32> rowWidth;
+
+  // count rows and find max row width
+  vector<string> splits;
+  Split(str, "\n", &splits);
+  int numRows = splits.size();
+  float maxRowWidth = 0;
+  for (const string& s : splits)
+  {
+    maxRowWidth = max<float>(maxRowWidth, s.size());
+    rowWidth.push_back(s.size());
+  }
+
+  maxRowWidth *= scale * 8;
+
+  Vector2f pos(center.x - maxRowWidth/2, center.y - scale * 8 * numRows/2);
+  Vector2f orgPos(pos);
+
+  float tmpY = pos.y;
+  int curRow = 0;
+  bool newRow = true;
+  for (size_t i = 0; i < numChars; ++i)
+  {
+    u8 ch = (u8)*str;
+    str++;
+    if (ch > 127)
+      continue;
+
+    // get starting x pos, based on current cur width
+    if (newRow)
+    {
+      pos.x = orgPos.x + (maxRowWidth - scale * 8 * rowWidth[curRow]) / 2;
+      newRow = false;
+    }
+
+    if (ch == '\n')
+    {
+      tmpY += scale * 8;
+      ++curRow;
+      newRow = true;
+      continue;
+    }
+
+    pos.y = tmpY;
+    float tmpX = pos.x;
+    for (int y = 0; y < 8; ++y)
+    {
+      u8 row = vincent_data[ch][y];
+
+      pos.x = tmpX;
+      for (int x = 0; x < 8; ++x)
+      {
+        u8 a = (row >> (7 - x)) & 1;
+        // if the current bit is set, create a rectangle
+        if (a)
+        {
+          RectangleShape rect;
+          rect.setPosition(pos);
+          rect.setSize(size);
+          out->push_back(rect);
+        }
+        pos.x += scale;
+      }
+      pos.y += scale;
+    }
+  }
+}
 
 //-----------------------------------------------------------------------------
 PlayerWindow::PlayerWindow(const string& title, const Vector2f& pos, const Vector2f& size, Game* game)
@@ -60,6 +163,7 @@ MainWindow::MainWindow(const string& title, const Vector2f& pos, const Vector2f&
   , _game(game)
   , _playerCircle(5, 100)
   , _monsterCircle(5, 50)
+  , _lastUpdate(microsec_clock::local_time())
 {
   _playerCircle.setFillColor(Color::Green);
   _monsterCircle.setFillColor(Color::Red);
@@ -94,44 +198,60 @@ bool MainWindow::OnMouseButtonReleased(const Event& event)
 void MainWindow::Draw()
 {
   _texture.clear();
-  
+
+  if (_game->_gameStarted)
+  {
 //  View view = _texture.getView();
 //  view.setCenter(_game->_world._players[0]->_pos);
-  //_texture.setView(view);
-  _texture.draw(_game->_level._sprite);
+    //_texture.setView(view);
+    _texture.draw(_game->_level._sprite);
 
-  for (const RenderPlayer& player : _game->_renderPlayers)
-  {
-    Vector2f p(player._pos);
-    p.x -= 5;
-    p.y -= 5;
-    _playerCircle.setPosition(p);
-    _texture.draw(_playerCircle);
+    for (const RenderPlayer& player : _game->_renderPlayers)
+    {
+      Vector2f p(player._pos);
+      p.x -= 5;
+      p.y -= 5;
+      _playerCircle.setPosition(p);
+      _texture.draw(_playerCircle);
+    }
+
+    RenderMonster* monster = _game->_renderMonsters.data();
+    MonsterState* state = _game->_monsterState.data();
+    for (size_t i = 0; i < _game->_renderMonsters.size(); ++i)
+    {
+      Vector2f p(monster->_pos);
+      p.x -= monster->_size;
+      p.y -= monster->_size;
+      _monsterCircle.setPosition(p);
+      _monsterCircle.setRadius(monster->_size);
+      _texture.draw(_monsterCircle);
+
+      ++monster;
+      ++state;
+    }
+
+    if (!_clickStart.is_not_a_date_time())
+    {
+      time_duration delta = microsec_clock::local_time() - _clickStart;
+      float r = 0.25f * delta.total_microseconds() / 1000.0;
+      _selectionCircle.setPosition(_clickPos - r * Vector2f(1,1));
+      _selectionCircle.setRadius(r);
+      _texture.draw(_selectionCircle);
+    }
   }
-
-  RenderMonster* monster = _game->_renderMonsters.data();
-  MonsterState* state = _game->_monsterState.data();
-  for (size_t i = 0; i < _game->_renderMonsters.size(); ++i)
+  else
   {
-    Vector2f p(monster->_pos);
-    p.x -= monster->_size;
-    p.y -= monster->_size;
-    _monsterCircle.setPosition(p);
-    _monsterCircle.setRadius(monster->_size);
-    _texture.draw(_monsterCircle);
+    s64 ms = microsec_clock::local_time().time_of_day().total_milliseconds();
+    vector<RectangleShape> rects;
+    CreateTextRects("Waiting for\nplayers", 0.5f * VectorCast<float>(_texture.getSize()), 20 + 15 * sinf(ms / 1000.0), &rects);
 
-    ++monster;
-    ++state;
-  }
+    for (const RectangleShape& rect : rects)
+    {
+      _texture.draw(rect);
+    }
 
-  if (!_clickStart.is_not_a_date_time())
-  {
-    time_duration delta = microsec_clock::local_time() - _clickStart;
-    float r = 0.25f * delta.total_microseconds() / 1000.0;
-    _selectionCircle.setPosition(_clickPos - r * Vector2f(1,1));
-    _selectionCircle.setRadius(r);
-    _texture.draw(_selectionCircle);
   }
+  
 
   _texture.display();
 }
@@ -161,9 +281,11 @@ void DebugWindow::Draw()
   _texture.display();
 }
 
+
 //----------------------------------------------------------------------------------
 Game::Game(u16 serverPort, const string& serverAddr)
-  : _done(false)
+  : _gameStarted(false)
+  , _done(false)
   , _frameTime(100)
   , _mainWindow(nullptr)
   , _playerWindow(nullptr)
@@ -202,7 +324,8 @@ bool Game::Init()
   sf::ContextSettings settings;
   settings.antialiasingLevel = 8;
   _renderWindow.reset(new RenderWindow(sf::VideoMode(8 * width / 10, 8 * height / 10), "...", sf::Style::Default, settings));
-  _renderWindow->setFramerateLimit(60);
+  //_renderWindow->setFramerateLimit(60);
+  _renderWindow->setVerticalSyncEnabled(true);
   _eventManager.reset(new WindowEventManager(_renderWindow.get()));
   _windowManager.reset(new VirtualWindowManager(_renderWindow.get(), _eventManager.get()));
 
@@ -232,6 +355,8 @@ bool Game::Init()
   {
     if (!_server.Init())
       return false;
+
+    _serverPort = _server.GetPort();
   }
 
   _socket.connect(IpAddress(_serverAddr.empty() ? "localhost" : _serverAddr), _serverPort);
@@ -321,6 +446,12 @@ void Game::UpdatePlayers()
 
   if (Keyboard::isKeyPressed(Keyboard::Down) || Keyboard::isKeyPressed(Keyboard::S))
     acc += Vector2f(0, +s);
+}
+
+//----------------------------------------------------------------------------------
+void Game::HandleGameStated(const game::GameStarted& msg)
+{
+
 }
 
 //----------------------------------------------------------------------------------
@@ -435,7 +566,7 @@ void Game::Run()
   Time lastSend = clock.getElapsedTime();
 
   // rendering time adds to the accumulator, and the physics update
-  // subracts from it (using a fixed timestep)
+  // subtracts from it (using a fixed timestep)
   double timestep = 1/50.0;
   double accumulator = 0;
 
@@ -487,87 +618,94 @@ void Game::Run()
       }
     }
 
-    // check if we should send click state
-    if (_sendClick)
+    if (_gameStarted)
     {
-      _sendClick = false;
-      float r = 0.25f * _clickDuration.total_microseconds() / 1000.0;
-      game::PlayerMessage msg;
-      msg.set_type(game::PlayerMessage_Type_PLAYER_CLICK);
-      game::PlayerClick* click = msg.mutable_click();
-      game::Vector2* pos = click->mutable_click_pos();
-      pos->set_x(_mainWindow->_clickPos.x);
-      pos->set_y(_mainWindow->_clickPos.y);
-      click->set_click_size(r);
-
-      string str;
-      if (msg.SerializePartialToString(&str))
+      // check if we should send click state
+      if (_sendClick)
       {
-        _socket.send(str.data(), str.size());
+        _sendClick = false;
+        float r = 0.25f * _clickDuration.total_microseconds() / 1000.0;
+        game::PlayerMessage msg;
+        msg.set_type(game::PlayerMessage_Type_PLAYER_CLICK);
+        game::PlayerClick* click = msg.mutable_click();
+        game::Vector2* pos = click->mutable_click_pos();
+        pos->set_x(_mainWindow->_clickPos.x);
+        pos->set_y(_mainWindow->_clickPos.y);
+        click->set_click_size(r);
+
+        string str;
+        if (msg.SerializePartialToString(&str))
+        {
+          _socket.send(str.data(), str.size());
+        }
       }
-    }
 
-    Time end = clock.getElapsedTime();
-    Time computeTime = end - start;
-    Time delta = end - lastUpdate;
-    lastUpdate = end;
+      Time end = clock.getElapsedTime();
+      Time computeTime = end - start;
+      _frameTime.AddSample(computeTime.asMicroseconds());
+      Time delta = end - lastUpdate;
+      lastUpdate = end;
 
-    UpdatePlayers();
+      UpdatePlayers();
 
-    accumulator += delta.asMicroseconds() / 1e6;
-    while (accumulator >= timestep)
-    {
+      accumulator += delta.asMicroseconds() / 1e6;
+      while (accumulator >= timestep)
+      {
+        for (RenderPlayer& player : _renderPlayers)
+        {
+          player._prevState = player._state;
+          UpdateState(player._state, (float)timestep);
+        }
+
+        _localPlayer._prevState = _localPlayer._state;
+        UpdateState(_localPlayer._state, (float)timestep);
+        _renderPlayers[_playerIdx]._state = _localPlayer._state;
+        _renderPlayers[_playerIdx]._prevState = _localPlayer._prevState;
+
+        for (MonsterState& state : _monsterState)
+        {
+          state._prevState = state._curState;
+          UpdateState(state._curState, (float)timestep);
+        }
+
+        accumulator -= timestep;
+      }
+
+      float alpha = (float)accumulator / timestep;
+
       for (RenderPlayer& player : _renderPlayers)
       {
-        player._prevState = player._state;
-        UpdateState(player._state, (float)timestep);
+        player._pos = lerp(player._prevState._pos, player._state._pos, alpha);
       }
 
-      _localPlayer._prevState = _localPlayer._state;
-      UpdateState(_localPlayer._state, (float)timestep);
-      _renderPlayers[_playerIdx]._state = _localPlayer._state;
-      _renderPlayers[_playerIdx]._prevState = _localPlayer._prevState;
 
-      for (MonsterState& state : _monsterState)
+      for (size_t i = 0; i < _monsterState.size(); ++i)
       {
-        state._prevState = state._curState;
-        UpdateState(state._curState, (float)timestep);
+        MonsterState& state = _monsterState[i];
+        _renderMonsters[i]._pos = lerp(state._prevState._pos, state._curState._pos, alpha);
       }
 
-      accumulator -= timestep;
-    }
-
-    float alpha = (double)accumulator / timestep;
-
-    for (RenderPlayer& player : _renderPlayers)
-    {
-      player._pos = lerp(player._prevState._pos, player._state._pos, alpha);
-    }
-
-
-    for (size_t i = 0; i < _monsterState.size(); ++i)
-    {
-      MonsterState& state = _monsterState[i];
-      _renderMonsters[i]._pos = lerp(state._prevState._pos, state._curState._pos, alpha);
-    }
-
-    if ((end - lastSend).asMilliseconds() > 100)
-    {
-      // send player state
-      game::PlayerMessage msg;
-      msg.set_type(game::PlayerMessage_Type_PLAYER_POS);
-      game::Vector2* pos = msg.mutable_pos();
-      ToProtocol(pos, _renderPlayers[_playerIdx]._pos);
-
-      string str;
-      if (msg.SerializePartialToString(&str))
+      if ((end - lastSend).asMilliseconds() > 100)
       {
-        _socket.send(str.data(), str.size());
+        // send player state
+        game::PlayerMessage msg;
+        msg.set_type(game::PlayerMessage_Type_PLAYER_POS);
+        game::Vector2* pos = msg.mutable_pos();
+        ToProtocol(pos, _renderPlayers[_playerIdx]._pos);
+
+        string str;
+        if (msg.SerializePartialToString(&str))
+        {
+          _socket.send(str.data(), str.size());
+        }
+        lastSend = end;
       }
-      lastSend = end;
+    }
+    else
+    {
+
     }
 
-    _frameTime.AddSample(computeTime.asMicroseconds());
     _renderWindow->display();
   }
 }

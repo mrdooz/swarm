@@ -18,6 +18,7 @@ namespace swarm
     class PlayerJoined;
     class SwarmState;
     class PlayerState;
+    class GameStarted;
   }
 
   class MainWindow : public VirtualWindow
@@ -34,6 +35,8 @@ namespace swarm
     CircleShape _playerCircle;
     CircleShape _monsterCircle;
     CircleShape _selectionCircle;
+
+    ptime _lastUpdate;
   };
 
   class PlayerWindow : public VirtualWindow
@@ -97,7 +100,9 @@ namespace swarm
     void HandlePlayerLeft(const game::PlayerLeft& msg);
     void HandleSwarmState(const game::SwarmState& msg);
     void HandlePlayerState(const game::PlayerState& msg);
+    void HandleGameStated(const game::GameStarted& msg);
 
+    bool _gameStarted;
     bool _done;
     string _appRoot;
     vector<RenderPlayer> _renderPlayers;

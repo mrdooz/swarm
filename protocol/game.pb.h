@@ -46,6 +46,7 @@ class PlayerClick;
 class PlayerState;
 class ServerMessage;
 class PlayerMessage;
+class GameStarted;
 
 enum ServerMessage_Type {
   ServerMessage_Type_CONNECTION_ACK = 0,
@@ -1245,6 +1246,112 @@ class PlayerMessage : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static PlayerMessage* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class GameStarted : public ::google::protobuf::Message {
+ public:
+  GameStarted();
+  virtual ~GameStarted();
+
+  GameStarted(const GameStarted& from);
+
+  inline GameStarted& operator=(const GameStarted& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GameStarted& default_instance();
+
+  void Swap(GameStarted* other);
+
+  // implements Message ----------------------------------------------
+
+  GameStarted* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GameStarted& from);
+  void MergeFrom(const GameStarted& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 player_id = 1;
+  inline bool has_player_id() const;
+  inline void clear_player_id();
+  static const int kPlayerIdFieldNumber = 1;
+  inline ::google::protobuf::uint32 player_id() const;
+  inline void set_player_id(::google::protobuf::uint32 value);
+
+  // optional .swarm.game.PlayerState player_state = 2;
+  inline bool has_player_state() const;
+  inline void clear_player_state();
+  static const int kPlayerStateFieldNumber = 2;
+  inline const ::swarm::game::PlayerState& player_state() const;
+  inline ::swarm::game::PlayerState* mutable_player_state();
+  inline ::swarm::game::PlayerState* release_player_state();
+  inline void set_allocated_player_state(::swarm::game::PlayerState* player_state);
+
+  // optional .swarm.game.SwarmState swarm_state = 3;
+  inline bool has_swarm_state() const;
+  inline void clear_swarm_state();
+  static const int kSwarmStateFieldNumber = 3;
+  inline const ::swarm::game::SwarmState& swarm_state() const;
+  inline ::swarm::game::SwarmState* mutable_swarm_state();
+  inline ::swarm::game::SwarmState* release_swarm_state();
+  inline void set_allocated_swarm_state(::swarm::game::SwarmState* swarm_state);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.GameStarted)
+ private:
+  inline void set_has_player_id();
+  inline void clear_has_player_id();
+  inline void set_has_player_state();
+  inline void clear_has_player_state();
+  inline void set_has_swarm_state();
+  inline void clear_has_swarm_state();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::swarm::game::PlayerState* player_state_;
+  ::swarm::game::SwarmState* swarm_state_;
+  ::google::protobuf::uint32 player_id_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static GameStarted* default_instance_;
+};
 // ===================================================================
 
 
@@ -2211,6 +2318,108 @@ inline void PlayerMessage::set_allocated_click(::swarm::game::PlayerClick* click
     set_has_click();
   } else {
     clear_has_click();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// GameStarted
+
+// optional uint32 player_id = 1;
+inline bool GameStarted::has_player_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GameStarted::set_has_player_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GameStarted::clear_has_player_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GameStarted::clear_player_id() {
+  player_id_ = 0u;
+  clear_has_player_id();
+}
+inline ::google::protobuf::uint32 GameStarted::player_id() const {
+  return player_id_;
+}
+inline void GameStarted::set_player_id(::google::protobuf::uint32 value) {
+  set_has_player_id();
+  player_id_ = value;
+}
+
+// optional .swarm.game.PlayerState player_state = 2;
+inline bool GameStarted::has_player_state() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void GameStarted::set_has_player_state() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void GameStarted::clear_has_player_state() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void GameStarted::clear_player_state() {
+  if (player_state_ != NULL) player_state_->::swarm::game::PlayerState::Clear();
+  clear_has_player_state();
+}
+inline const ::swarm::game::PlayerState& GameStarted::player_state() const {
+  return player_state_ != NULL ? *player_state_ : *default_instance_->player_state_;
+}
+inline ::swarm::game::PlayerState* GameStarted::mutable_player_state() {
+  set_has_player_state();
+  if (player_state_ == NULL) player_state_ = new ::swarm::game::PlayerState;
+  return player_state_;
+}
+inline ::swarm::game::PlayerState* GameStarted::release_player_state() {
+  clear_has_player_state();
+  ::swarm::game::PlayerState* temp = player_state_;
+  player_state_ = NULL;
+  return temp;
+}
+inline void GameStarted::set_allocated_player_state(::swarm::game::PlayerState* player_state) {
+  delete player_state_;
+  player_state_ = player_state;
+  if (player_state) {
+    set_has_player_state();
+  } else {
+    clear_has_player_state();
+  }
+}
+
+// optional .swarm.game.SwarmState swarm_state = 3;
+inline bool GameStarted::has_swarm_state() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void GameStarted::set_has_swarm_state() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void GameStarted::clear_has_swarm_state() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void GameStarted::clear_swarm_state() {
+  if (swarm_state_ != NULL) swarm_state_->::swarm::game::SwarmState::Clear();
+  clear_has_swarm_state();
+}
+inline const ::swarm::game::SwarmState& GameStarted::swarm_state() const {
+  return swarm_state_ != NULL ? *swarm_state_ : *default_instance_->swarm_state_;
+}
+inline ::swarm::game::SwarmState* GameStarted::mutable_swarm_state() {
+  set_has_swarm_state();
+  if (swarm_state_ == NULL) swarm_state_ = new ::swarm::game::SwarmState;
+  return swarm_state_;
+}
+inline ::swarm::game::SwarmState* GameStarted::release_swarm_state() {
+  clear_has_swarm_state();
+  ::swarm::game::SwarmState* temp = swarm_state_;
+  swarm_state_ = NULL;
+  return temp;
+}
+inline void GameStarted::set_allocated_swarm_state(::swarm::game::SwarmState* swarm_state) {
+  delete swarm_state_;
+  swarm_state_ = swarm_state;
+  if (swarm_state) {
+    set_has_swarm_state();
+  } else {
+    clear_has_swarm_state();
   }
 }
 
