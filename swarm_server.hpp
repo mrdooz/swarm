@@ -2,6 +2,7 @@
 #include "level.hpp"
 #include "physics.hpp"
 #include "shared.hpp"
+#include "protocol/game.pb.h"
 
 namespace swarm
 {
@@ -13,12 +14,16 @@ namespace swarm
     Server();
     ~Server();
 
-    bool Init();
+    bool Init(const char* configFile);
     bool Close();
 
     u16 GetPort() const { return _port; }
 
   private:
+
+    bool InitLevel();
+    void PlayerAdded(TcpSocket* socket);
+
     void UpdateState(PhysicsState& state, float dt);
 
     void SendPlayerState();
@@ -41,6 +46,7 @@ namespace swarm
 
     struct PlayerData
     {
+      u32 id;
       Vector2f pos;
     };
 
@@ -57,9 +63,9 @@ namespace swarm
     Level _level;
 
     vector<TcpSocket *> _connectedClients;
-    map<pair<u32, u16>, int> _addrToId;
+    map<pair<u32, u16>, u32> _addrToId;
 
-    map<int, PlayerData> _playerData;
+    map<u32, PlayerData> _playerData;
 
     thread* _serverThread;
     u8 _networkBuffer[32*1024];
@@ -67,5 +73,8 @@ namespace swarm
     TcpListener _listener;
     u16 _port;
     atomic<bool> _done;
+    u32 _nextPlayerId;
+    game::Config _config;
+    bool _gameStarted;
   };
 }

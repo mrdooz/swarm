@@ -84,7 +84,7 @@ namespace swarm
   template <typename T>
   float Length(const sf::Vector2<T>& a)
   {
-    return sqrt(a.x*a.x + a.y*a.y);
+    return sqrtf(a.x*a.x + a.y*a.y);
   }
 
   template <typename T>
@@ -93,7 +93,7 @@ namespace swarm
     float dx = a.x - b.x;
     float dy = a.y - b.y;
 
-    return sqrt(dx*dx+dy*dy);
+    return sqrtf(dx*dx+dy*dy);
   }
 
   template <typename T>

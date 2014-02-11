@@ -8,13 +8,6 @@ message Vector2
 }
 
 //-----------------------------------------------------------------------------
-message ConnectionAck
-{
-	// sent to a newly connected player to allow him to initialize player state
-	optional uint32 player_id = 1;
-}
-
-//-----------------------------------------------------------------------------
 message PlayerJoined
 {
 	optional string name = 1;
@@ -66,13 +59,22 @@ message PlayerState
 }
 
 //-----------------------------------------------------------------------------
+message GameStarted
+{
+	optional uint32 player_id = 1;
+	optional string map_name = 2;
+	optional PlayerState player_state = 3;
+	optional SwarmState swarm_state = 4;
+}
+
+//-----------------------------------------------------------------------------
 message ServerMessage
 {
 	// wrapper message type. server -> player
 	
 	enum Type
 	{ 
-		CONNECTION_ACK	= 0;
+		GAME_STARTED	= 0;
 		PLAYER_JOINED 	= 1;
 		PLAYER_LEFT 	= 2;
 		SWARM_STATE 	= 3;
@@ -81,7 +83,7 @@ message ServerMessage
 	
 	required Type type = 1;
 	
-	optional ConnectionAck connection_ack = 2;
+	optional GameStarted game_started = 2;
 	optional PlayerJoined player_joined = 3;
 	optional PlayerLeft player_left = 4;
 	optional SwarmState swarm_state = 5;
@@ -105,9 +107,10 @@ message PlayerMessage
 }
 
 //-----------------------------------------------------------------------------
-message GameStarted
+message Config
 {
-	optional uint32 player_id = 1;
-	optional PlayerState player_state = 2;
-	optional SwarmState swarm_state = 3;
+	optional string map_name = 1;
+	optional uint32 num_monsters = 2 [default = 20];
+	optional uint32 min_players = 3 [default = 2];
+	optional uint32 max_players = 4 [default = 4];
 }

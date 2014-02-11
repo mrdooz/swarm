@@ -12,6 +12,7 @@ bool Level::Load(const char *filename)
   Image img;
   if (!img.loadFromFile(filename))
   {
+    LOG_WARN("Unable to load image" << LogKeyValue("filename", filename));
     // logwarn
     return false;
   }
@@ -25,7 +26,7 @@ bool Level::Load(const char *filename)
   for (int i = 0; i < _width * _height; ++i)
   {
     u32 cur = data[i];
-    _background[i] = cur & 0xff;
+    _background[i] = (u8)(cur & 0xff);
   }
 
   _scale = 2;
@@ -78,8 +79,8 @@ Vector2f Level::GetPlayerPos()
   // find a free spot to put the player in
   while (true)
   {
-    int x = rand() % _width/4;
-    int y = rand() % _height/4;
+    int x = rand() % _width;
+    int y = rand() % _height;
     if (_background[y*_width+x] == 0)
     {
       pos = scale * Vector2f(x, y);

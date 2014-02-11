@@ -100,7 +100,7 @@ namespace swarm
     void HandlePlayerLeft(const game::PlayerLeft& msg);
     void HandleSwarmState(const game::SwarmState& msg);
     void HandlePlayerState(const game::PlayerState& msg);
-    void HandleGameStated(const game::GameStarted& msg);
+    void HandleGameStarted(const game::GameStarted& msg);
 
     bool _gameStarted;
     bool _done;

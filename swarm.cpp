@@ -249,9 +249,7 @@ void MainWindow::Draw()
     {
       _texture.draw(rect);
     }
-
   }
-  
 
   _texture.display();
 }
@@ -332,11 +330,11 @@ bool Game::Init()
   if (!_level.Load("data/pacman.png"))
     return false;
 
-  _renderPlayers.push_back(RenderPlayer());
-  _localPlayer._state._pos = _level.GetPlayerPos();
+//  _renderPlayers.push_back(RenderPlayer());
+//  _localPlayer._state._pos = _level.GetPlayerPos();
 
-  if (!_font.loadFromFile("gfx/wscsnrg.ttf"))
-    return false;
+//  if (!_font.loadFromFile("gfx/wscsnrg.ttf"))
+//    return false;
 
   _eventManager->RegisterHandler(Event::KeyPressed, bind(&Game::OnKeyPressed, this, _1));
   _eventManager->RegisterHandler(Event::KeyReleased, bind(&Game::OnKeyReleased, this, _1));
@@ -353,30 +351,13 @@ bool Game::Init()
   // Only run a local server if one wasn't specified
   if (_serverAddr.empty())
   {
-    if (!_server.Init())
+    if (!_server.Init("config.pb"))
       return false;
 
     _serverPort = _server.GetPort();
   }
 
   _socket.connect(IpAddress(_serverAddr.empty() ? "localhost" : _serverAddr), _serverPort);
-
-  // wait for connection ack
-  size_t recv;
-  Socket::Status status = _socket.receive(_networkBuffer, sizeof(_networkBuffer), recv);
-  if (status != Socket::Done)
-  {
-    LOG_WARN("No ack recieved");
-    return false;
-  }
-
-  game::ServerMessage msg;
-  if (!msg.ParseFromArray(_networkBuffer, recv) || msg.type() != game::ServerMessage_Type_CONNECTION_ACK)
-    return false;
-
-  _playerId = msg.connection_ack().player_id();
-  _renderPlayers.push_back(RenderPlayer());
-
   _socket.setBlocking(false);
 
   return true;
@@ -449,8 +430,58 @@ void Game::UpdatePlayers()
 }
 
 //----------------------------------------------------------------------------------
-void Game::HandleGameStated(const game::GameStarted& msg)
+void Game::HandleGameStarted(const game::GameStarted& msg)
 {
+  _gameStarted = true;
+  _playerId = msg.player_id();
+
+  // Initial player state
+  const game::PlayerState& playerState = msg.player_state();
+  if (_renderPlayers.size() != playerState.player_size() && playerState.player_size() > 0)
+    _renderPlayers.resize(playerState.player_size());
+
+  for (int i = 0; i < playerState.player_size(); ++i)
+  {
+    const game::Player& player = playerState.player(i);
+
+    _renderPlayers[i]._id = player.id();
+    _renderPlayers[i]._health = player.health();
+
+    FromProtocol(&_renderPlayers[i]._state._acc, player.acc());
+    FromProtocol(&_renderPlayers[i]._state._vel, player.vel());
+    FromProtocol(&_renderPlayers[i]._state._pos, player.pos());
+
+    if (player.id() == _playerId)
+    {
+      _localPlayer._state = _renderPlayers[i]._state;
+      _playerIdx = (u32)i;
+    }
+  }
+
+  // Initial swarm state
+  const game::SwarmState& swarmState = msg.swarm_state();
+  if (_renderMonsters.size() != swarmState.monster_size())
+  {
+    _renderMonsters.resize(swarmState.monster_size());
+    _monsterState.resize(swarmState.monster_size());
+  }
+
+  RenderMonster* monster = _renderMonsters.data();
+  MonsterState* state = _monsterState.data();
+  for (int i = 0; i < swarmState.monster_size(); ++i)
+  {
+    const game::Monster& m = swarmState.monster(i);
+    FromProtocol(&monster->_pos, m.pos());
+    monster->_size = m.size();
+
+    FromProtocol(&state->_curState._acc, m.acc());
+    FromProtocol(&state->_curState._vel, m.vel());
+    FromProtocol(&state->_curState._pos, m.pos());
+    state->_prevState = state->_curState;
+
+    monster++;
+    state++;
+  }
 
 }
 
@@ -490,7 +521,6 @@ void Game::HandlePlayerState(const game::PlayerState& msg)
     }
     else
     {
-      _playerIdx = i;
       _renderPlayers[i] = _localPlayer;
     }
   }
@@ -594,6 +624,10 @@ void Game::Run()
           ptr += msgSize;
           switch (msg.type())
           {
+          case game::ServerMessage_Type_GAME_STARTED:
+            HandleGameStarted(msg.game_started());
+            break;
+
           case game::ServerMessage_Type_PLAYER_JOINED:
             HandlePlayerJoined(msg.player_joined());
             break;
@@ -690,8 +724,7 @@ void Game::Run()
         // send player state
         game::PlayerMessage msg;
         msg.set_type(game::PlayerMessage_Type_PLAYER_POS);
-        game::Vector2* pos = msg.mutable_pos();
-        ToProtocol(pos, _renderPlayers[_playerIdx]._pos);
+        ToProtocol(msg.mutable_pos(), _localPlayer._state._pos);
 
         string str;
         if (msg.SerializePartialToString(&str))

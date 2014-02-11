@@ -1,18 +1,25 @@
 #include "swarm_server.hpp"
-#include "utils.hpp"
-#include "entity.hpp"
-#include "protocol/game.pb.h"
 #include "error.hpp"
 #include "protocol.hpp"
 
 using namespace swarm;
 
+namespace
+{
+  //-----------------------------------------------------------------------------
+  pair<u32, u16> KeyFromSocket(const TcpSocket* socket)
+  {
+    return make_pair(socket->getRemoteAddress().toInteger(), socket->getRemotePort());
+  }
+}
+
 //-----------------------------------------------------------------------------
 Server::Server()
   : _serverThread(nullptr)
   , _done(false)
+  , _nextPlayerId(1)
+  , _gameStarted(false)
 {
-
 }
 
 //-----------------------------------------------------------------------------
@@ -25,16 +32,16 @@ Server::~Server()
 //-----------------------------------------------------------------------------
 void Server::HandleClientMessages()
 {
-  for (TcpSocket* s : _connectedClients)
+  for (TcpSocket* socket : _connectedClients)
   {
     size_t receivedBytes = 0;
-    Socket::Status status = s->receive(_networkBuffer, sizeof(_networkBuffer), receivedBytes);
+    Socket::Status status = socket->receive(_networkBuffer, sizeof(_networkBuffer), receivedBytes);
     if (status == Socket::Done)
     {
       game::PlayerMessage playerMsg;
       if (playerMsg.ParseFromArray(_networkBuffer, receivedBytes))
       {
-        auto it = _addrToId.find(make_pair(s->getRemoteAddress().toInteger(), s->getRemotePort()));
+        auto it = _addrToId.find(KeyFromSocket(socket));
         if (it == _addrToId.end())
         {
           LOG_WARN("Unknown client");
@@ -63,6 +70,79 @@ void Server::HandleClientMessages()
 }
 
 //-----------------------------------------------------------------------------
+void Server::PlayerAdded(TcpSocket* socket)
+{
+  _connectedClients.push_back(socket);
+
+  // save the address to id mapping
+  auto key = KeyFromSocket(socket);
+  auto it = _addrToId.find(key);
+  bool newPlayer = it == _addrToId.end();
+  u32 id = newPlayer ? _nextPlayerId++ : it->second;
+  _addrToId[key] = id;
+
+  LOG_INFO((newPlayer ? "New player connected" : "Existing player connected")
+      << LogKeyValue("addr", socket->getRemoteAddress().toString())
+      << LogKeyValue("port", socket->getRemotePort())
+      << LogKeyValue("id", id));
+
+  PlayerData& player = _playerData[id];
+  player.id = id;
+  player.pos = _level.GetPlayerPos();
+
+  // Check if the new player is enough to start the game
+  if (!_gameStarted && _connectedClients.size() >= _config.min_players())
+  {
+    game::ServerMessage serverMsg;
+    serverMsg.set_type(game::ServerMessage_Type_GAME_STARTED);
+    game::GameStarted& msg = *serverMsg.mutable_game_started();
+
+    // add initial player state
+    game::PlayerState* playerState = msg.mutable_player_state();
+    for (auto it = _playerData.begin(); it != _playerData.end(); ++it)
+    {
+      const PlayerData& data = it->second;
+      game::Player* player = playerState->add_player();
+      player->set_id(it->first);
+      ToProtocol(player->mutable_pos(), data.pos);
+    }
+
+    // add initial swarm state
+    game::SwarmState* swarmState = msg.mutable_swarm_state();
+
+    for (size_t i = 0; i < _monsterState.size(); ++i)
+    {
+      MonsterState& state = _monsterState[i];
+      MonsterData& data = _monsterData[i];
+
+      game::Monster* m = swarmState->add_monster();
+      ToProtocol(m->mutable_acc(), state._curState._acc);
+      ToProtocol(m->mutable_vel(), state._curState._vel);
+      ToProtocol(m->mutable_pos(), state._curState._pos);
+      m->set_size(data._size);
+    }
+
+    // send game started to each player
+    for (TcpSocket* socket : _connectedClients)
+    {
+      auto key = KeyFromSocket(socket);
+      u32 id = _addrToId[key];
+      const PlayerData& player = _playerData[id];
+      msg.set_player_id(id);
+
+      vector<char> buf;
+      if (PackMessage(buf, serverMsg))
+      {
+        SendToClients(buf);
+      }
+    }
+
+   _gameStarted = true;
+  }
+
+}
+
+//-----------------------------------------------------------------------------
 void Server::ThreadProc()
 {
   TcpSocket *socket = new TcpSocket();
@@ -81,41 +161,7 @@ void Server::ThreadProc()
     Socket::Status status = _listener.accept(*socket);
     if (status == Socket::Done)
     {
-      _connectedClients.push_back(socket);
-      u16 port = socket->getRemotePort();
-      u32 addr = socket->getRemoteAddress().toInteger();
-
-      // save the address to id mapping
-      auto key = make_pair(addr, port);
-      int id;
-      auto it = _addrToId.find(key);
-      bool newPlayer = false;
-      if (it != _addrToId.end())
-      {
-        id = it->second;
-      }
-      else
-      {
-        newPlayer = true;
-        id = _addrToId.size();
-        _addrToId[key] = id;
-      }
-
-      LOG_INFO((newPlayer ? "New player connected" : "Existing player connected")
-        << LogKeyValue("addr", socket->getRemoteAddress().toString())
-        << LogKeyValue("port", socket->getRemotePort()));
-
-      // send the ack to the client
-      game::ServerMessage msg;
-      msg.set_type(game::ServerMessage_Type_CONNECTION_ACK);
-      game::ConnectionAck& ack = *msg.mutable_connection_ack();
-      ack.set_player_id(id);
-      string str;
-      if (msg.SerializeToString(&str))
-      {
-        socket->send(str.data(), str.size());
-      }
-
+      PlayerAdded(socket);
       socket = new TcpSocket();
       socket->setBlocking(false);
     }
@@ -150,7 +196,7 @@ void Server::ThreadProc()
       accumulator -= timestep;
     }
 
-    float alpha = (double)accumulator / timestep;
+    float alpha = (float)accumulator / timestep;
 
     // send state 10 times/sec
     Time sendDelta = end - lastSend;
@@ -194,14 +240,15 @@ void Server::ThreadProc()
   delete socket;
 }
 
+
 //-----------------------------------------------------------------------------
-bool Server::Init()
+bool Server::InitLevel()
 {
-  if (!_level.Load("data/pacman.png"))
+  if (!_level.Load(_config.map_name().c_str()))
     return false;
 
   float scale = _level._scale;
-  for (size_t i = 0; i < 20; ++i)
+  for (size_t i = 0; i < _config.num_monsters(); ++i)
   {
     while (true)
     {
@@ -225,6 +272,25 @@ bool Server::Init()
     }
   }
 
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+bool Server::Init(const char* configFile)
+{
+  if (!ProtobufFromFile(configFile, &_config))
+  {
+    LOG_WARN("Unable to load config file" << LogKeyValue("name", configFile));
+    return false;
+  }
+
+  if (!InitLevel())
+  {
+    LOG_WARN("Error initialzing level");
+    return false;
+  }
+
+  // Start listening on the first available port
   _listener.setBlocking(false);
   _port = 50000;
   Socket::Status status = _listener.listen(_port);
@@ -233,6 +299,7 @@ bool Server::Init()
     (_port)++;
     status = _listener.listen(_port);
   }
+  printf("Server listening on port: %d\n", _port);
 
   _serverThread = new thread(bind(&Server::ThreadProc, this));
   return true;

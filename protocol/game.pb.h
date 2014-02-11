@@ -36,7 +36,6 @@ void protobuf_AssignDesc_game_2eproto();
 void protobuf_ShutdownFile_game_2eproto();
 
 class Vector2;
-class ConnectionAck;
 class PlayerJoined;
 class PlayerLeft;
 class Monster;
@@ -44,19 +43,20 @@ class SwarmState;
 class Player;
 class PlayerClick;
 class PlayerState;
+class GameStarted;
 class ServerMessage;
 class PlayerMessage;
-class GameStarted;
+class Config;
 
 enum ServerMessage_Type {
-  ServerMessage_Type_CONNECTION_ACK = 0,
+  ServerMessage_Type_GAME_STARTED = 0,
   ServerMessage_Type_PLAYER_JOINED = 1,
   ServerMessage_Type_PLAYER_LEFT = 2,
   ServerMessage_Type_SWARM_STATE = 3,
   ServerMessage_Type_PLAYER_STATE = 4
 };
 bool ServerMessage_Type_IsValid(int value);
-const ServerMessage_Type ServerMessage_Type_Type_MIN = ServerMessage_Type_CONNECTION_ACK;
+const ServerMessage_Type ServerMessage_Type_Type_MIN = ServerMessage_Type_GAME_STARTED;
 const ServerMessage_Type ServerMessage_Type_Type_MAX = ServerMessage_Type_PLAYER_STATE;
 const int ServerMessage_Type_Type_ARRAYSIZE = ServerMessage_Type_Type_MAX + 1;
 
@@ -180,88 +180,6 @@ class Vector2 : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Vector2* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class ConnectionAck : public ::google::protobuf::Message {
- public:
-  ConnectionAck();
-  virtual ~ConnectionAck();
-
-  ConnectionAck(const ConnectionAck& from);
-
-  inline ConnectionAck& operator=(const ConnectionAck& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const ConnectionAck& default_instance();
-
-  void Swap(ConnectionAck* other);
-
-  // implements Message ----------------------------------------------
-
-  ConnectionAck* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ConnectionAck& from);
-  void MergeFrom(const ConnectionAck& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // optional uint32 player_id = 1;
-  inline bool has_player_id() const;
-  inline void clear_player_id();
-  static const int kPlayerIdFieldNumber = 1;
-  inline ::google::protobuf::uint32 player_id() const;
-  inline void set_player_id(::google::protobuf::uint32 value);
-
-  // @@protoc_insertion_point(class_scope:swarm.game.ConnectionAck)
- private:
-  inline void set_has_player_id();
-  inline void clear_has_player_id();
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  ::google::protobuf::uint32 player_id_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
-
-  friend void  protobuf_AddDesc_game_2eproto();
-  friend void protobuf_AssignDesc_game_2eproto();
-  friend void protobuf_ShutdownFile_game_2eproto();
-
-  void InitAsDefaultInstance();
-  static ConnectionAck* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -949,6 +867,127 @@ class PlayerState : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class GameStarted : public ::google::protobuf::Message {
+ public:
+  GameStarted();
+  virtual ~GameStarted();
+
+  GameStarted(const GameStarted& from);
+
+  inline GameStarted& operator=(const GameStarted& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GameStarted& default_instance();
+
+  void Swap(GameStarted* other);
+
+  // implements Message ----------------------------------------------
+
+  GameStarted* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GameStarted& from);
+  void MergeFrom(const GameStarted& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 player_id = 1;
+  inline bool has_player_id() const;
+  inline void clear_player_id();
+  static const int kPlayerIdFieldNumber = 1;
+  inline ::google::protobuf::uint32 player_id() const;
+  inline void set_player_id(::google::protobuf::uint32 value);
+
+  // optional string map_name = 2;
+  inline bool has_map_name() const;
+  inline void clear_map_name();
+  static const int kMapNameFieldNumber = 2;
+  inline const ::std::string& map_name() const;
+  inline void set_map_name(const ::std::string& value);
+  inline void set_map_name(const char* value);
+  inline void set_map_name(const char* value, size_t size);
+  inline ::std::string* mutable_map_name();
+  inline ::std::string* release_map_name();
+  inline void set_allocated_map_name(::std::string* map_name);
+
+  // optional .swarm.game.PlayerState player_state = 3;
+  inline bool has_player_state() const;
+  inline void clear_player_state();
+  static const int kPlayerStateFieldNumber = 3;
+  inline const ::swarm::game::PlayerState& player_state() const;
+  inline ::swarm::game::PlayerState* mutable_player_state();
+  inline ::swarm::game::PlayerState* release_player_state();
+  inline void set_allocated_player_state(::swarm::game::PlayerState* player_state);
+
+  // optional .swarm.game.SwarmState swarm_state = 4;
+  inline bool has_swarm_state() const;
+  inline void clear_swarm_state();
+  static const int kSwarmStateFieldNumber = 4;
+  inline const ::swarm::game::SwarmState& swarm_state() const;
+  inline ::swarm::game::SwarmState* mutable_swarm_state();
+  inline ::swarm::game::SwarmState* release_swarm_state();
+  inline void set_allocated_swarm_state(::swarm::game::SwarmState* swarm_state);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.GameStarted)
+ private:
+  inline void set_has_player_id();
+  inline void clear_has_player_id();
+  inline void set_has_map_name();
+  inline void clear_has_map_name();
+  inline void set_has_player_state();
+  inline void clear_has_player_state();
+  inline void set_has_swarm_state();
+  inline void clear_has_swarm_state();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* map_name_;
+  ::swarm::game::PlayerState* player_state_;
+  ::swarm::game::SwarmState* swarm_state_;
+  ::google::protobuf::uint32 player_id_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static GameStarted* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class ServerMessage : public ::google::protobuf::Message {
  public:
   ServerMessage();
@@ -1002,7 +1041,7 @@ class ServerMessage : public ::google::protobuf::Message {
   // nested types ----------------------------------------------------
 
   typedef ServerMessage_Type Type;
-  static const Type CONNECTION_ACK = ServerMessage_Type_CONNECTION_ACK;
+  static const Type GAME_STARTED = ServerMessage_Type_GAME_STARTED;
   static const Type PLAYER_JOINED = ServerMessage_Type_PLAYER_JOINED;
   static const Type PLAYER_LEFT = ServerMessage_Type_PLAYER_LEFT;
   static const Type SWARM_STATE = ServerMessage_Type_SWARM_STATE;
@@ -1037,14 +1076,14 @@ class ServerMessage : public ::google::protobuf::Message {
   inline ::swarm::game::ServerMessage_Type type() const;
   inline void set_type(::swarm::game::ServerMessage_Type value);
 
-  // optional .swarm.game.ConnectionAck connection_ack = 2;
-  inline bool has_connection_ack() const;
-  inline void clear_connection_ack();
-  static const int kConnectionAckFieldNumber = 2;
-  inline const ::swarm::game::ConnectionAck& connection_ack() const;
-  inline ::swarm::game::ConnectionAck* mutable_connection_ack();
-  inline ::swarm::game::ConnectionAck* release_connection_ack();
-  inline void set_allocated_connection_ack(::swarm::game::ConnectionAck* connection_ack);
+  // optional .swarm.game.GameStarted game_started = 2;
+  inline bool has_game_started() const;
+  inline void clear_game_started();
+  static const int kGameStartedFieldNumber = 2;
+  inline const ::swarm::game::GameStarted& game_started() const;
+  inline ::swarm::game::GameStarted* mutable_game_started();
+  inline ::swarm::game::GameStarted* release_game_started();
+  inline void set_allocated_game_started(::swarm::game::GameStarted* game_started);
 
   // optional .swarm.game.PlayerJoined player_joined = 3;
   inline bool has_player_joined() const;
@@ -1086,8 +1125,8 @@ class ServerMessage : public ::google::protobuf::Message {
  private:
   inline void set_has_type();
   inline void clear_has_type();
-  inline void set_has_connection_ack();
-  inline void clear_has_connection_ack();
+  inline void set_has_game_started();
+  inline void clear_has_game_started();
   inline void set_has_player_joined();
   inline void clear_has_player_joined();
   inline void set_has_player_left();
@@ -1099,7 +1138,7 @@ class ServerMessage : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::swarm::game::ConnectionAck* connection_ack_;
+  ::swarm::game::GameStarted* game_started_;
   ::swarm::game::PlayerJoined* player_joined_;
   ::swarm::game::PlayerLeft* player_left_;
   ::swarm::game::SwarmState* swarm_state_;
@@ -1248,14 +1287,14 @@ class PlayerMessage : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class GameStarted : public ::google::protobuf::Message {
+class Config : public ::google::protobuf::Message {
  public:
-  GameStarted();
-  virtual ~GameStarted();
+  Config();
+  virtual ~Config();
 
-  GameStarted(const GameStarted& from);
+  Config(const Config& from);
 
-  inline GameStarted& operator=(const GameStarted& from) {
+  inline Config& operator=(const Config& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1269,17 +1308,17 @@ class GameStarted : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const GameStarted& default_instance();
+  static const Config& default_instance();
 
-  void Swap(GameStarted* other);
+  void Swap(Config* other);
 
   // implements Message ----------------------------------------------
 
-  GameStarted* New() const;
+  Config* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GameStarted& from);
-  void MergeFrom(const GameStarted& from);
+  void CopyFrom(const Config& from);
+  void MergeFrom(const Config& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1302,55 +1341,66 @@ class GameStarted : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional uint32 player_id = 1;
-  inline bool has_player_id() const;
-  inline void clear_player_id();
-  static const int kPlayerIdFieldNumber = 1;
-  inline ::google::protobuf::uint32 player_id() const;
-  inline void set_player_id(::google::protobuf::uint32 value);
+  // optional string map_name = 1;
+  inline bool has_map_name() const;
+  inline void clear_map_name();
+  static const int kMapNameFieldNumber = 1;
+  inline const ::std::string& map_name() const;
+  inline void set_map_name(const ::std::string& value);
+  inline void set_map_name(const char* value);
+  inline void set_map_name(const char* value, size_t size);
+  inline ::std::string* mutable_map_name();
+  inline ::std::string* release_map_name();
+  inline void set_allocated_map_name(::std::string* map_name);
 
-  // optional .swarm.game.PlayerState player_state = 2;
-  inline bool has_player_state() const;
-  inline void clear_player_state();
-  static const int kPlayerStateFieldNumber = 2;
-  inline const ::swarm::game::PlayerState& player_state() const;
-  inline ::swarm::game::PlayerState* mutable_player_state();
-  inline ::swarm::game::PlayerState* release_player_state();
-  inline void set_allocated_player_state(::swarm::game::PlayerState* player_state);
+  // optional uint32 num_monsters = 2 [default = 20];
+  inline bool has_num_monsters() const;
+  inline void clear_num_monsters();
+  static const int kNumMonstersFieldNumber = 2;
+  inline ::google::protobuf::uint32 num_monsters() const;
+  inline void set_num_monsters(::google::protobuf::uint32 value);
 
-  // optional .swarm.game.SwarmState swarm_state = 3;
-  inline bool has_swarm_state() const;
-  inline void clear_swarm_state();
-  static const int kSwarmStateFieldNumber = 3;
-  inline const ::swarm::game::SwarmState& swarm_state() const;
-  inline ::swarm::game::SwarmState* mutable_swarm_state();
-  inline ::swarm::game::SwarmState* release_swarm_state();
-  inline void set_allocated_swarm_state(::swarm::game::SwarmState* swarm_state);
+  // optional uint32 min_players = 3 [default = 2];
+  inline bool has_min_players() const;
+  inline void clear_min_players();
+  static const int kMinPlayersFieldNumber = 3;
+  inline ::google::protobuf::uint32 min_players() const;
+  inline void set_min_players(::google::protobuf::uint32 value);
 
-  // @@protoc_insertion_point(class_scope:swarm.game.GameStarted)
+  // optional uint32 max_players = 4 [default = 4];
+  inline bool has_max_players() const;
+  inline void clear_max_players();
+  static const int kMaxPlayersFieldNumber = 4;
+  inline ::google::protobuf::uint32 max_players() const;
+  inline void set_max_players(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.Config)
  private:
-  inline void set_has_player_id();
-  inline void clear_has_player_id();
-  inline void set_has_player_state();
-  inline void clear_has_player_state();
-  inline void set_has_swarm_state();
-  inline void clear_has_swarm_state();
+  inline void set_has_map_name();
+  inline void clear_has_map_name();
+  inline void set_has_num_monsters();
+  inline void clear_has_num_monsters();
+  inline void set_has_min_players();
+  inline void clear_has_min_players();
+  inline void set_has_max_players();
+  inline void clear_has_max_players();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::swarm::game::PlayerState* player_state_;
-  ::swarm::game::SwarmState* swarm_state_;
-  ::google::protobuf::uint32 player_id_;
+  ::std::string* map_name_;
+  ::google::protobuf::uint32 num_monsters_;
+  ::google::protobuf::uint32 min_players_;
+  ::google::protobuf::uint32 max_players_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
   friend void protobuf_ShutdownFile_game_2eproto();
 
   void InitAsDefaultInstance();
-  static GameStarted* default_instance_;
+  static Config* default_instance_;
 };
 // ===================================================================
 
@@ -1401,32 +1451,6 @@ inline float Vector2::y() const {
 inline void Vector2::set_y(float value) {
   set_has_y();
   y_ = value;
-}
-
-// -------------------------------------------------------------------
-
-// ConnectionAck
-
-// optional uint32 player_id = 1;
-inline bool ConnectionAck::has_player_id() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void ConnectionAck::set_has_player_id() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void ConnectionAck::clear_has_player_id() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void ConnectionAck::clear_player_id() {
-  player_id_ = 0u;
-  clear_has_player_id();
-}
-inline ::google::protobuf::uint32 ConnectionAck::player_id() const {
-  return player_id_;
-}
-inline void ConnectionAck::set_player_id(::google::protobuf::uint32 value) {
-  set_has_player_id();
-  player_id_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -2003,6 +2027,178 @@ PlayerState::mutable_player() {
 
 // -------------------------------------------------------------------
 
+// GameStarted
+
+// optional uint32 player_id = 1;
+inline bool GameStarted::has_player_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GameStarted::set_has_player_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GameStarted::clear_has_player_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GameStarted::clear_player_id() {
+  player_id_ = 0u;
+  clear_has_player_id();
+}
+inline ::google::protobuf::uint32 GameStarted::player_id() const {
+  return player_id_;
+}
+inline void GameStarted::set_player_id(::google::protobuf::uint32 value) {
+  set_has_player_id();
+  player_id_ = value;
+}
+
+// optional string map_name = 2;
+inline bool GameStarted::has_map_name() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void GameStarted::set_has_map_name() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void GameStarted::clear_has_map_name() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void GameStarted::clear_map_name() {
+  if (map_name_ != &::google::protobuf::internal::kEmptyString) {
+    map_name_->clear();
+  }
+  clear_has_map_name();
+}
+inline const ::std::string& GameStarted::map_name() const {
+  return *map_name_;
+}
+inline void GameStarted::set_map_name(const ::std::string& value) {
+  set_has_map_name();
+  if (map_name_ == &::google::protobuf::internal::kEmptyString) {
+    map_name_ = new ::std::string;
+  }
+  map_name_->assign(value);
+}
+inline void GameStarted::set_map_name(const char* value) {
+  set_has_map_name();
+  if (map_name_ == &::google::protobuf::internal::kEmptyString) {
+    map_name_ = new ::std::string;
+  }
+  map_name_->assign(value);
+}
+inline void GameStarted::set_map_name(const char* value, size_t size) {
+  set_has_map_name();
+  if (map_name_ == &::google::protobuf::internal::kEmptyString) {
+    map_name_ = new ::std::string;
+  }
+  map_name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GameStarted::mutable_map_name() {
+  set_has_map_name();
+  if (map_name_ == &::google::protobuf::internal::kEmptyString) {
+    map_name_ = new ::std::string;
+  }
+  return map_name_;
+}
+inline ::std::string* GameStarted::release_map_name() {
+  clear_has_map_name();
+  if (map_name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = map_name_;
+    map_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GameStarted::set_allocated_map_name(::std::string* map_name) {
+  if (map_name_ != &::google::protobuf::internal::kEmptyString) {
+    delete map_name_;
+  }
+  if (map_name) {
+    set_has_map_name();
+    map_name_ = map_name;
+  } else {
+    clear_has_map_name();
+    map_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional .swarm.game.PlayerState player_state = 3;
+inline bool GameStarted::has_player_state() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void GameStarted::set_has_player_state() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void GameStarted::clear_has_player_state() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void GameStarted::clear_player_state() {
+  if (player_state_ != NULL) player_state_->::swarm::game::PlayerState::Clear();
+  clear_has_player_state();
+}
+inline const ::swarm::game::PlayerState& GameStarted::player_state() const {
+  return player_state_ != NULL ? *player_state_ : *default_instance_->player_state_;
+}
+inline ::swarm::game::PlayerState* GameStarted::mutable_player_state() {
+  set_has_player_state();
+  if (player_state_ == NULL) player_state_ = new ::swarm::game::PlayerState;
+  return player_state_;
+}
+inline ::swarm::game::PlayerState* GameStarted::release_player_state() {
+  clear_has_player_state();
+  ::swarm::game::PlayerState* temp = player_state_;
+  player_state_ = NULL;
+  return temp;
+}
+inline void GameStarted::set_allocated_player_state(::swarm::game::PlayerState* player_state) {
+  delete player_state_;
+  player_state_ = player_state;
+  if (player_state) {
+    set_has_player_state();
+  } else {
+    clear_has_player_state();
+  }
+}
+
+// optional .swarm.game.SwarmState swarm_state = 4;
+inline bool GameStarted::has_swarm_state() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void GameStarted::set_has_swarm_state() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void GameStarted::clear_has_swarm_state() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void GameStarted::clear_swarm_state() {
+  if (swarm_state_ != NULL) swarm_state_->::swarm::game::SwarmState::Clear();
+  clear_has_swarm_state();
+}
+inline const ::swarm::game::SwarmState& GameStarted::swarm_state() const {
+  return swarm_state_ != NULL ? *swarm_state_ : *default_instance_->swarm_state_;
+}
+inline ::swarm::game::SwarmState* GameStarted::mutable_swarm_state() {
+  set_has_swarm_state();
+  if (swarm_state_ == NULL) swarm_state_ = new ::swarm::game::SwarmState;
+  return swarm_state_;
+}
+inline ::swarm::game::SwarmState* GameStarted::release_swarm_state() {
+  clear_has_swarm_state();
+  ::swarm::game::SwarmState* temp = swarm_state_;
+  swarm_state_ = NULL;
+  return temp;
+}
+inline void GameStarted::set_allocated_swarm_state(::swarm::game::SwarmState* swarm_state) {
+  delete swarm_state_;
+  swarm_state_ = swarm_state;
+  if (swarm_state) {
+    set_has_swarm_state();
+  } else {
+    clear_has_swarm_state();
+  }
+}
+
+// -------------------------------------------------------------------
+
 // ServerMessage
 
 // required .swarm.game.ServerMessage.Type type = 1;
@@ -2028,41 +2224,41 @@ inline void ServerMessage::set_type(::swarm::game::ServerMessage_Type value) {
   type_ = value;
 }
 
-// optional .swarm.game.ConnectionAck connection_ack = 2;
-inline bool ServerMessage::has_connection_ack() const {
+// optional .swarm.game.GameStarted game_started = 2;
+inline bool ServerMessage::has_game_started() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void ServerMessage::set_has_connection_ack() {
+inline void ServerMessage::set_has_game_started() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void ServerMessage::clear_has_connection_ack() {
+inline void ServerMessage::clear_has_game_started() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void ServerMessage::clear_connection_ack() {
-  if (connection_ack_ != NULL) connection_ack_->::swarm::game::ConnectionAck::Clear();
-  clear_has_connection_ack();
+inline void ServerMessage::clear_game_started() {
+  if (game_started_ != NULL) game_started_->::swarm::game::GameStarted::Clear();
+  clear_has_game_started();
 }
-inline const ::swarm::game::ConnectionAck& ServerMessage::connection_ack() const {
-  return connection_ack_ != NULL ? *connection_ack_ : *default_instance_->connection_ack_;
+inline const ::swarm::game::GameStarted& ServerMessage::game_started() const {
+  return game_started_ != NULL ? *game_started_ : *default_instance_->game_started_;
 }
-inline ::swarm::game::ConnectionAck* ServerMessage::mutable_connection_ack() {
-  set_has_connection_ack();
-  if (connection_ack_ == NULL) connection_ack_ = new ::swarm::game::ConnectionAck;
-  return connection_ack_;
+inline ::swarm::game::GameStarted* ServerMessage::mutable_game_started() {
+  set_has_game_started();
+  if (game_started_ == NULL) game_started_ = new ::swarm::game::GameStarted;
+  return game_started_;
 }
-inline ::swarm::game::ConnectionAck* ServerMessage::release_connection_ack() {
-  clear_has_connection_ack();
-  ::swarm::game::ConnectionAck* temp = connection_ack_;
-  connection_ack_ = NULL;
+inline ::swarm::game::GameStarted* ServerMessage::release_game_started() {
+  clear_has_game_started();
+  ::swarm::game::GameStarted* temp = game_started_;
+  game_started_ = NULL;
   return temp;
 }
-inline void ServerMessage::set_allocated_connection_ack(::swarm::game::ConnectionAck* connection_ack) {
-  delete connection_ack_;
-  connection_ack_ = connection_ack;
-  if (connection_ack) {
-    set_has_connection_ack();
+inline void ServerMessage::set_allocated_game_started(::swarm::game::GameStarted* game_started) {
+  delete game_started_;
+  game_started_ = game_started;
+  if (game_started) {
+    set_has_game_started();
   } else {
-    clear_has_connection_ack();
+    clear_has_game_started();
   }
 }
 
@@ -2323,104 +2519,142 @@ inline void PlayerMessage::set_allocated_click(::swarm::game::PlayerClick* click
 
 // -------------------------------------------------------------------
 
-// GameStarted
+// Config
 
-// optional uint32 player_id = 1;
-inline bool GameStarted::has_player_id() const {
+// optional string map_name = 1;
+inline bool Config::has_map_name() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void GameStarted::set_has_player_id() {
+inline void Config::set_has_map_name() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void GameStarted::clear_has_player_id() {
+inline void Config::clear_has_map_name() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void GameStarted::clear_player_id() {
-  player_id_ = 0u;
-  clear_has_player_id();
+inline void Config::clear_map_name() {
+  if (map_name_ != &::google::protobuf::internal::kEmptyString) {
+    map_name_->clear();
+  }
+  clear_has_map_name();
 }
-inline ::google::protobuf::uint32 GameStarted::player_id() const {
-  return player_id_;
+inline const ::std::string& Config::map_name() const {
+  return *map_name_;
 }
-inline void GameStarted::set_player_id(::google::protobuf::uint32 value) {
-  set_has_player_id();
-  player_id_ = value;
+inline void Config::set_map_name(const ::std::string& value) {
+  set_has_map_name();
+  if (map_name_ == &::google::protobuf::internal::kEmptyString) {
+    map_name_ = new ::std::string;
+  }
+  map_name_->assign(value);
+}
+inline void Config::set_map_name(const char* value) {
+  set_has_map_name();
+  if (map_name_ == &::google::protobuf::internal::kEmptyString) {
+    map_name_ = new ::std::string;
+  }
+  map_name_->assign(value);
+}
+inline void Config::set_map_name(const char* value, size_t size) {
+  set_has_map_name();
+  if (map_name_ == &::google::protobuf::internal::kEmptyString) {
+    map_name_ = new ::std::string;
+  }
+  map_name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Config::mutable_map_name() {
+  set_has_map_name();
+  if (map_name_ == &::google::protobuf::internal::kEmptyString) {
+    map_name_ = new ::std::string;
+  }
+  return map_name_;
+}
+inline ::std::string* Config::release_map_name() {
+  clear_has_map_name();
+  if (map_name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = map_name_;
+    map_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Config::set_allocated_map_name(::std::string* map_name) {
+  if (map_name_ != &::google::protobuf::internal::kEmptyString) {
+    delete map_name_;
+  }
+  if (map_name) {
+    set_has_map_name();
+    map_name_ = map_name;
+  } else {
+    clear_has_map_name();
+    map_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
-// optional .swarm.game.PlayerState player_state = 2;
-inline bool GameStarted::has_player_state() const {
+// optional uint32 num_monsters = 2 [default = 20];
+inline bool Config::has_num_monsters() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void GameStarted::set_has_player_state() {
+inline void Config::set_has_num_monsters() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void GameStarted::clear_has_player_state() {
+inline void Config::clear_has_num_monsters() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void GameStarted::clear_player_state() {
-  if (player_state_ != NULL) player_state_->::swarm::game::PlayerState::Clear();
-  clear_has_player_state();
+inline void Config::clear_num_monsters() {
+  num_monsters_ = 20u;
+  clear_has_num_monsters();
 }
-inline const ::swarm::game::PlayerState& GameStarted::player_state() const {
-  return player_state_ != NULL ? *player_state_ : *default_instance_->player_state_;
+inline ::google::protobuf::uint32 Config::num_monsters() const {
+  return num_monsters_;
 }
-inline ::swarm::game::PlayerState* GameStarted::mutable_player_state() {
-  set_has_player_state();
-  if (player_state_ == NULL) player_state_ = new ::swarm::game::PlayerState;
-  return player_state_;
-}
-inline ::swarm::game::PlayerState* GameStarted::release_player_state() {
-  clear_has_player_state();
-  ::swarm::game::PlayerState* temp = player_state_;
-  player_state_ = NULL;
-  return temp;
-}
-inline void GameStarted::set_allocated_player_state(::swarm::game::PlayerState* player_state) {
-  delete player_state_;
-  player_state_ = player_state;
-  if (player_state) {
-    set_has_player_state();
-  } else {
-    clear_has_player_state();
-  }
+inline void Config::set_num_monsters(::google::protobuf::uint32 value) {
+  set_has_num_monsters();
+  num_monsters_ = value;
 }
 
-// optional .swarm.game.SwarmState swarm_state = 3;
-inline bool GameStarted::has_swarm_state() const {
+// optional uint32 min_players = 3 [default = 2];
+inline bool Config::has_min_players() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void GameStarted::set_has_swarm_state() {
+inline void Config::set_has_min_players() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void GameStarted::clear_has_swarm_state() {
+inline void Config::clear_has_min_players() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void GameStarted::clear_swarm_state() {
-  if (swarm_state_ != NULL) swarm_state_->::swarm::game::SwarmState::Clear();
-  clear_has_swarm_state();
+inline void Config::clear_min_players() {
+  min_players_ = 2u;
+  clear_has_min_players();
 }
-inline const ::swarm::game::SwarmState& GameStarted::swarm_state() const {
-  return swarm_state_ != NULL ? *swarm_state_ : *default_instance_->swarm_state_;
+inline ::google::protobuf::uint32 Config::min_players() const {
+  return min_players_;
 }
-inline ::swarm::game::SwarmState* GameStarted::mutable_swarm_state() {
-  set_has_swarm_state();
-  if (swarm_state_ == NULL) swarm_state_ = new ::swarm::game::SwarmState;
-  return swarm_state_;
+inline void Config::set_min_players(::google::protobuf::uint32 value) {
+  set_has_min_players();
+  min_players_ = value;
 }
-inline ::swarm::game::SwarmState* GameStarted::release_swarm_state() {
-  clear_has_swarm_state();
-  ::swarm::game::SwarmState* temp = swarm_state_;
-  swarm_state_ = NULL;
-  return temp;
+
+// optional uint32 max_players = 4 [default = 4];
+inline bool Config::has_max_players() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void GameStarted::set_allocated_swarm_state(::swarm::game::SwarmState* swarm_state) {
-  delete swarm_state_;
-  swarm_state_ = swarm_state;
-  if (swarm_state) {
-    set_has_swarm_state();
-  } else {
-    clear_has_swarm_state();
-  }
+inline void Config::set_has_max_players() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Config::clear_has_max_players() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void Config::clear_max_players() {
+  max_players_ = 4u;
+  clear_has_max_players();
+}
+inline ::google::protobuf::uint32 Config::max_players() const {
+  return max_players_;
+}
+inline void Config::set_max_players(::google::protobuf::uint32 value) {
+  set_has_max_players();
+  max_players_ = value;
 }
 
 
