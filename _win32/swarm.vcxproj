@@ -26,13 +26,16 @@
     </ClCompile>
     <ClCompile Include="..\protocol.cpp" />
     <ClCompile Include="..\protocol\game.pb.cc" />
-    <ClCompile Include="..\protocol\settings.pb.cc" />
+    <ClCompile Include="..\protocol\settings.pb.cc">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
+    </ClCompile>
     <ClCompile Include="..\sfml_helpers.cpp" />
     <ClCompile Include="..\shared.cpp" />
     <ClCompile Include="..\standard_cursor.cpp" />
     <ClCompile Include="..\swarm.cpp" />
     <ClCompile Include="..\swarm_server.cpp" />
     <ClCompile Include="..\utils.cpp" />
+    <ClCompile Include="..\vincent.cpp" />
     <ClCompile Include="..\virtual_window.cpp" />
     <ClCompile Include="..\virtual_window_manager.cpp" />
     <ClCompile Include="..\window_event_manager.cpp" />
@@ -56,6 +59,7 @@
     <ClInclude Include="..\swarm.hpp" />
     <ClInclude Include="..\swarm_server.hpp" />
     <ClInclude Include="..\utils.hpp" />
+    <ClInclude Include="..\vincent.hpp" />
     <ClInclude Include="..\virtual_window.hpp" />
     <ClInclude Include="..\virtual_window_manager.hpp" />
     <ClInclude Include="..\window_event_manager.hpp" />

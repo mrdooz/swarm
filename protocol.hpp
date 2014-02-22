@@ -1,7 +1,7 @@
 #pragma once
 #include "utils.hpp"
 #include "protocol/game.pb.h"
-
+#include <google/protobuf/text_format.h>
 
 namespace swarm
 {

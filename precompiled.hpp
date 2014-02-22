@@ -24,9 +24,6 @@
 #include <boost/date_time.hpp>
 #include <boost/intrusive_ptr.hpp>
 
-#include <google/protobuf/text_format.h>
-
-
 #include "vincent.hpp"
 
 #ifdef _WIN32
