@@ -21,6 +21,15 @@ namespace swarm
     class GameStarted;
   }
 
+  struct LocalPlayer
+  {
+    PhysicsState _state;
+    PhysicsState _prevState;
+    Vector2f _pos;
+    int _id;
+    int _health;
+  };
+
   class MainWindow : public VirtualWindow
   {
   public:
@@ -86,6 +95,8 @@ namespace swarm
     void Close();
 
     private:
+
+    void ProcessNetworkPackets();
     bool OnKeyPressed(const Event& event);
     bool OnKeyReleased(const Event& event);
     bool OnMouseReleased(const Event& event);
@@ -105,7 +116,10 @@ namespace swarm
     bool _gameStarted;
     bool _done;
     string _appRoot;
-    vector<RenderPlayer> _renderPlayers;
+
+    unordered_map<u32, RenderPlayer> _remotePlayers;
+    LocalPlayer _localPlayer;
+
     vector<RenderMonster> _renderMonsters;
     unique_ptr<RenderWindow> _renderWindow;
     unique_ptr<WindowEventManager> _eventManager;
@@ -117,7 +131,6 @@ namespace swarm
 
     vector<MonsterState> _monsterState;
 
-    RenderPlayer _localPlayer;
     Level _level;
     MainWindow* _mainWindow;
     PlayerWindow* _playerWindow;
@@ -128,11 +141,9 @@ namespace swarm
     time_duration _clickDuration;
     bool _sendClick;
 
-    u32 _playerIdx;
     u32 _playerId;
     u16 _serverPort;
     string _serverAddr;
-    u8 _networkBuffer[32*1024];
     bool _focus;
   };
 }

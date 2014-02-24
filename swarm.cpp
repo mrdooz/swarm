@@ -129,20 +129,27 @@ void PlayerWindow::Draw()
   Text header("", _game->_font, 30);
   Text text("", _game->_font, 20);
 
-  Vector2f pos(10, 10);
-  for (const RenderPlayer& player : _game->_renderPlayers)
-  {
-    if (player._id == _game->_playerId)
-    {
-      text.setColor(Color::Yellow);
-      header.setColor(Color::Yellow);
-    }
-    else
-    {
-      text.setColor(Color::White);
-      header.setColor(Color::White);
-    }
+  // draw local player first, followed by remote players
 
+  Vector2f pos(10, 10);
+  text.setColor(Color::Yellow);
+  header.setColor(Color::Yellow);
+  header.setString(toString("Player %d", _game->_localPlayer._id));
+  header.setPosition(pos);
+  _texture.draw(header);
+  pos.y += 35;
+
+  text.setPosition(pos);
+  text.setString(toString("Health: %d", _game->_localPlayer._health));
+  _texture.draw(text);
+  pos.y += 20;
+
+  text.setColor(Color::White);
+  header.setColor(Color::White);
+
+  for (const auto& kv : _game->_remotePlayers)
+  {
+    const RenderPlayer& player = kv.second;
     header.setString(toString("Player %d", player._id));
     header.setPosition(pos);
     _texture.draw(header);
@@ -205,9 +212,17 @@ void MainWindow::Draw()
 //  view.setCenter(_game->_world._players[0]->_pos);
     //_texture.setView(view);
     _texture.draw(_game->_level._sprite);
+    // draw local player
+    Vector2f p(_game->_localPlayer._pos);
+    p.x -= 5;
+    p.y -= 5;
+    _playerCircle.setPosition(p);
+    _texture.draw(_playerCircle);
 
-    for (const RenderPlayer& player : _game->_renderPlayers)
+    // draw remote players
+    for (const auto& kv: _game->_remotePlayers)
     {
+      const RenderPlayer& player = kv.second;
       Vector2f p(player._pos);
       p.x -= 5;
       p.y -= 5;
@@ -289,7 +304,6 @@ Game::Game(u16 serverPort, const string& serverAddr)
   , _playerWindow(nullptr)
   , _debugWindow(nullptr)
   , _sendClick(false)
-  , _playerIdx(0)
   , _playerId(0)
   , _serverPort(serverPort)
   , _serverAddr(serverAddr)
@@ -330,22 +344,19 @@ bool Game::Init()
   if (!_level.Load("data/pacman.png"))
     return false;
 
-//  _renderPlayers.push_back(RenderPlayer());
-//  _localPlayer._state._pos = _level.GetPlayerPos();
-
-//  if (!_font.loadFromFile("gfx/wscsnrg.ttf"))
-//    return false;
+  if (!_font.loadFromFile("gfx/wscsnrg.ttf"))
+    return false;
 
   _eventManager->RegisterHandler(Event::KeyPressed, bind(&Game::OnKeyPressed, this, _1));
   _eventManager->RegisterHandler(Event::KeyReleased, bind(&Game::OnKeyReleased, this, _1));
   _eventManager->RegisterHandler(Event::LostFocus, bind(&Game::OnLostFocus, this, _1));
   _eventManager->RegisterHandler(Event::GainedFocus, bind(&Game::OnGainedFocus, this, _1));
 
-  _playerWindow = new PlayerWindow("PLAYER", Vector2f(0,0), Vector2f(200, _renderWindow->getSize().y), this);
-  _debugWindow = new DebugWindow("DEBUG", Vector2f(0,500), Vector2f(200, _renderWindow->getSize().y), this);
+  _playerWindow = new PlayerWindow("PLAYER", Vector2f(0,0), Vector2f(200, 200), this);
+  //_debugWindow = new DebugWindow("DEBUG", Vector2f(0,500), Vector2f(200, _renderWindow->getSize().y), this);
   _mainWindow = new MainWindow("MAIN", Vector2f(200,0), Vector2f(_renderWindow->getSize().x-200, _renderWindow->getSize().y), this);
   _windowManager->AddWindow(_playerWindow);
-  _windowManager->AddWindow(_debugWindow);
+ // _windowManager->AddWindow(_debugWindow);
   _windowManager->AddWindow(_mainWindow);
 
   // Only run a local server if one wasn't specified
@@ -434,27 +445,34 @@ void Game::HandleGameStarted(const game::GameStarted& msg)
 {
   _gameStarted = true;
   _playerId = msg.player_id();
+  _localPlayer._id = _playerId;
+  _localPlayer._health = msg.health();
 
   // Initial player state
   const game::PlayerState& playerState = msg.player_state();
-  if (_renderPlayers.size() != playerState.player_size() && playerState.player_size() > 0)
-    _renderPlayers.resize(playerState.player_size());
 
   for (int i = 0; i < playerState.player_size(); ++i)
   {
     const game::Player& player = playerState.player(i);
+    u32 id = player.id();
 
-    _renderPlayers[i]._id = player.id();
-    _renderPlayers[i]._health = player.health();
-
-    FromProtocol(&_renderPlayers[i]._state._acc, player.acc());
-    FromProtocol(&_renderPlayers[i]._state._vel, player.vel());
-    FromProtocol(&_renderPlayers[i]._state._pos, player.pos());
-
+    // copy the initial local player state
     if (player.id() == _playerId)
     {
-      _localPlayer._state = _renderPlayers[i]._state;
-      _playerIdx = (u32)i;
+      FromProtocol(&_localPlayer._state._acc, player.acc());
+      FromProtocol(&_localPlayer._state._vel, player.vel());
+      FromProtocol(&_localPlayer._state._pos, player.pos());
+    }
+    else
+    {
+      RenderPlayer& remotePlayer = _remotePlayers[id];
+
+      remotePlayer._id = player.id();
+      remotePlayer._health = player.health();
+
+      FromProtocol(&remotePlayer._state._acc, player.acc());
+      FromProtocol(&remotePlayer._state._vel, player.vel());
+      FromProtocol(&remotePlayer._state._pos, player.pos());
     }
   }
 
@@ -502,26 +520,26 @@ void Game::HandlePlayerState(const game::PlayerState& msg)
 {
   //LOG_INFO(__FUNCTION__ << LogKeyValue("num_players", msg.player_size()));
 
-  if (_renderPlayers.size() != msg.player_size() && msg.player_size() > 0)
-    _renderPlayers.resize(msg.player_size());
-
   for (int i = 0; i < msg.player_size(); ++i)
   {
     const game::Player& player = msg.player(i);
-
-    _renderPlayers[i]._id = player.id();
-    _renderPlayers[i]._health = player.health();
+    u32 id = player.id();
 
     // Don't update position of local player..
     if (player.id() != _playerId)
     {
-      FromProtocol(&_renderPlayers[i]._state._acc, player.acc());
-      FromProtocol(&_renderPlayers[i]._state._vel, player.vel());
-      FromProtocol(&_renderPlayers[i]._state._pos, player.pos());
+      RenderPlayer& remotePlayer = _remotePlayers[id];
+
+      remotePlayer._id = player.id();
+      remotePlayer._health = player.health();
+
+      FromProtocol(&remotePlayer._state._acc, player.acc());
+      FromProtocol(&remotePlayer._state._vel, player.vel());
+      FromProtocol(&remotePlayer._state._pos, player.pos());
     }
     else
     {
-      _renderPlayers[i] = _localPlayer;
+      _localPlayer._health = player.health();
     }
   }
 }
@@ -585,6 +603,56 @@ void Game::UpdateState(PhysicsState& state, float dt)
 }
 
 //----------------------------------------------------------------------------------
+void Game::ProcessNetworkPackets()
+{
+  static char buf[32*1024];
+
+  size_t bytesReceived = 0;
+  Socket::Status status = _socket.receive(buf, sizeof(buf), bytesReceived);
+  if (status == Socket::Done)
+  {
+    // LOG_INFO("received from server" << LogKeyValue("num_bytes", bytesReceived));
+    char *ptr = buf;
+    while (ptr < buf + bytesReceived)
+    {
+      u32 msgSize = ntohl(*(u32*)ptr);
+      ptr += sizeof(u32);
+      game::ServerMessage msg;
+      if (msg.ParseFromArray(ptr, msgSize))
+      {
+        ptr += msgSize;
+        switch (msg.type())
+        {
+          case game::ServerMessage_Type_GAME_STARTED:
+            HandleGameStarted(msg.game_started());
+            break;
+
+          case game::ServerMessage_Type_PLAYER_JOINED:
+            HandlePlayerJoined(msg.player_joined());
+            break;
+
+          case game::ServerMessage_Type_PLAYER_LEFT:
+            HandlePlayerLeft(msg.player_left());
+            break;
+
+          case game::ServerMessage_Type_SWARM_STATE:
+            HandleSwarmState(msg.swarm_state());
+            break;
+
+          case game::ServerMessage_Type_PLAYER_STATE:
+            HandlePlayerState(msg.player_state());
+            break;
+        }
+      }
+      else
+      {
+        break;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------
 void Game::Run()
 {
   Clock clock;
@@ -607,50 +675,7 @@ void Game::Run()
     _eventManager->Poll();
     _windowManager->Update();
 
-    // check for network packets
-    size_t bytesRecieved = 0;
-    Socket::Status status = _socket.receive(buf.data(), buf.size(), bytesRecieved);
-    if (status == Socket::Done)
-    {
-      // LOG_INFO("recieved from server" << LogKeyValue("num_bytes", bytesRecieved));
-      char *ptr = buf.data();
-      while (ptr < buf.data() + bytesRecieved)
-      {
-        u32 msgSize = ntohl(*(u32*)ptr);
-        ptr += sizeof(u32);
-        game::ServerMessage msg;
-        if (msg.ParseFromArray(ptr, msgSize))
-        {
-          ptr += msgSize;
-          switch (msg.type())
-          {
-          case game::ServerMessage_Type_GAME_STARTED:
-            HandleGameStarted(msg.game_started());
-            break;
-
-          case game::ServerMessage_Type_PLAYER_JOINED:
-            HandlePlayerJoined(msg.player_joined());
-            break;
-
-          case game::ServerMessage_Type_PLAYER_LEFT:
-            HandlePlayerLeft(msg.player_left());
-            break;
-
-          case game::ServerMessage_Type_SWARM_STATE:
-            HandleSwarmState(msg.swarm_state());
-            break;
-
-          case game::ServerMessage_Type_PLAYER_STATE:
-            HandlePlayerState(msg.player_state());
-            break;
-          }
-        }
-        else
-        {
-          break;
-        }
-      }
-    }
+    ProcessNetworkPackets();
 
     if (_gameStarted)
     {
@@ -685,16 +710,17 @@ void Game::Run()
       accumulator += delta.asMicroseconds() / 1e6;
       while (accumulator >= timestep)
       {
-        for (RenderPlayer& player : _renderPlayers)
+        // Update all the remote players
+        for (auto& kv : _remotePlayers)
         {
+          RenderPlayer& player = kv.second;
           player._prevState = player._state;
           UpdateState(player._state, (float)timestep);
         }
 
+        // Update the local player
         _localPlayer._prevState = _localPlayer._state;
         UpdateState(_localPlayer._state, (float)timestep);
-        _renderPlayers[_playerIdx]._state = _localPlayer._state;
-        _renderPlayers[_playerIdx]._prevState = _localPlayer._prevState;
 
         for (MonsterState& state : _monsterState)
         {
@@ -705,12 +731,16 @@ void Game::Run()
         accumulator -= timestep;
       }
 
-      float alpha = (float)accumulator / timestep;
+      // Do the lerp approximation step
+      float alpha = (float)(accumulator / timestep);
 
-      for (RenderPlayer& player : _renderPlayers)
+      for (auto& kv : _remotePlayers)
       {
+        RenderPlayer& player = kv.second;
         player._pos = lerp(player._prevState._pos, player._state._pos, alpha);
       }
+
+      _localPlayer._pos = lerp(_localPlayer._prevState._pos, _localPlayer._state._pos, alpha);
 
 
       for (size_t i = 0; i < _monsterState.size(); ++i)

@@ -27,10 +27,14 @@ namespace swarm
     void UpdateState(PhysicsState& state, float dt);
 
     void SendPlayerState();
+    void SendMonsterState(float alpha);
     void SendToClients(const vector<char>& buf);
+    bool SendToClient(const vector<char>& buf, TcpSocket* socket);
 
     void HandleClientMessages();
     void ApplyAttractor(const Vector2f& pos, float radius);
+
+    void HandleCollisions();
 
     void ThreadProc();
 
@@ -48,15 +52,16 @@ namespace swarm
     {
       u32 id;
       Vector2f pos;
+      int health;
     };
 
     struct MonsterData
     {
+      MonsterState _state;
       float _size;
       int _health;
     };
 
-    vector<MonsterState> _monsterState;
     vector<MonsterData> _monsterData;
     vector<MonsterAttractor> _attractors;
 

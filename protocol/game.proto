@@ -62,9 +62,10 @@ message PlayerState
 message GameStarted
 {
 	optional uint32 player_id = 1;
-	optional string map_name = 2;
-	optional PlayerState player_state = 3;
-	optional SwarmState swarm_state = 4;
+	optional uint32 health = 2;
+	optional string map_name = 3;
+	optional PlayerState player_state = 4;
+	optional SwarmState swarm_state = 5;
 }
 
 //-----------------------------------------------------------------------------

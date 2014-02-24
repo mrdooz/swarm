@@ -72,6 +72,8 @@ void Server::HandleClientMessages()
 //-----------------------------------------------------------------------------
 void Server::PlayerAdded(TcpSocket* socket)
 {
+  int initialHealth = 10;
+
   _connectedClients.push_back(socket);
 
   // save the address to id mapping
@@ -89,6 +91,7 @@ void Server::PlayerAdded(TcpSocket* socket)
   PlayerData& player = _playerData[id];
   player.id = id;
   player.pos = _level.GetPlayerPos();
+  player.health = initialHealth;
 
   // Check if the new player is enough to start the game
   if (!_gameStarted && _connectedClients.size() >= _config.min_players())
@@ -104,16 +107,17 @@ void Server::PlayerAdded(TcpSocket* socket)
       const PlayerData& data = it->second;
       game::Player* player = playerState->add_player();
       player->set_id(it->first);
+      player->set_health(initialHealth);
       ToProtocol(player->mutable_pos(), data.pos);
     }
 
     // add initial swarm state
     game::SwarmState* swarmState = msg.mutable_swarm_state();
 
-    for (size_t i = 0; i < _monsterState.size(); ++i)
+    for (size_t i = 0; i < _monsterData.size(); ++i)
     {
-      MonsterState& state = _monsterState[i];
       MonsterData& data = _monsterData[i];
+      MonsterState& state = data._state;
 
       game::Monster* m = swarmState->add_monster();
       ToProtocol(m->mutable_acc(), state._curState._acc);
@@ -129,17 +133,17 @@ void Server::PlayerAdded(TcpSocket* socket)
       u32 id = _addrToId[key];
       const PlayerData& player = _playerData[id];
       msg.set_player_id(id);
+      msg.set_health(initialHealth);
 
       vector<char> buf;
       if (PackMessage(buf, serverMsg))
       {
-        SendToClients(buf);
+        SendToClient(buf, socket);
       }
     }
 
    _gameStarted = true;
   }
-
 }
 
 //-----------------------------------------------------------------------------
@@ -166,75 +170,55 @@ void Server::ThreadProc()
       socket->setBlocking(false);
     }
 
-    Time end = clock.getElapsedTime();
-    Time delta = end - lastUpdate;
-    lastUpdate = end;
-
-    // apply attractors..
-    for (MonsterState& state : _monsterState)
+    if (_gameStarted)
     {
-      state._curState._acc = Vector2f(0,0);
-    }
+      Time end = clock.getElapsedTime();
+      Time delta = end - lastUpdate;
+      lastUpdate = end;
 
-    for (const MonsterAttractor& a : _attractors)
-    {
-      ApplyAttractor(a.pos, a.radius);
-    }
-
-    accumulator += delta.asMicroseconds() / 1e6;
-
-    if (accumulator >= timestep)
-      _attractors.clear();
-
-    while (accumulator >= timestep)
-    {
-      for (MonsterState& state : _monsterState)
+      // apply attractors..
+      for (MonsterData& data : _monsterData)
       {
-        state._prevState = state._curState;
-        UpdateState(state._curState, (float)timestep);
-      }
-      accumulator -= timestep;
-    }
-
-    float alpha = (float)accumulator / timestep;
-
-    // send state 10 times/sec
-    Time sendDelta = end - lastSend;
-    if (sendDelta.asMilliseconds() > 100)
-    {
-      game::ServerMessage msg;
-      msg.set_type(game::ServerMessage_Type_SWARM_STATE);
-      game::SwarmState& swarmState = *msg.mutable_swarm_state();
-
-      for (size_t i = 0; i < _monsterState.size(); ++i)
-      {
-        MonsterState& state = _monsterState[i];
-        MonsterData& data = _monsterData[i];
-
-        // add monster to state
-        game::Monster* m = swarmState.add_monster();
-        Vector2f acc = lerp(state._prevState._acc, state._curState._acc, alpha);
-        Vector2f vel = lerp(state._prevState._vel, state._curState._vel, alpha);
-        Vector2f pos = lerp(state._prevState._pos, state._curState._pos, alpha);
-
-        ToProtocol(m->mutable_acc(), acc);
-        ToProtocol(m->mutable_vel(), vel);
-        ToProtocol(m->mutable_pos(), pos);
-        m->set_size(data._size);
+        data._state._curState._acc = Vector2f(0,0);
       }
 
-      // Send state to all connected clients
-      vector<char> buf;
-      if (PackMessage(buf, msg))
+      for (const MonsterAttractor& a : _attractors)
       {
-        SendToClients(buf);
+        ApplyAttractor(a.pos, a.radius);
       }
 
-      SendPlayerState();
-      lastSend = end;
+      accumulator += delta.asMicroseconds() / 1e6;
+
+      if (accumulator >= timestep)
+        _attractors.clear();
+
+      while (accumulator >= timestep)
+      {
+        for (MonsterData& data : _monsterData)
+        {
+          MonsterState& state = data._state;
+          state._prevState = state._curState;
+          UpdateState(state._curState, (float)timestep);
+        }
+        accumulator -= timestep;
+      }
+
+      HandleCollisions();
+
+      // send state 10 times/sec
+      Time sendDelta = end - lastSend;
+      if (sendDelta.asMilliseconds() > 100)
+      {
+        float alpha = (float)(accumulator / timestep);
+        SendMonsterState(alpha);
+        SendPlayerState();
+        lastSend = end;
+      }
+
+      HandleClientMessages();
+
     }
 
-    HandleClientMessages();
   }
 
   delete socket;
@@ -259,13 +243,13 @@ bool Server::InitLevel()
       {
         Vector2f pos(scale * Vector2f(x, y));
 
-        _monsterState.push_back(MonsterState());
-        MonsterState& state = _monsterState.back();
-        state._curState._pos = pos;
-        state._prevState._pos = pos;
 
         _monsterData.push_back(MonsterData());
         MonsterData& data  = _monsterData.back();
+        MonsterState& state = data._state;
+        state._curState._pos = pos;
+        state._prevState._pos = pos;
+
         data._size = s;
         break;
       }
@@ -348,6 +332,31 @@ void Server::UpdateState(PhysicsState& state, float dt)
 }
 
 //----------------------------------------------------------------------------------
+bool Server::SendToClient(const vector<char>& buf, TcpSocket* socket)
+{
+  Socket::Status status = socket->send(buf.data(), buf.size());
+  if (status == Socket::Disconnected)
+  {
+    // unable to send, so remove the client
+    auto idIt = _addrToId.find(
+        make_pair(socket->getRemoteAddress().toInteger(), socket->getRemotePort()));
+    if (idIt != _addrToId.end())
+    {
+      int id = idIt->second;
+      _playerData.erase(id);
+    }
+
+    delete socket;
+    auto it = find(_connectedClients.begin(), _connectedClients.end(), socket);
+    if (it != _connectedClients.end())
+      _connectedClients.erase(it);
+    return false;
+  }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------------
 void Server::SendToClients(const vector<char>& buf)
 {
   for (auto it = _connectedClients.begin(); it != _connectedClients.end(); )
@@ -390,6 +399,38 @@ bool Server::PackMessage(vector<char>& buf, const T& msg)
   return true;
 }
 
+//----------------------------------------------------------------------------------
+void Server::SendMonsterState(float alpha)
+{
+  game::ServerMessage msg;
+  msg.set_type(game::ServerMessage_Type_SWARM_STATE);
+  game::SwarmState& swarmState = *msg.mutable_swarm_state();
+
+  for (size_t i = 0; i < _monsterData.size(); ++i)
+  {
+    MonsterData& data = _monsterData[i];
+    MonsterState& state = data._state;
+
+    // add monster to state
+    game::Monster* m = swarmState.add_monster();
+    Vector2f acc = lerp(state._prevState._acc, state._curState._acc, alpha);
+    Vector2f vel = lerp(state._prevState._vel, state._curState._vel, alpha);
+    Vector2f pos = lerp(state._prevState._pos, state._curState._pos, alpha);
+
+    ToProtocol(m->mutable_acc(), acc);
+    ToProtocol(m->mutable_vel(), vel);
+    ToProtocol(m->mutable_pos(), pos);
+    m->set_size(data._size);
+  }
+
+  // Send state to all connected clients
+  vector<char> buf;
+  if (PackMessage(buf, msg))
+  {
+    SendToClients(buf);
+  }
+}
+
 
 //----------------------------------------------------------------------------------
 void Server::SendPlayerState()
@@ -403,6 +444,7 @@ void Server::SendPlayerState()
     const PlayerData& data = it->second;
     game::Player* player = state->add_player();
     player->set_id(it->first);
+    player->set_health(data.health);
     ToProtocol(player->mutable_pos(), data.pos);
   }
 
@@ -416,8 +458,9 @@ void Server::SendPlayerState()
 //----------------------------------------------------------------------------------
 void Server::ApplyAttractor(const Vector2f& pos, float radius)
 {
-  for (MonsterState& state : _monsterState)
+  for (MonsterData& data : _monsterData)
   {
+    MonsterState& state = data._state;
     // Set acceleration for any mobs inside the click radius
     if (radius > 0)
     {
@@ -425,8 +468,43 @@ void Server::ApplyAttractor(const Vector2f& pos, float radius)
       float d = Length(dir);
       if (d < radius)
       {
-        state._curState._acc += 250.0f * Normalize(dir);
+        // f = m * a, a = f / m
+        state._curState._acc += 1000.0f / data._size * Normalize(dir);
       }
     }
   }
+}
+
+//----------------------------------------------------------------------------------
+void Server::HandleCollisions()
+{
+  for (auto it = _monsterData.begin(); it != _monsterData.end(); )
+  {
+    MonsterData& data = *it;
+    MonsterState& state = data._state;
+
+    bool deleteMonster = false;
+    for (auto& kv : _playerData)
+    {
+      PlayerData& player = kv.second;
+
+      Vector2f dir = player.pos - state._curState._pos;
+      float d = Length(dir);
+      if (d < data._size)
+      {
+        player.health--;
+        deleteMonster = true;
+      }
+    }
+
+    if (deleteMonster)
+    {
+      it = _monsterData.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+
 }

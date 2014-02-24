@@ -928,10 +928,17 @@ class GameStarted : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 player_id() const;
   inline void set_player_id(::google::protobuf::uint32 value);
 
-  // optional string map_name = 2;
+  // optional uint32 health = 2;
+  inline bool has_health() const;
+  inline void clear_health();
+  static const int kHealthFieldNumber = 2;
+  inline ::google::protobuf::uint32 health() const;
+  inline void set_health(::google::protobuf::uint32 value);
+
+  // optional string map_name = 3;
   inline bool has_map_name() const;
   inline void clear_map_name();
-  static const int kMapNameFieldNumber = 2;
+  static const int kMapNameFieldNumber = 3;
   inline const ::std::string& map_name() const;
   inline void set_map_name(const ::std::string& value);
   inline void set_map_name(const char* value);
@@ -940,19 +947,19 @@ class GameStarted : public ::google::protobuf::Message {
   inline ::std::string* release_map_name();
   inline void set_allocated_map_name(::std::string* map_name);
 
-  // optional .swarm.game.PlayerState player_state = 3;
+  // optional .swarm.game.PlayerState player_state = 4;
   inline bool has_player_state() const;
   inline void clear_player_state();
-  static const int kPlayerStateFieldNumber = 3;
+  static const int kPlayerStateFieldNumber = 4;
   inline const ::swarm::game::PlayerState& player_state() const;
   inline ::swarm::game::PlayerState* mutable_player_state();
   inline ::swarm::game::PlayerState* release_player_state();
   inline void set_allocated_player_state(::swarm::game::PlayerState* player_state);
 
-  // optional .swarm.game.SwarmState swarm_state = 4;
+  // optional .swarm.game.SwarmState swarm_state = 5;
   inline bool has_swarm_state() const;
   inline void clear_swarm_state();
-  static const int kSwarmStateFieldNumber = 4;
+  static const int kSwarmStateFieldNumber = 5;
   inline const ::swarm::game::SwarmState& swarm_state() const;
   inline ::swarm::game::SwarmState* mutable_swarm_state();
   inline ::swarm::game::SwarmState* release_swarm_state();
@@ -962,6 +969,8 @@ class GameStarted : public ::google::protobuf::Message {
  private:
   inline void set_has_player_id();
   inline void clear_has_player_id();
+  inline void set_has_health();
+  inline void clear_has_health();
   inline void set_has_map_name();
   inline void clear_has_map_name();
   inline void set_has_player_state();
@@ -971,13 +980,14 @@ class GameStarted : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::google::protobuf::uint32 player_id_;
+  ::google::protobuf::uint32 health_;
   ::std::string* map_name_;
   ::swarm::game::PlayerState* player_state_;
   ::swarm::game::SwarmState* swarm_state_;
-  ::google::protobuf::uint32 player_id_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
@@ -2051,15 +2061,37 @@ inline void GameStarted::set_player_id(::google::protobuf::uint32 value) {
   player_id_ = value;
 }
 
-// optional string map_name = 2;
-inline bool GameStarted::has_map_name() const {
+// optional uint32 health = 2;
+inline bool GameStarted::has_health() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void GameStarted::set_has_map_name() {
+inline void GameStarted::set_has_health() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void GameStarted::clear_has_map_name() {
+inline void GameStarted::clear_has_health() {
   _has_bits_[0] &= ~0x00000002u;
+}
+inline void GameStarted::clear_health() {
+  health_ = 0u;
+  clear_has_health();
+}
+inline ::google::protobuf::uint32 GameStarted::health() const {
+  return health_;
+}
+inline void GameStarted::set_health(::google::protobuf::uint32 value) {
+  set_has_health();
+  health_ = value;
+}
+
+// optional string map_name = 3;
+inline bool GameStarted::has_map_name() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void GameStarted::set_has_map_name() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void GameStarted::clear_has_map_name() {
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void GameStarted::clear_map_name() {
   if (map_name_ != &::google::protobuf::internal::kEmptyString) {
@@ -2121,15 +2153,15 @@ inline void GameStarted::set_allocated_map_name(::std::string* map_name) {
   }
 }
 
-// optional .swarm.game.PlayerState player_state = 3;
+// optional .swarm.game.PlayerState player_state = 4;
 inline bool GameStarted::has_player_state() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void GameStarted::set_has_player_state() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void GameStarted::clear_has_player_state() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void GameStarted::clear_player_state() {
   if (player_state_ != NULL) player_state_->::swarm::game::PlayerState::Clear();
@@ -2159,15 +2191,15 @@ inline void GameStarted::set_allocated_player_state(::swarm::game::PlayerState* 
   }
 }
 
-// optional .swarm.game.SwarmState swarm_state = 4;
+// optional .swarm.game.SwarmState swarm_state = 5;
 inline bool GameStarted::has_swarm_state() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void GameStarted::set_has_swarm_state() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void GameStarted::clear_has_swarm_state() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void GameStarted::clear_swarm_state() {
   if (swarm_state_ != NULL) swarm_state_->::swarm::game::SwarmState::Clear();
