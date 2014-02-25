@@ -72,7 +72,7 @@ void Server::HandleClientMessages()
 //-----------------------------------------------------------------------------
 void Server::PlayerAdded(TcpSocket* socket)
 {
-  int initialHealth = 10;
+  int initialHealth = 1;
 
   _connectedClients.push_back(socket);
 
@@ -93,45 +93,50 @@ void Server::PlayerAdded(TcpSocket* socket)
   player.pos = _level.GetPlayerPos();
   player.health = initialHealth;
 
-  // Check if the new player is enough to start the game
-  if (!_gameStarted && _connectedClients.size() >= _config.min_players())
+  if (!_gameStarted && _connectedClients.size() < _config.min_players())
+    return;
+
+  _gameStarted = true;
+
+  game::ServerMessage serverMsg;
+  serverMsg.set_type(game::ServerMessage_Type_GAME_STARTED);
+  game::GameStarted& msg = *serverMsg.mutable_game_started();
+
+  // add initial player state
+  game::PlayerState* playerState = msg.mutable_player_state();
+  for (auto it = _playerData.begin(); it != _playerData.end(); ++it)
   {
-    game::ServerMessage serverMsg;
-    serverMsg.set_type(game::ServerMessage_Type_GAME_STARTED);
-    game::GameStarted& msg = *serverMsg.mutable_game_started();
+    const PlayerData& data = it->second;
+    game::Player* player = playerState->add_player();
+    player->set_id(it->first);
+    player->set_health(data.health);
+    ToProtocol(player->mutable_pos(), data.pos);
+  }
 
-    // add initial player state
-    game::PlayerState* playerState = msg.mutable_player_state();
-    for (auto it = _playerData.begin(); it != _playerData.end(); ++it)
+  // add initial swarm state
+  game::SwarmState* swarmState = msg.mutable_swarm_state();
+
+  for (size_t i = 0; i < _monsterData.size(); ++i)
+  {
+    MonsterData& data = _monsterData[i];
+    MonsterState& state = data._state;
+
+    game::Monster* m = swarmState->add_monster();
+    ToProtocol(m->mutable_acc(), state._curState._acc);
+    ToProtocol(m->mutable_vel(), state._curState._vel);
+    ToProtocol(m->mutable_pos(), state._curState._pos);
+    m->set_size(data._size);
+  }
+
+  // send game started to each player who hasn't already got it
+  for (TcpSocket* socket : _connectedClients)
+  {
+    auto key = KeyFromSocket(socket);
+    u32 id = _addrToId[key];
+    PlayerData& player = _playerData[id];
+    if (!player.sentStartGame)
     {
-      const PlayerData& data = it->second;
-      game::Player* player = playerState->add_player();
-      player->set_id(it->first);
-      player->set_health(initialHealth);
-      ToProtocol(player->mutable_pos(), data.pos);
-    }
-
-    // add initial swarm state
-    game::SwarmState* swarmState = msg.mutable_swarm_state();
-
-    for (size_t i = 0; i < _monsterData.size(); ++i)
-    {
-      MonsterData& data = _monsterData[i];
-      MonsterState& state = data._state;
-
-      game::Monster* m = swarmState->add_monster();
-      ToProtocol(m->mutable_acc(), state._curState._acc);
-      ToProtocol(m->mutable_vel(), state._curState._vel);
-      ToProtocol(m->mutable_pos(), state._curState._pos);
-      m->set_size(data._size);
-    }
-
-    // send game started to each player
-    for (TcpSocket* socket : _connectedClients)
-    {
-      auto key = KeyFromSocket(socket);
-      u32 id = _addrToId[key];
-      const PlayerData& player = _playerData[id];
+      player.sentStartGame = true;
       msg.set_player_id(id);
       msg.set_health(initialHealth);
 
@@ -141,8 +146,6 @@ void Server::PlayerAdded(TcpSocket* socket)
         SendToClient(buf, socket);
       }
     }
-
-   _gameStarted = true;
   }
 }
 
@@ -400,6 +403,21 @@ bool Server::PackMessage(vector<char>& buf, const T& msg)
 }
 
 //----------------------------------------------------------------------------------
+template <typename T>
+bool Server::SendMessageToClients(const T& msg)
+{
+  // Send state to all connected clients
+  vector<char> buf;
+  if (PackMessage(buf, msg))
+  {
+    SendToClients(buf);
+    return true;
+  }
+  return false;
+}
+
+
+//----------------------------------------------------------------------------------
 void Server::SendMonsterState(float alpha)
 {
   game::ServerMessage msg;
@@ -423,12 +441,7 @@ void Server::SendMonsterState(float alpha)
     m->set_size(data._size);
   }
 
-  // Send state to all connected clients
-  vector<char> buf;
-  if (PackMessage(buf, msg))
-  {
-    SendToClients(buf);
-  }
+  SendMessageToClients(msg);
 }
 
 
@@ -448,11 +461,7 @@ void Server::SendPlayerState()
     ToProtocol(player->mutable_pos(), data.pos);
   }
 
-  vector<char> buf;
-  if (PackMessage(buf, msg))
-  {
-    SendToClients(buf);
-  }
+  SendMessageToClients(msg);
 }
 
 //----------------------------------------------------------------------------------
@@ -476,24 +485,46 @@ void Server::ApplyAttractor(const Vector2f& pos, float radius)
 }
 
 //----------------------------------------------------------------------------------
+void Server::SendPlayerDied(u32 id)
+{
+  game::ServerMessage msg;
+  msg.set_type(game::ServerMessage_Type_PLAYER_DIED);
+  game::PlayerDied* d = msg.mutable_player_died();
+  d->set_player_id(id);
+  SendMessageToClients(msg);
+}
+
+
+//----------------------------------------------------------------------------------
 void Server::HandleCollisions()
 {
+  game::ServerMessage msg;
+  msg.set_type(game::ServerMessage_Type_MONSTER_DIED);
+  game::MonsterDied* m = msg.mutable_monster_died();
+
   for (auto it = _monsterData.begin(); it != _monsterData.end(); )
   {
     MonsterData& data = *it;
     MonsterState& state = data._state;
+    const Vector2f& monsterPos = state._curState._pos;
 
     bool deleteMonster = false;
     for (auto& kv : _playerData)
     {
       PlayerData& player = kv.second;
 
-      Vector2f dir = player.pos - state._curState._pos;
+      Vector2f dir = player.pos - monsterPos;
       float d = Length(dir);
       if (d < data._size)
       {
-        player.health--;
+        // Check if collision leads to player death
+        if (0 == --player.health)
+        {
+          SendPlayerDied(player.id);
+          player.alive = false;
+        }
         deleteMonster = true;
+        ToProtocol(m->mutable_pos()->Add(), monsterPos);
       }
     }
 
@@ -507,4 +538,39 @@ void Server::HandleCollisions()
     }
   }
 
+  // Check for monster collisions
+  if (m->pos_size())
+  {
+    SendMessageToClients(msg);
+  }
+
+  int numPlayersAlive = 0;
+  u32 firstLiving = ~0;
+  for (auto& kv : _playerData)
+  {
+    PlayerData& player = kv.second;
+    if (player.alive)
+    {
+      numPlayersAlive++;
+      firstLiving = firstLiving == ~0 ? player.id : firstLiving;
+    }
+  }
+
+  if (_connectedClients.size() == 1 && numPlayersAlive == 0 ||
+      _connectedClients.size() > 1 && numPlayersAlive == 1)
+  {
+    game::ServerMessage msg;
+    msg.set_type(game::ServerMessage_Type_GAME_ENDED);
+    game::GameEnded* e = msg.mutable_game_ended();
+    e->set_winner_id(firstLiving);
+    SendMessageToClients(msg);
+  }
+
 }
+
+//----------------------------------------------------------------------------------
+void Server::ResetGame()
+{
+  // todo: disconnect everyone, reset state
+}
+

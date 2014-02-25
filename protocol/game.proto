@@ -11,12 +11,14 @@ message Vector2
 message PlayerJoined
 {
 	optional string name = 1;
+	optional uint32 id = 2;
 }
 
 //-----------------------------------------------------------------------------
 message PlayerLeft
 {
 	optional string name = 1;
+	optional uint32 id = 2;
 }
 
 //-----------------------------------------------------------------------------
@@ -69,6 +71,24 @@ message GameStarted
 }
 
 //-----------------------------------------------------------------------------
+message GameEnded
+{
+	optional uint32 winner_id = 1;
+}
+
+//-----------------------------------------------------------------------------
+message PlayerDied
+{
+	optional uint32 player_id = 1;
+}
+
+//-----------------------------------------------------------------------------
+message MonsterDied
+{
+	repeated Vector2 pos = 1;
+}
+
+//-----------------------------------------------------------------------------
 message ServerMessage
 {
 	// wrapper message type. server -> player
@@ -80,6 +100,9 @@ message ServerMessage
 		PLAYER_LEFT 	= 2;
 		SWARM_STATE 	= 3;
 		PLAYER_STATE	= 4;
+		PLAYER_DIED		= 5;
+		GAME_ENDED		= 6;
+		MONSTER_DIED	= 7;
 	}
 	
 	required Type type = 1;
@@ -89,6 +112,9 @@ message ServerMessage
 	optional PlayerLeft player_left = 4;
 	optional SwarmState swarm_state = 5;
 	optional PlayerState player_state = 6;
+	optional PlayerDied player_died = 7;
+	optional GameEnded game_ended = 8; 
+	optional MonsterDied monster_died = 9;
 }
 
 //-----------------------------------------------------------------------------

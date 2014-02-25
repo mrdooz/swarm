@@ -8,7 +8,7 @@ namespace swarm
   class Level
   {
   public:
-    bool Load(const char* filename);
+    bool Load(const string& filename);
     bool PosToBackground(const Vector2f& p, u8* out);
 
     Player* AddPlayer();

@@ -44,6 +44,9 @@ class Player;
 class PlayerClick;
 class PlayerState;
 class GameStarted;
+class GameEnded;
+class PlayerDied;
+class MonsterDied;
 class ServerMessage;
 class PlayerMessage;
 class Config;
@@ -53,11 +56,14 @@ enum ServerMessage_Type {
   ServerMessage_Type_PLAYER_JOINED = 1,
   ServerMessage_Type_PLAYER_LEFT = 2,
   ServerMessage_Type_SWARM_STATE = 3,
-  ServerMessage_Type_PLAYER_STATE = 4
+  ServerMessage_Type_PLAYER_STATE = 4,
+  ServerMessage_Type_PLAYER_DIED = 5,
+  ServerMessage_Type_GAME_ENDED = 6,
+  ServerMessage_Type_MONSTER_DIED = 7
 };
 bool ServerMessage_Type_IsValid(int value);
 const ServerMessage_Type ServerMessage_Type_Type_MIN = ServerMessage_Type_GAME_STARTED;
-const ServerMessage_Type ServerMessage_Type_Type_MAX = ServerMessage_Type_PLAYER_STATE;
+const ServerMessage_Type ServerMessage_Type_Type_MAX = ServerMessage_Type_MONSTER_DIED;
 const int ServerMessage_Type_Type_ARRAYSIZE = ServerMessage_Type_Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* ServerMessage_Type_descriptor();
@@ -249,17 +255,27 @@ class PlayerJoined : public ::google::protobuf::Message {
   inline ::std::string* release_name();
   inline void set_allocated_name(::std::string* name);
 
+  // optional uint32 id = 2;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 2;
+  inline ::google::protobuf::uint32 id() const;
+  inline void set_id(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:swarm.game.PlayerJoined)
  private:
   inline void set_has_name();
   inline void clear_has_name();
+  inline void set_has_id();
+  inline void clear_has_id();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* name_;
+  ::google::protobuf::uint32 id_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
@@ -336,17 +352,27 @@ class PlayerLeft : public ::google::protobuf::Message {
   inline ::std::string* release_name();
   inline void set_allocated_name(::std::string* name);
 
+  // optional uint32 id = 2;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 2;
+  inline ::google::protobuf::uint32 id() const;
+  inline void set_id(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:swarm.game.PlayerLeft)
  private:
   inline void set_has_name();
   inline void clear_has_name();
+  inline void set_has_id();
+  inline void clear_has_id();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* name_;
+  ::google::protobuf::uint32 id_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
@@ -998,6 +1024,255 @@ class GameStarted : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class GameEnded : public ::google::protobuf::Message {
+ public:
+  GameEnded();
+  virtual ~GameEnded();
+
+  GameEnded(const GameEnded& from);
+
+  inline GameEnded& operator=(const GameEnded& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GameEnded& default_instance();
+
+  void Swap(GameEnded* other);
+
+  // implements Message ----------------------------------------------
+
+  GameEnded* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GameEnded& from);
+  void MergeFrom(const GameEnded& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 winner_id = 1;
+  inline bool has_winner_id() const;
+  inline void clear_winner_id();
+  static const int kWinnerIdFieldNumber = 1;
+  inline ::google::protobuf::uint32 winner_id() const;
+  inline void set_winner_id(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.GameEnded)
+ private:
+  inline void set_has_winner_id();
+  inline void clear_has_winner_id();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 winner_id_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static GameEnded* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class PlayerDied : public ::google::protobuf::Message {
+ public:
+  PlayerDied();
+  virtual ~PlayerDied();
+
+  PlayerDied(const PlayerDied& from);
+
+  inline PlayerDied& operator=(const PlayerDied& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PlayerDied& default_instance();
+
+  void Swap(PlayerDied* other);
+
+  // implements Message ----------------------------------------------
+
+  PlayerDied* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PlayerDied& from);
+  void MergeFrom(const PlayerDied& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 player_id = 1;
+  inline bool has_player_id() const;
+  inline void clear_player_id();
+  static const int kPlayerIdFieldNumber = 1;
+  inline ::google::protobuf::uint32 player_id() const;
+  inline void set_player_id(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:swarm.game.PlayerDied)
+ private:
+  inline void set_has_player_id();
+  inline void clear_has_player_id();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 player_id_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static PlayerDied* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MonsterDied : public ::google::protobuf::Message {
+ public:
+  MonsterDied();
+  virtual ~MonsterDied();
+
+  MonsterDied(const MonsterDied& from);
+
+  inline MonsterDied& operator=(const MonsterDied& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MonsterDied& default_instance();
+
+  void Swap(MonsterDied* other);
+
+  // implements Message ----------------------------------------------
+
+  MonsterDied* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MonsterDied& from);
+  void MergeFrom(const MonsterDied& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .swarm.game.Vector2 pos = 1;
+  inline int pos_size() const;
+  inline void clear_pos();
+  static const int kPosFieldNumber = 1;
+  inline const ::swarm::game::Vector2& pos(int index) const;
+  inline ::swarm::game::Vector2* mutable_pos(int index);
+  inline ::swarm::game::Vector2* add_pos();
+  inline const ::google::protobuf::RepeatedPtrField< ::swarm::game::Vector2 >&
+      pos() const;
+  inline ::google::protobuf::RepeatedPtrField< ::swarm::game::Vector2 >*
+      mutable_pos();
+
+  // @@protoc_insertion_point(class_scope:swarm.game.MonsterDied)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::swarm::game::Vector2 > pos_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_game_2eproto();
+  friend void protobuf_AssignDesc_game_2eproto();
+  friend void protobuf_ShutdownFile_game_2eproto();
+
+  void InitAsDefaultInstance();
+  static MonsterDied* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class ServerMessage : public ::google::protobuf::Message {
  public:
   ServerMessage();
@@ -1056,6 +1331,9 @@ class ServerMessage : public ::google::protobuf::Message {
   static const Type PLAYER_LEFT = ServerMessage_Type_PLAYER_LEFT;
   static const Type SWARM_STATE = ServerMessage_Type_SWARM_STATE;
   static const Type PLAYER_STATE = ServerMessage_Type_PLAYER_STATE;
+  static const Type PLAYER_DIED = ServerMessage_Type_PLAYER_DIED;
+  static const Type GAME_ENDED = ServerMessage_Type_GAME_ENDED;
+  static const Type MONSTER_DIED = ServerMessage_Type_MONSTER_DIED;
   static inline bool Type_IsValid(int value) {
     return ServerMessage_Type_IsValid(value);
   }
@@ -1131,6 +1409,33 @@ class ServerMessage : public ::google::protobuf::Message {
   inline ::swarm::game::PlayerState* release_player_state();
   inline void set_allocated_player_state(::swarm::game::PlayerState* player_state);
 
+  // optional .swarm.game.PlayerDied player_died = 7;
+  inline bool has_player_died() const;
+  inline void clear_player_died();
+  static const int kPlayerDiedFieldNumber = 7;
+  inline const ::swarm::game::PlayerDied& player_died() const;
+  inline ::swarm::game::PlayerDied* mutable_player_died();
+  inline ::swarm::game::PlayerDied* release_player_died();
+  inline void set_allocated_player_died(::swarm::game::PlayerDied* player_died);
+
+  // optional .swarm.game.GameEnded game_ended = 8;
+  inline bool has_game_ended() const;
+  inline void clear_game_ended();
+  static const int kGameEndedFieldNumber = 8;
+  inline const ::swarm::game::GameEnded& game_ended() const;
+  inline ::swarm::game::GameEnded* mutable_game_ended();
+  inline ::swarm::game::GameEnded* release_game_ended();
+  inline void set_allocated_game_ended(::swarm::game::GameEnded* game_ended);
+
+  // optional .swarm.game.MonsterDied monster_died = 9;
+  inline bool has_monster_died() const;
+  inline void clear_monster_died();
+  static const int kMonsterDiedFieldNumber = 9;
+  inline const ::swarm::game::MonsterDied& monster_died() const;
+  inline ::swarm::game::MonsterDied* mutable_monster_died();
+  inline ::swarm::game::MonsterDied* release_monster_died();
+  inline void set_allocated_monster_died(::swarm::game::MonsterDied* monster_died);
+
   // @@protoc_insertion_point(class_scope:swarm.game.ServerMessage)
  private:
   inline void set_has_type();
@@ -1145,6 +1450,12 @@ class ServerMessage : public ::google::protobuf::Message {
   inline void clear_has_swarm_state();
   inline void set_has_player_state();
   inline void clear_has_player_state();
+  inline void set_has_player_died();
+  inline void clear_has_player_died();
+  inline void set_has_game_ended();
+  inline void clear_has_game_ended();
+  inline void set_has_monster_died();
+  inline void clear_has_monster_died();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1153,10 +1464,13 @@ class ServerMessage : public ::google::protobuf::Message {
   ::swarm::game::PlayerLeft* player_left_;
   ::swarm::game::SwarmState* swarm_state_;
   ::swarm::game::PlayerState* player_state_;
+  ::swarm::game::PlayerDied* player_died_;
+  ::swarm::game::GameEnded* game_ended_;
+  ::swarm::game::MonsterDied* monster_died_;
   int type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
@@ -1537,6 +1851,28 @@ inline void PlayerJoined::set_allocated_name(::std::string* name) {
   }
 }
 
+// optional uint32 id = 2;
+inline bool PlayerJoined::has_id() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void PlayerJoined::set_has_id() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void PlayerJoined::clear_has_id() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void PlayerJoined::clear_id() {
+  id_ = 0u;
+  clear_has_id();
+}
+inline ::google::protobuf::uint32 PlayerJoined::id() const {
+  return id_;
+}
+inline void PlayerJoined::set_id(::google::protobuf::uint32 value) {
+  set_has_id();
+  id_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // PlayerLeft
@@ -1609,6 +1945,28 @@ inline void PlayerLeft::set_allocated_name(::std::string* name) {
     clear_has_name();
     name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional uint32 id = 2;
+inline bool PlayerLeft::has_id() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void PlayerLeft::set_has_id() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void PlayerLeft::clear_has_id() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void PlayerLeft::clear_id() {
+  id_ = 0u;
+  clear_has_id();
+}
+inline ::google::protobuf::uint32 PlayerLeft::id() const {
+  return id_;
+}
+inline void PlayerLeft::set_id(::google::protobuf::uint32 value) {
+  set_has_id();
+  id_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -2231,6 +2589,87 @@ inline void GameStarted::set_allocated_swarm_state(::swarm::game::SwarmState* sw
 
 // -------------------------------------------------------------------
 
+// GameEnded
+
+// optional uint32 winner_id = 1;
+inline bool GameEnded::has_winner_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GameEnded::set_has_winner_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GameEnded::clear_has_winner_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GameEnded::clear_winner_id() {
+  winner_id_ = 0u;
+  clear_has_winner_id();
+}
+inline ::google::protobuf::uint32 GameEnded::winner_id() const {
+  return winner_id_;
+}
+inline void GameEnded::set_winner_id(::google::protobuf::uint32 value) {
+  set_has_winner_id();
+  winner_id_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// PlayerDied
+
+// optional uint32 player_id = 1;
+inline bool PlayerDied::has_player_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void PlayerDied::set_has_player_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void PlayerDied::clear_has_player_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void PlayerDied::clear_player_id() {
+  player_id_ = 0u;
+  clear_has_player_id();
+}
+inline ::google::protobuf::uint32 PlayerDied::player_id() const {
+  return player_id_;
+}
+inline void PlayerDied::set_player_id(::google::protobuf::uint32 value) {
+  set_has_player_id();
+  player_id_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// MonsterDied
+
+// repeated .swarm.game.Vector2 pos = 1;
+inline int MonsterDied::pos_size() const {
+  return pos_.size();
+}
+inline void MonsterDied::clear_pos() {
+  pos_.Clear();
+}
+inline const ::swarm::game::Vector2& MonsterDied::pos(int index) const {
+  return pos_.Get(index);
+}
+inline ::swarm::game::Vector2* MonsterDied::mutable_pos(int index) {
+  return pos_.Mutable(index);
+}
+inline ::swarm::game::Vector2* MonsterDied::add_pos() {
+  return pos_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::swarm::game::Vector2 >&
+MonsterDied::pos() const {
+  return pos_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::swarm::game::Vector2 >*
+MonsterDied::mutable_pos() {
+  return &pos_;
+}
+
+// -------------------------------------------------------------------
+
 // ServerMessage
 
 // required .swarm.game.ServerMessage.Type type = 1;
@@ -2443,6 +2882,120 @@ inline void ServerMessage::set_allocated_player_state(::swarm::game::PlayerState
     set_has_player_state();
   } else {
     clear_has_player_state();
+  }
+}
+
+// optional .swarm.game.PlayerDied player_died = 7;
+inline bool ServerMessage::has_player_died() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void ServerMessage::set_has_player_died() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void ServerMessage::clear_has_player_died() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void ServerMessage::clear_player_died() {
+  if (player_died_ != NULL) player_died_->::swarm::game::PlayerDied::Clear();
+  clear_has_player_died();
+}
+inline const ::swarm::game::PlayerDied& ServerMessage::player_died() const {
+  return player_died_ != NULL ? *player_died_ : *default_instance_->player_died_;
+}
+inline ::swarm::game::PlayerDied* ServerMessage::mutable_player_died() {
+  set_has_player_died();
+  if (player_died_ == NULL) player_died_ = new ::swarm::game::PlayerDied;
+  return player_died_;
+}
+inline ::swarm::game::PlayerDied* ServerMessage::release_player_died() {
+  clear_has_player_died();
+  ::swarm::game::PlayerDied* temp = player_died_;
+  player_died_ = NULL;
+  return temp;
+}
+inline void ServerMessage::set_allocated_player_died(::swarm::game::PlayerDied* player_died) {
+  delete player_died_;
+  player_died_ = player_died;
+  if (player_died) {
+    set_has_player_died();
+  } else {
+    clear_has_player_died();
+  }
+}
+
+// optional .swarm.game.GameEnded game_ended = 8;
+inline bool ServerMessage::has_game_ended() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void ServerMessage::set_has_game_ended() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void ServerMessage::clear_has_game_ended() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void ServerMessage::clear_game_ended() {
+  if (game_ended_ != NULL) game_ended_->::swarm::game::GameEnded::Clear();
+  clear_has_game_ended();
+}
+inline const ::swarm::game::GameEnded& ServerMessage::game_ended() const {
+  return game_ended_ != NULL ? *game_ended_ : *default_instance_->game_ended_;
+}
+inline ::swarm::game::GameEnded* ServerMessage::mutable_game_ended() {
+  set_has_game_ended();
+  if (game_ended_ == NULL) game_ended_ = new ::swarm::game::GameEnded;
+  return game_ended_;
+}
+inline ::swarm::game::GameEnded* ServerMessage::release_game_ended() {
+  clear_has_game_ended();
+  ::swarm::game::GameEnded* temp = game_ended_;
+  game_ended_ = NULL;
+  return temp;
+}
+inline void ServerMessage::set_allocated_game_ended(::swarm::game::GameEnded* game_ended) {
+  delete game_ended_;
+  game_ended_ = game_ended;
+  if (game_ended) {
+    set_has_game_ended();
+  } else {
+    clear_has_game_ended();
+  }
+}
+
+// optional .swarm.game.MonsterDied monster_died = 9;
+inline bool ServerMessage::has_monster_died() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void ServerMessage::set_has_monster_died() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void ServerMessage::clear_has_monster_died() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void ServerMessage::clear_monster_died() {
+  if (monster_died_ != NULL) monster_died_->::swarm::game::MonsterDied::Clear();
+  clear_has_monster_died();
+}
+inline const ::swarm::game::MonsterDied& ServerMessage::monster_died() const {
+  return monster_died_ != NULL ? *monster_died_ : *default_instance_->monster_died_;
+}
+inline ::swarm::game::MonsterDied* ServerMessage::mutable_monster_died() {
+  set_has_monster_died();
+  if (monster_died_ == NULL) monster_died_ = new ::swarm::game::MonsterDied;
+  return monster_died_;
+}
+inline ::swarm::game::MonsterDied* ServerMessage::release_monster_died() {
+  clear_has_monster_died();
+  ::swarm::game::MonsterDied* temp = monster_died_;
+  monster_died_ = NULL;
+  return temp;
+}
+inline void ServerMessage::set_allocated_monster_died(::swarm::game::MonsterDied* monster_died) {
+  delete monster_died_;
+  monster_died_ = monster_died;
+  if (monster_died) {
+    set_has_monster_died();
+  } else {
+    clear_has_monster_died();
   }
 }
 

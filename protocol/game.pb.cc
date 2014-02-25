@@ -48,6 +48,15 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GameStarted_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GameStarted_reflection_ = NULL;
+const ::google::protobuf::Descriptor* GameEnded_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  GameEnded_reflection_ = NULL;
+const ::google::protobuf::Descriptor* PlayerDied_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  PlayerDied_reflection_ = NULL;
+const ::google::protobuf::Descriptor* MonsterDied_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  MonsterDied_reflection_ = NULL;
 const ::google::protobuf::Descriptor* ServerMessage_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ServerMessage_reflection_ = NULL;
@@ -86,8 +95,9 @@ void protobuf_AssignDesc_game_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Vector2));
   PlayerJoined_descriptor_ = file->message_type(1);
-  static const int PlayerJoined_offsets_[1] = {
+  static const int PlayerJoined_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerJoined, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerJoined, id_),
   };
   PlayerJoined_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -101,8 +111,9 @@ void protobuf_AssignDesc_game_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PlayerJoined));
   PlayerLeft_descriptor_ = file->message_type(2);
-  static const int PlayerLeft_offsets_[1] = {
+  static const int PlayerLeft_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerLeft, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerLeft, id_),
   };
   PlayerLeft_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -217,14 +228,62 @@ void protobuf_AssignDesc_game_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GameStarted));
-  ServerMessage_descriptor_ = file->message_type(9);
-  static const int ServerMessage_offsets_[6] = {
+  GameEnded_descriptor_ = file->message_type(9);
+  static const int GameEnded_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameEnded, winner_id_),
+  };
+  GameEnded_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      GameEnded_descriptor_,
+      GameEnded::default_instance_,
+      GameEnded_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameEnded, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GameEnded, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(GameEnded));
+  PlayerDied_descriptor_ = file->message_type(10);
+  static const int PlayerDied_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerDied, player_id_),
+  };
+  PlayerDied_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      PlayerDied_descriptor_,
+      PlayerDied::default_instance_,
+      PlayerDied_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerDied, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerDied, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(PlayerDied));
+  MonsterDied_descriptor_ = file->message_type(11);
+  static const int MonsterDied_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MonsterDied, pos_),
+  };
+  MonsterDied_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      MonsterDied_descriptor_,
+      MonsterDied::default_instance_,
+      MonsterDied_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MonsterDied, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MonsterDied, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(MonsterDied));
+  ServerMessage_descriptor_ = file->message_type(12);
+  static const int ServerMessage_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServerMessage, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServerMessage, game_started_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServerMessage, player_joined_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServerMessage, player_left_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServerMessage, swarm_state_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServerMessage, player_state_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServerMessage, player_died_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServerMessage, game_ended_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServerMessage, monster_died_),
   };
   ServerMessage_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -238,7 +297,7 @@ void protobuf_AssignDesc_game_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ServerMessage));
   ServerMessage_Type_descriptor_ = ServerMessage_descriptor_->enum_type(0);
-  PlayerMessage_descriptor_ = file->message_type(10);
+  PlayerMessage_descriptor_ = file->message_type(13);
   static const int PlayerMessage_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerMessage, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PlayerMessage, pos_),
@@ -256,7 +315,7 @@ void protobuf_AssignDesc_game_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PlayerMessage));
   PlayerMessage_Type_descriptor_ = PlayerMessage_descriptor_->enum_type(0);
-  Config_descriptor_ = file->message_type(11);
+  Config_descriptor_ = file->message_type(14);
   static const int Config_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Config, map_name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Config, num_monsters_),
@@ -305,6 +364,12 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GameStarted_descriptor_, &GameStarted::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    GameEnded_descriptor_, &GameEnded::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    PlayerDied_descriptor_, &PlayerDied::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    MonsterDied_descriptor_, &MonsterDied::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ServerMessage_descriptor_, &ServerMessage::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     PlayerMessage_descriptor_, &PlayerMessage::default_instance());
@@ -333,6 +398,12 @@ void protobuf_ShutdownFile_game_2eproto() {
   delete PlayerState_reflection_;
   delete GameStarted::default_instance_;
   delete GameStarted_reflection_;
+  delete GameEnded::default_instance_;
+  delete GameEnded_reflection_;
+  delete PlayerDied::default_instance_;
+  delete PlayerDied_reflection_;
+  delete MonsterDied::default_instance_;
+  delete MonsterDied_reflection_;
   delete ServerMessage::default_instance_;
   delete ServerMessage_reflection_;
   delete PlayerMessage::default_instance_;
@@ -349,40 +420,49 @@ void protobuf_AddDesc_game_2eproto() {
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\ngame.proto\022\nswarm.game\"\037\n\007Vector2\022\t\n\001x"
-    "\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\"\034\n\014PlayerJoined\022\014\n\004nam"
-    "e\030\001 \001(\t\"\032\n\nPlayerLeft\022\014\n\004name\030\001 \001(\t\"}\n\007M"
-    "onster\022 \n\003acc\030\001 \001(\0132\023.swarm.game.Vector2"
-    "\022 \n\003vel\030\002 \001(\0132\023.swarm.game.Vector2\022 \n\003po"
-    "s\030\003 \001(\0132\023.swarm.game.Vector2\022\014\n\004size\030\004 \001"
-    "(\002\"2\n\nSwarmState\022$\n\007monster\030\001 \003(\0132\023.swar"
-    "m.game.Monster\"\212\001\n\006Player\022\n\n\002id\030\001 \001(\r\022 \n"
-    "\003acc\030\002 \001(\0132\023.swarm.game.Vector2\022 \n\003vel\030\003"
-    " \001(\0132\023.swarm.game.Vector2\022 \n\003pos\030\004 \001(\0132\023"
-    ".swarm.game.Vector2\022\016\n\006health\030\005 \001(\005\"I\n\013P"
-    "layerClick\022&\n\tclick_pos\030\001 \001(\0132\023.swarm.ga"
-    "me.Vector2\022\022\n\nclick_size\030\002 \001(\002\"1\n\013Player"
-    "State\022\"\n\006player\030\001 \003(\0132\022.swarm.game.Playe"
-    "r\"\236\001\n\013GameStarted\022\021\n\tplayer_id\030\001 \001(\r\022\016\n\006"
-    "health\030\002 \001(\r\022\020\n\010map_name\030\003 \001(\t\022-\n\014player"
-    "_state\030\004 \001(\0132\027.swarm.game.PlayerState\022+\n"
-    "\013swarm_state\030\005 \001(\0132\026.swarm.game.SwarmSta"
-    "te\"\207\003\n\rServerMessage\022,\n\004type\030\001 \002(\0162\036.swa"
-    "rm.game.ServerMessage.Type\022-\n\014game_start"
-    "ed\030\002 \001(\0132\027.swarm.game.GameStarted\022/\n\rpla"
-    "yer_joined\030\003 \001(\0132\030.swarm.game.PlayerJoin"
-    "ed\022+\n\013player_left\030\004 \001(\0132\026.swarm.game.Pla"
-    "yerLeft\022+\n\013swarm_state\030\005 \001(\0132\026.swarm.gam"
-    "e.SwarmState\022-\n\014player_state\030\006 \001(\0132\027.swa"
-    "rm.game.PlayerState\"_\n\004Type\022\020\n\014GAME_STAR"
-    "TED\020\000\022\021\n\rPLAYER_JOINED\020\001\022\017\n\013PLAYER_LEFT\020"
-    "\002\022\017\n\013SWARM_STATE\020\003\022\020\n\014PLAYER_STATE\020\004\"\261\001\n"
-    "\rPlayerMessage\022,\n\004type\030\001 \002(\0162\036.swarm.gam"
-    "e.PlayerMessage.Type\022 \n\003pos\030\002 \001(\0132\023.swar"
-    "m.game.Vector2\022&\n\005click\030\003 \001(\0132\027.swarm.ga"
-    "me.PlayerClick\"(\n\004Type\022\016\n\nPLAYER_POS\020\001\022\020"
-    "\n\014PLAYER_CLICK\020\002\"d\n\006Config\022\020\n\010map_name\030\001"
-    " \001(\t\022\030\n\014num_monsters\030\002 \001(\r:\00220\022\026\n\013min_pl"
-    "ayers\030\003 \001(\r:\0012\022\026\n\013max_players\030\004 \001(\r:\0014", 1398);
+    "\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\"(\n\014PlayerJoined\022\014\n\004nam"
+    "e\030\001 \001(\t\022\n\n\002id\030\002 \001(\r\"&\n\nPlayerLeft\022\014\n\004nam"
+    "e\030\001 \001(\t\022\n\n\002id\030\002 \001(\r\"}\n\007Monster\022 \n\003acc\030\001 "
+    "\001(\0132\023.swarm.game.Vector2\022 \n\003vel\030\002 \001(\0132\023."
+    "swarm.game.Vector2\022 \n\003pos\030\003 \001(\0132\023.swarm."
+    "game.Vector2\022\014\n\004size\030\004 \001(\002\"2\n\nSwarmState"
+    "\022$\n\007monster\030\001 \003(\0132\023.swarm.game.Monster\"\212"
+    "\001\n\006Player\022\n\n\002id\030\001 \001(\r\022 \n\003acc\030\002 \001(\0132\023.swa"
+    "rm.game.Vector2\022 \n\003vel\030\003 \001(\0132\023.swarm.gam"
+    "e.Vector2\022 \n\003pos\030\004 \001(\0132\023.swarm.game.Vect"
+    "or2\022\016\n\006health\030\005 \001(\005\"I\n\013PlayerClick\022&\n\tcl"
+    "ick_pos\030\001 \001(\0132\023.swarm.game.Vector2\022\022\n\ncl"
+    "ick_size\030\002 \001(\002\"1\n\013PlayerState\022\"\n\006player\030"
+    "\001 \003(\0132\022.swarm.game.Player\"\236\001\n\013GameStarte"
+    "d\022\021\n\tplayer_id\030\001 \001(\r\022\016\n\006health\030\002 \001(\r\022\020\n\010"
+    "map_name\030\003 \001(\t\022-\n\014player_state\030\004 \001(\0132\027.s"
+    "warm.game.PlayerState\022+\n\013swarm_state\030\005 \001"
+    "(\0132\026.swarm.game.SwarmState\"\036\n\tGameEnded\022"
+    "\021\n\twinner_id\030\001 \001(\r\"\037\n\nPlayerDied\022\021\n\tplay"
+    "er_id\030\001 \001(\r\"/\n\013MonsterDied\022 \n\003pos\030\001 \003(\0132"
+    "\023.swarm.game.Vector2\"\302\004\n\rServerMessage\022,"
+    "\n\004type\030\001 \002(\0162\036.swarm.game.ServerMessage."
+    "Type\022-\n\014game_started\030\002 \001(\0132\027.swarm.game."
+    "GameStarted\022/\n\rplayer_joined\030\003 \001(\0132\030.swa"
+    "rm.game.PlayerJoined\022+\n\013player_left\030\004 \001("
+    "\0132\026.swarm.game.PlayerLeft\022+\n\013swarm_state"
+    "\030\005 \001(\0132\026.swarm.game.SwarmState\022-\n\014player"
+    "_state\030\006 \001(\0132\027.swarm.game.PlayerState\022+\n"
+    "\013player_died\030\007 \001(\0132\026.swarm.game.PlayerDi"
+    "ed\022)\n\ngame_ended\030\010 \001(\0132\025.swarm.game.Game"
+    "Ended\022-\n\014monster_died\030\t \001(\0132\027.swarm.game"
+    ".MonsterDied\"\222\001\n\004Type\022\020\n\014GAME_STARTED\020\000\022"
+    "\021\n\rPLAYER_JOINED\020\001\022\017\n\013PLAYER_LEFT\020\002\022\017\n\013S"
+    "WARM_STATE\020\003\022\020\n\014PLAYER_STATE\020\004\022\017\n\013PLAYER"
+    "_DIED\020\005\022\016\n\nGAME_ENDED\020\006\022\020\n\014MONSTER_DIED\020"
+    "\007\"\261\001\n\rPlayerMessage\022,\n\004type\030\001 \002(\0162\036.swar"
+    "m.game.PlayerMessage.Type\022 \n\003pos\030\002 \001(\0132\023"
+    ".swarm.game.Vector2\022&\n\005click\030\003 \001(\0132\027.swa"
+    "rm.game.PlayerClick\"(\n\004Type\022\016\n\nPLAYER_PO"
+    "S\020\001\022\020\n\014PLAYER_CLICK\020\002\"d\n\006Config\022\020\n\010map_n"
+    "ame\030\001 \001(\t\022\030\n\014num_monsters\030\002 \001(\r:\00220\022\026\n\013m"
+    "in_players\030\003 \001(\r:\0012\022\026\n\013max_players\030\004 \001(\r"
+    ":\0014", 1723);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "game.proto", &protobuf_RegisterTypes);
   Vector2::default_instance_ = new Vector2();
@@ -394,6 +474,9 @@ void protobuf_AddDesc_game_2eproto() {
   PlayerClick::default_instance_ = new PlayerClick();
   PlayerState::default_instance_ = new PlayerState();
   GameStarted::default_instance_ = new GameStarted();
+  GameEnded::default_instance_ = new GameEnded();
+  PlayerDied::default_instance_ = new PlayerDied();
+  MonsterDied::default_instance_ = new MonsterDied();
   ServerMessage::default_instance_ = new ServerMessage();
   PlayerMessage::default_instance_ = new PlayerMessage();
   Config::default_instance_ = new Config();
@@ -406,6 +489,9 @@ void protobuf_AddDesc_game_2eproto() {
   PlayerClick::default_instance_->InitAsDefaultInstance();
   PlayerState::default_instance_->InitAsDefaultInstance();
   GameStarted::default_instance_->InitAsDefaultInstance();
+  GameEnded::default_instance_->InitAsDefaultInstance();
+  PlayerDied::default_instance_->InitAsDefaultInstance();
+  MonsterDied::default_instance_->InitAsDefaultInstance();
   ServerMessage::default_instance_->InitAsDefaultInstance();
   PlayerMessage::default_instance_->InitAsDefaultInstance();
   Config::default_instance_->InitAsDefaultInstance();
@@ -667,6 +753,7 @@ void Vector2::Swap(Vector2* other) {
 
 #ifndef _MSC_VER
 const int PlayerJoined::kNameFieldNumber;
+const int PlayerJoined::kIdFieldNumber;
 #endif  // !_MSC_VER
 
 PlayerJoined::PlayerJoined()
@@ -686,6 +773,7 @@ PlayerJoined::PlayerJoined(const PlayerJoined& from)
 void PlayerJoined::SharedCtor() {
   _cached_size_ = 0;
   name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  id_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -729,6 +817,7 @@ void PlayerJoined::Clear() {
         name_->clear();
       }
     }
+    id_ = 0u;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -749,6 +838,22 @@ bool PlayerJoined::MergePartialFromCodedStream(
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
             this->name().data(), this->name().length(),
             ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_id;
+        break;
+      }
+
+      // optional uint32 id = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_id:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &id_)));
+          set_has_id();
         } else {
           goto handle_uninterpreted;
         }
@@ -783,6 +888,11 @@ void PlayerJoined::SerializeWithCachedSizes(
       1, this->name(), output);
   }
 
+  // optional uint32 id = 2;
+  if (has_id()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->id(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -801,6 +911,11 @@ void PlayerJoined::SerializeWithCachedSizes(
         1, this->name(), target);
   }
 
+  // optional uint32 id = 2;
+  if (has_id()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->id(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -817,6 +932,13 @@ int PlayerJoined::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->name());
+    }
+
+    // optional uint32 id = 2;
+    if (has_id()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->id());
     }
 
   }
@@ -849,6 +971,9 @@ void PlayerJoined::MergeFrom(const PlayerJoined& from) {
     if (from.has_name()) {
       set_name(from.name());
     }
+    if (from.has_id()) {
+      set_id(from.id());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -873,6 +998,7 @@ bool PlayerJoined::IsInitialized() const {
 void PlayerJoined::Swap(PlayerJoined* other) {
   if (other != this) {
     std::swap(name_, other->name_);
+    std::swap(id_, other->id_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -892,6 +1018,7 @@ void PlayerJoined::Swap(PlayerJoined* other) {
 
 #ifndef _MSC_VER
 const int PlayerLeft::kNameFieldNumber;
+const int PlayerLeft::kIdFieldNumber;
 #endif  // !_MSC_VER
 
 PlayerLeft::PlayerLeft()
@@ -911,6 +1038,7 @@ PlayerLeft::PlayerLeft(const PlayerLeft& from)
 void PlayerLeft::SharedCtor() {
   _cached_size_ = 0;
   name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  id_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -954,6 +1082,7 @@ void PlayerLeft::Clear() {
         name_->clear();
       }
     }
+    id_ = 0u;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -974,6 +1103,22 @@ bool PlayerLeft::MergePartialFromCodedStream(
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
             this->name().data(), this->name().length(),
             ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_id;
+        break;
+      }
+
+      // optional uint32 id = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_id:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &id_)));
+          set_has_id();
         } else {
           goto handle_uninterpreted;
         }
@@ -1008,6 +1153,11 @@ void PlayerLeft::SerializeWithCachedSizes(
       1, this->name(), output);
   }
 
+  // optional uint32 id = 2;
+  if (has_id()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->id(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1026,6 +1176,11 @@ void PlayerLeft::SerializeWithCachedSizes(
         1, this->name(), target);
   }
 
+  // optional uint32 id = 2;
+  if (has_id()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->id(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -1042,6 +1197,13 @@ int PlayerLeft::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->name());
+    }
+
+    // optional uint32 id = 2;
+    if (has_id()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->id());
     }
 
   }
@@ -1074,6 +1236,9 @@ void PlayerLeft::MergeFrom(const PlayerLeft& from) {
     if (from.has_name()) {
       set_name(from.name());
     }
+    if (from.has_id()) {
+      set_id(from.id());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -1098,6 +1263,7 @@ bool PlayerLeft::IsInitialized() const {
 void PlayerLeft::Swap(PlayerLeft* other) {
   if (other != this) {
     std::swap(name_, other->name_);
+    std::swap(id_, other->id_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -2891,6 +3057,625 @@ void GameStarted::Swap(GameStarted* other) {
 
 // ===================================================================
 
+#ifndef _MSC_VER
+const int GameEnded::kWinnerIdFieldNumber;
+#endif  // !_MSC_VER
+
+GameEnded::GameEnded()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void GameEnded::InitAsDefaultInstance() {
+}
+
+GameEnded::GameEnded(const GameEnded& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void GameEnded::SharedCtor() {
+  _cached_size_ = 0;
+  winner_id_ = 0u;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+GameEnded::~GameEnded() {
+  SharedDtor();
+}
+
+void GameEnded::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void GameEnded::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* GameEnded::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return GameEnded_descriptor_;
+}
+
+const GameEnded& GameEnded::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_game_2eproto();
+  return *default_instance_;
+}
+
+GameEnded* GameEnded::default_instance_ = NULL;
+
+GameEnded* GameEnded::New() const {
+  return new GameEnded;
+}
+
+void GameEnded::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    winner_id_ = 0u;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool GameEnded::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional uint32 winner_id = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &winner_id_)));
+          set_has_winner_id();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void GameEnded::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional uint32 winner_id = 1;
+  if (has_winner_id()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->winner_id(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* GameEnded::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional uint32 winner_id = 1;
+  if (has_winner_id()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->winner_id(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int GameEnded::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional uint32 winner_id = 1;
+    if (has_winner_id()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->winner_id());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void GameEnded::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const GameEnded* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const GameEnded*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void GameEnded::MergeFrom(const GameEnded& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_winner_id()) {
+      set_winner_id(from.winner_id());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void GameEnded::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void GameEnded::CopyFrom(const GameEnded& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GameEnded::IsInitialized() const {
+
+  return true;
+}
+
+void GameEnded::Swap(GameEnded* other) {
+  if (other != this) {
+    std::swap(winner_id_, other->winner_id_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata GameEnded::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = GameEnded_descriptor_;
+  metadata.reflection = GameEnded_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int PlayerDied::kPlayerIdFieldNumber;
+#endif  // !_MSC_VER
+
+PlayerDied::PlayerDied()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void PlayerDied::InitAsDefaultInstance() {
+}
+
+PlayerDied::PlayerDied(const PlayerDied& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void PlayerDied::SharedCtor() {
+  _cached_size_ = 0;
+  player_id_ = 0u;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+PlayerDied::~PlayerDied() {
+  SharedDtor();
+}
+
+void PlayerDied::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void PlayerDied::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* PlayerDied::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return PlayerDied_descriptor_;
+}
+
+const PlayerDied& PlayerDied::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_game_2eproto();
+  return *default_instance_;
+}
+
+PlayerDied* PlayerDied::default_instance_ = NULL;
+
+PlayerDied* PlayerDied::New() const {
+  return new PlayerDied;
+}
+
+void PlayerDied::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    player_id_ = 0u;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool PlayerDied::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional uint32 player_id = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &player_id_)));
+          set_has_player_id();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void PlayerDied::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional uint32 player_id = 1;
+  if (has_player_id()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->player_id(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* PlayerDied::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional uint32 player_id = 1;
+  if (has_player_id()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->player_id(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int PlayerDied::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional uint32 player_id = 1;
+    if (has_player_id()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->player_id());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void PlayerDied::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const PlayerDied* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const PlayerDied*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void PlayerDied::MergeFrom(const PlayerDied& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_player_id()) {
+      set_player_id(from.player_id());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void PlayerDied::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void PlayerDied::CopyFrom(const PlayerDied& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool PlayerDied::IsInitialized() const {
+
+  return true;
+}
+
+void PlayerDied::Swap(PlayerDied* other) {
+  if (other != this) {
+    std::swap(player_id_, other->player_id_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata PlayerDied::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = PlayerDied_descriptor_;
+  metadata.reflection = PlayerDied_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int MonsterDied::kPosFieldNumber;
+#endif  // !_MSC_VER
+
+MonsterDied::MonsterDied()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void MonsterDied::InitAsDefaultInstance() {
+}
+
+MonsterDied::MonsterDied(const MonsterDied& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void MonsterDied::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+MonsterDied::~MonsterDied() {
+  SharedDtor();
+}
+
+void MonsterDied::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void MonsterDied::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* MonsterDied::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MonsterDied_descriptor_;
+}
+
+const MonsterDied& MonsterDied::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_game_2eproto();
+  return *default_instance_;
+}
+
+MonsterDied* MonsterDied::default_instance_ = NULL;
+
+MonsterDied* MonsterDied::New() const {
+  return new MonsterDied;
+}
+
+void MonsterDied::Clear() {
+  pos_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool MonsterDied::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // repeated .swarm.game.Vector2 pos = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_pos:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_pos()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(10)) goto parse_pos;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void MonsterDied::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // repeated .swarm.game.Vector2 pos = 1;
+  for (int i = 0; i < this->pos_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->pos(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* MonsterDied::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // repeated .swarm.game.Vector2 pos = 1;
+  for (int i = 0; i < this->pos_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, this->pos(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int MonsterDied::ByteSize() const {
+  int total_size = 0;
+
+  // repeated .swarm.game.Vector2 pos = 1;
+  total_size += 1 * this->pos_size();
+  for (int i = 0; i < this->pos_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->pos(i));
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void MonsterDied::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const MonsterDied* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const MonsterDied*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void MonsterDied::MergeFrom(const MonsterDied& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  pos_.MergeFrom(from.pos_);
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void MonsterDied::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void MonsterDied::CopyFrom(const MonsterDied& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool MonsterDied::IsInitialized() const {
+
+  return true;
+}
+
+void MonsterDied::Swap(MonsterDied* other) {
+  if (other != this) {
+    pos_.Swap(&other->pos_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata MonsterDied::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = MonsterDied_descriptor_;
+  metadata.reflection = MonsterDied_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
 const ::google::protobuf::EnumDescriptor* ServerMessage_Type_descriptor() {
   protobuf_AssignDescriptorsOnce();
   return ServerMessage_Type_descriptor_;
@@ -2902,6 +3687,9 @@ bool ServerMessage_Type_IsValid(int value) {
     case 2:
     case 3:
     case 4:
+    case 5:
+    case 6:
+    case 7:
       return true;
     default:
       return false;
@@ -2914,6 +3702,9 @@ const ServerMessage_Type ServerMessage::PLAYER_JOINED;
 const ServerMessage_Type ServerMessage::PLAYER_LEFT;
 const ServerMessage_Type ServerMessage::SWARM_STATE;
 const ServerMessage_Type ServerMessage::PLAYER_STATE;
+const ServerMessage_Type ServerMessage::PLAYER_DIED;
+const ServerMessage_Type ServerMessage::GAME_ENDED;
+const ServerMessage_Type ServerMessage::MONSTER_DIED;
 const ServerMessage_Type ServerMessage::Type_MIN;
 const ServerMessage_Type ServerMessage::Type_MAX;
 const int ServerMessage::Type_ARRAYSIZE;
@@ -2925,6 +3716,9 @@ const int ServerMessage::kPlayerJoinedFieldNumber;
 const int ServerMessage::kPlayerLeftFieldNumber;
 const int ServerMessage::kSwarmStateFieldNumber;
 const int ServerMessage::kPlayerStateFieldNumber;
+const int ServerMessage::kPlayerDiedFieldNumber;
+const int ServerMessage::kGameEndedFieldNumber;
+const int ServerMessage::kMonsterDiedFieldNumber;
 #endif  // !_MSC_VER
 
 ServerMessage::ServerMessage()
@@ -2938,6 +3732,9 @@ void ServerMessage::InitAsDefaultInstance() {
   player_left_ = const_cast< ::swarm::game::PlayerLeft*>(&::swarm::game::PlayerLeft::default_instance());
   swarm_state_ = const_cast< ::swarm::game::SwarmState*>(&::swarm::game::SwarmState::default_instance());
   player_state_ = const_cast< ::swarm::game::PlayerState*>(&::swarm::game::PlayerState::default_instance());
+  player_died_ = const_cast< ::swarm::game::PlayerDied*>(&::swarm::game::PlayerDied::default_instance());
+  game_ended_ = const_cast< ::swarm::game::GameEnded*>(&::swarm::game::GameEnded::default_instance());
+  monster_died_ = const_cast< ::swarm::game::MonsterDied*>(&::swarm::game::MonsterDied::default_instance());
 }
 
 ServerMessage::ServerMessage(const ServerMessage& from)
@@ -2954,6 +3751,9 @@ void ServerMessage::SharedCtor() {
   player_left_ = NULL;
   swarm_state_ = NULL;
   player_state_ = NULL;
+  player_died_ = NULL;
+  game_ended_ = NULL;
+  monster_died_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -2968,6 +3768,9 @@ void ServerMessage::SharedDtor() {
     delete player_left_;
     delete swarm_state_;
     delete player_state_;
+    delete player_died_;
+    delete game_ended_;
+    delete monster_died_;
   }
 }
 
@@ -3009,6 +3812,17 @@ void ServerMessage::Clear() {
     }
     if (has_player_state()) {
       if (player_state_ != NULL) player_state_->::swarm::game::PlayerState::Clear();
+    }
+    if (has_player_died()) {
+      if (player_died_ != NULL) player_died_->::swarm::game::PlayerDied::Clear();
+    }
+    if (has_game_ended()) {
+      if (game_ended_ != NULL) game_ended_->::swarm::game::GameEnded::Clear();
+    }
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (has_monster_died()) {
+      if (monster_died_ != NULL) monster_died_->::swarm::game::MonsterDied::Clear();
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -3107,6 +3921,48 @@ bool ServerMessage::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(58)) goto parse_player_died;
+        break;
+      }
+
+      // optional .swarm.game.PlayerDied player_died = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_player_died:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_player_died()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(66)) goto parse_game_ended;
+        break;
+      }
+
+      // optional .swarm.game.GameEnded game_ended = 8;
+      case 8: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_game_ended:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_game_ended()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(74)) goto parse_monster_died;
+        break;
+      }
+
+      // optional .swarm.game.MonsterDied monster_died = 9;
+      case 9: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_monster_died:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_monster_died()));
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -3165,6 +4021,24 @@ void ServerMessage::SerializeWithCachedSizes(
       6, this->player_state(), output);
   }
 
+  // optional .swarm.game.PlayerDied player_died = 7;
+  if (has_player_died()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      7, this->player_died(), output);
+  }
+
+  // optional .swarm.game.GameEnded game_ended = 8;
+  if (has_game_ended()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      8, this->game_ended(), output);
+  }
+
+  // optional .swarm.game.MonsterDied monster_died = 9;
+  if (has_monster_died()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      9, this->monster_died(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -3212,6 +4086,27 @@ void ServerMessage::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         6, this->player_state(), target);
+  }
+
+  // optional .swarm.game.PlayerDied player_died = 7;
+  if (has_player_died()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        7, this->player_died(), target);
+  }
+
+  // optional .swarm.game.GameEnded game_ended = 8;
+  if (has_game_ended()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        8, this->game_ended(), target);
+  }
+
+  // optional .swarm.game.MonsterDied monster_died = 9;
+  if (has_monster_died()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        9, this->monster_died(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -3266,6 +4161,29 @@ int ServerMessage::ByteSize() const {
           this->player_state());
     }
 
+    // optional .swarm.game.PlayerDied player_died = 7;
+    if (has_player_died()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->player_died());
+    }
+
+    // optional .swarm.game.GameEnded game_ended = 8;
+    if (has_game_ended()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->game_ended());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional .swarm.game.MonsterDied monster_died = 9;
+    if (has_monster_died()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->monster_died());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -3311,6 +4229,17 @@ void ServerMessage::MergeFrom(const ServerMessage& from) {
     if (from.has_player_state()) {
       mutable_player_state()->::swarm::game::PlayerState::MergeFrom(from.player_state());
     }
+    if (from.has_player_died()) {
+      mutable_player_died()->::swarm::game::PlayerDied::MergeFrom(from.player_died());
+    }
+    if (from.has_game_ended()) {
+      mutable_game_ended()->::swarm::game::GameEnded::MergeFrom(from.game_ended());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_monster_died()) {
+      mutable_monster_died()->::swarm::game::MonsterDied::MergeFrom(from.monster_died());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -3341,6 +4270,9 @@ void ServerMessage::Swap(ServerMessage* other) {
     std::swap(player_left_, other->player_left_);
     std::swap(swarm_state_, other->swarm_state_);
     std::swap(player_state_, other->player_state_);
+    std::swap(player_died_, other->player_died_);
+    std::swap(game_ended_, other->game_ended_);
+    std::swap(monster_died_, other->monster_died_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

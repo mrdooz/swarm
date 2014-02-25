@@ -208,8 +208,8 @@ void MainWindow::Draw()
 
   if (_game->_gameStarted)
   {
-//  View view = _texture.getView();
-//  view.setCenter(_game->_world._players[0]->_pos);
+    //View view = _texture.getView();
+    //view.setCenter(_game->_world._players[0]->_pos);
     //_texture.setView(view);
     _texture.draw(_game->_level._sprite);
     // draw local player
@@ -266,6 +266,25 @@ void MainWindow::Draw()
     }
   }
 
+  if (_game->_gameEnded)
+  {
+    s64 ms = microsec_clock::local_time().time_of_day().total_milliseconds();
+    vector<RectangleShape> rects;
+    if (_game->_winnerId == _game->_playerId)
+    {
+      CreateTextRects("A winner is you!", 0.5f * VectorCast<float>(_texture.getSize()), 20 + 15 * sinf(ms / 1000.0), &rects);
+    }
+    else
+    {
+      CreateTextRects("Game over!", 0.5f * VectorCast<float>(_texture.getSize()), 20 + 15 * sinf(ms / 1000.0), &rects);
+    }
+
+    for (const RectangleShape& rect : rects)
+    {
+      _texture.draw(rect);
+    }
+  }
+
   _texture.display();
 }
 
@@ -298,7 +317,9 @@ void DebugWindow::Draw()
 //----------------------------------------------------------------------------------
 Game::Game(u16 serverPort, const string& serverAddr)
   : _gameStarted(false)
+  , _gameEnded(false)
   , _done(false)
+  , _winnerId(~0)
   , _frameTime(100)
   , _mainWindow(nullptr)
   , _playerWindow(nullptr)
@@ -341,8 +362,8 @@ bool Game::Init()
   _eventManager.reset(new WindowEventManager(_renderWindow.get()));
   _windowManager.reset(new VirtualWindowManager(_renderWindow.get(), _eventManager.get()));
 
-  if (!_level.Load("data/pacman.png"))
-    return false;
+//  if (!_level.Load("data/pacman.png"))
+//    return false;
 
   if (!_font.loadFromFile("gfx/wscsnrg.ttf"))
     return false;
@@ -419,7 +440,7 @@ bool Game::OnMouseReleased(const Event& event)
 //----------------------------------------------------------------------------------
 void Game::UpdatePlayers()
 {
-  if (!_focus)
+  if (!_focus || _gameEnded)
     return;
 
   float s = 30;
@@ -441,8 +462,11 @@ void Game::UpdatePlayers()
 }
 
 //----------------------------------------------------------------------------------
-void Game::HandleGameStarted(const game::GameStarted& msg)
+bool Game::HandleGameStarted(const game::GameStarted& msg)
 {
+  if (!_level.Load(msg.map_name()))
+    return false;
+
   _gameStarted = true;
   _playerId = msg.player_id();
   _localPlayer._id = _playerId;
@@ -500,7 +524,7 @@ void Game::HandleGameStarted(const game::GameStarted& msg)
     monster++;
     state++;
   }
-
+  return true;
 }
 
 //----------------------------------------------------------------------------------
@@ -512,7 +536,7 @@ void Game::HandlePlayerJoined(const game::PlayerJoined& msg)
 //----------------------------------------------------------------------------------
 void Game::HandlePlayerLeft(const game::PlayerLeft& msg)
 {
-
+  _remotePlayers.erase(msg.id());
 }
 
 //----------------------------------------------------------------------------------
@@ -542,6 +566,25 @@ void Game::HandlePlayerState(const game::PlayerState& msg)
       _localPlayer._health = player.health();
     }
   }
+}
+
+//----------------------------------------------------------------------------------
+void Game::HandleMonsterDied(const game::MonsterDied& msg)
+{
+
+}
+
+//----------------------------------------------------------------------------------
+void Game::HandlePlayerDied(const game::PlayerDied& msg)
+{
+
+}
+
+//----------------------------------------------------------------------------------
+void Game::HandleGameEnded(const game::GameEnded& msg)
+{
+  _gameEnded = true;
+  _winnerId = msg.winner_id();
 }
 
 //----------------------------------------------------------------------------------
@@ -641,6 +684,18 @@ void Game::ProcessNetworkPackets()
 
           case game::ServerMessage_Type_PLAYER_STATE:
             HandlePlayerState(msg.player_state());
+            break;
+
+          case game::ServerMessage_Type_GAME_ENDED:
+            HandleGameEnded(msg.game_ended());
+            break;
+
+          case game::ServerMessage_Type_PLAYER_DIED:
+            HandlePlayerDied(msg.player_died());
+            break;
+
+          case game::ServerMessage_Type_MONSTER_DIED:
+            HandleMonsterDied(msg.monster_died());
             break;
         }
       }

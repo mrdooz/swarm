@@ -7,7 +7,7 @@
 using namespace swarm;
 
 //----------------------------------------------------------------------------------
-bool Level::Load(const char *filename)
+bool Level::Load(const string& filename)
 {
   Image img;
   if (!img.loadFromFile(filename))

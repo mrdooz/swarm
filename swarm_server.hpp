@@ -33,13 +33,19 @@ namespace swarm
 
     void HandleClientMessages();
     void ApplyAttractor(const Vector2f& pos, float radius);
+    void SendPlayerDied(u32 id);
 
     void HandleCollisions();
+
+    void ResetGame();
 
     void ThreadProc();
 
     template <typename T>
     bool PackMessage(vector<char>& buf, const T& msg);
+
+    template <typename T>
+    bool SendMessageToClients(const T& msg);
 
     struct MonsterAttractor
     {
@@ -50,9 +56,12 @@ namespace swarm
 
     struct PlayerData
     {
+      PlayerData() : id(~0), sentStartGame(false), alive(true) {}
       u32 id;
       Vector2f pos;
       int health;
+      bool sentStartGame;
+      bool alive;
     };
 
     struct MonsterData
@@ -70,7 +79,8 @@ namespace swarm
     vector<TcpSocket *> _connectedClients;
     map<pair<u32, u16>, u32> _addrToId;
 
-    map<u32, PlayerData> _playerData;
+    typedef map<u32, PlayerData> PlayerDataById;
+    PlayerDataById _playerData;
 
     thread* _serverThread;
     u8 _networkBuffer[32*1024];

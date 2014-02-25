@@ -111,10 +111,15 @@ namespace swarm
     void HandlePlayerLeft(const game::PlayerLeft& msg);
     void HandleSwarmState(const game::SwarmState& msg);
     void HandlePlayerState(const game::PlayerState& msg);
-    void HandleGameStarted(const game::GameStarted& msg);
+    bool HandleGameStarted(const game::GameStarted& msg);
+    void HandleGameEnded(const game::GameEnded& msg);
+    void HandleMonsterDied(const game::MonsterDied& msg);
+    void HandlePlayerDied(const game::PlayerDied& msg);
 
     bool _gameStarted;
+    bool _gameEnded;
     bool _done;
+    u32 _winnerId;
     string _appRoot;
 
     unordered_map<u32, RenderPlayer> _remotePlayers;

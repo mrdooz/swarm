@@ -49,6 +49,7 @@ namespace swarm
 {
   using std::atomic;
   using std::condition_variable;
+  using std::count_if;
   using std::bind;
   using std::function;
   using std::placeholders::_1;
