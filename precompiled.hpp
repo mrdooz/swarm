@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 
+#define BOOST_ALL_NO_LIB
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time.hpp>
 #include <boost/intrusive_ptr.hpp>
@@ -110,3 +111,9 @@ namespace swarm
   using boost::posix_time::milliseconds;
   using boost::posix_time::seconds;
 }
+
+#ifdef _DEBUG
+#pragma comment(lib, "libboost_date_time-vc120-mt-sgd-1_55.lib")
+#else
+#pragma comment(lib, "libboost_date_time-vc120-mt-s-1_55.lib")
+#endif

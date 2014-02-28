@@ -137,7 +137,9 @@ message PlayerMessage
 message Config
 {
 	optional string map_name = 1;
-	optional uint32 num_monsters = 2 [default = 20];
-	optional uint32 min_players = 3 [default = 2];
-	optional uint32 max_players = 4 [default = 4];
+	optional uint32 num_swarms = 2 [default = 5];
+	optional uint32 monsters_per_swarm = 3 [default = 10];
+	optional uint32 min_players = 4 [default = 2];
+	optional uint32 max_players = 5 [default = 4];
+	optional uint32 initial_health = 6 [default = 10];
 }

@@ -316,11 +316,13 @@ void protobuf_AssignDesc_game_2eproto() {
       sizeof(PlayerMessage));
   PlayerMessage_Type_descriptor_ = PlayerMessage_descriptor_->enum_type(0);
   Config_descriptor_ = file->message_type(14);
-  static const int Config_offsets_[4] = {
+  static const int Config_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Config, map_name_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Config, num_monsters_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Config, num_swarms_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Config, monsters_per_swarm_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Config, min_players_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Config, max_players_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Config, initial_health_),
   };
   Config_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -459,10 +461,11 @@ void protobuf_AddDesc_game_2eproto() {
     "m.game.PlayerMessage.Type\022 \n\003pos\030\002 \001(\0132\023"
     ".swarm.game.Vector2\022&\n\005click\030\003 \001(\0132\027.swa"
     "rm.game.PlayerClick\"(\n\004Type\022\016\n\nPLAYER_PO"
-    "S\020\001\022\020\n\014PLAYER_CLICK\020\002\"d\n\006Config\022\020\n\010map_n"
-    "ame\030\001 \001(\t\022\030\n\014num_monsters\030\002 \001(\r:\00220\022\026\n\013m"
-    "in_players\030\003 \001(\r:\0012\022\026\n\013max_players\030\004 \001(\r"
-    ":\0014", 1723);
+    "S\020\001\022\020\n\014PLAYER_CLICK\020\002\"\235\001\n\006Config\022\020\n\010map_"
+    "name\030\001 \001(\t\022\025\n\nnum_swarms\030\002 \001(\r:\0015\022\036\n\022mon"
+    "sters_per_swarm\030\003 \001(\r:\00210\022\026\n\013min_players"
+    "\030\004 \001(\r:\0012\022\026\n\013max_players\030\005 \001(\r:\0014\022\032\n\016ini"
+    "tial_health\030\006 \001(\r:\00210", 1781);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "game.proto", &protobuf_RegisterTypes);
   Vector2::default_instance_ = new Vector2();
@@ -4618,9 +4621,11 @@ void PlayerMessage::Swap(PlayerMessage* other) {
 
 #ifndef _MSC_VER
 const int Config::kMapNameFieldNumber;
-const int Config::kNumMonstersFieldNumber;
+const int Config::kNumSwarmsFieldNumber;
+const int Config::kMonstersPerSwarmFieldNumber;
 const int Config::kMinPlayersFieldNumber;
 const int Config::kMaxPlayersFieldNumber;
+const int Config::kInitialHealthFieldNumber;
 #endif  // !_MSC_VER
 
 Config::Config()
@@ -4640,9 +4645,11 @@ Config::Config(const Config& from)
 void Config::SharedCtor() {
   _cached_size_ = 0;
   map_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  num_monsters_ = 20u;
+  num_swarms_ = 5u;
+  monsters_per_swarm_ = 10u;
   min_players_ = 2u;
   max_players_ = 4u;
+  initial_health_ = 10u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -4686,9 +4693,11 @@ void Config::Clear() {
         map_name_->clear();
       }
     }
-    num_monsters_ = 20u;
+    num_swarms_ = 5u;
+    monsters_per_swarm_ = 10u;
     min_players_ = 2u;
     max_players_ = 4u;
+    initial_health_ = 10u;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -4712,28 +4721,44 @@ bool Config::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(16)) goto parse_num_monsters;
+        if (input->ExpectTag(16)) goto parse_num_swarms;
         break;
       }
 
-      // optional uint32 num_monsters = 2 [default = 20];
+      // optional uint32 num_swarms = 2 [default = 5];
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_num_monsters:
+         parse_num_swarms:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &num_monsters_)));
-          set_has_num_monsters();
+                 input, &num_swarms_)));
+          set_has_num_swarms();
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(24)) goto parse_min_players;
+        if (input->ExpectTag(24)) goto parse_monsters_per_swarm;
         break;
       }
 
-      // optional uint32 min_players = 3 [default = 2];
+      // optional uint32 monsters_per_swarm = 3 [default = 10];
       case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_monsters_per_swarm:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &monsters_per_swarm_)));
+          set_has_monsters_per_swarm();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(32)) goto parse_min_players;
+        break;
+      }
+
+      // optional uint32 min_players = 4 [default = 2];
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_min_players:
@@ -4744,12 +4769,12 @@ bool Config::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(32)) goto parse_max_players;
+        if (input->ExpectTag(40)) goto parse_max_players;
         break;
       }
 
-      // optional uint32 max_players = 4 [default = 4];
-      case 4: {
+      // optional uint32 max_players = 5 [default = 4];
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_max_players:
@@ -4757,6 +4782,22 @@ bool Config::MergePartialFromCodedStream(
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &max_players_)));
           set_has_max_players();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(48)) goto parse_initial_health;
+        break;
+      }
+
+      // optional uint32 initial_health = 6 [default = 10];
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_initial_health:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &initial_health_)));
+          set_has_initial_health();
         } else {
           goto handle_uninterpreted;
         }
@@ -4791,19 +4832,29 @@ void Config::SerializeWithCachedSizes(
       1, this->map_name(), output);
   }
 
-  // optional uint32 num_monsters = 2 [default = 20];
-  if (has_num_monsters()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->num_monsters(), output);
+  // optional uint32 num_swarms = 2 [default = 5];
+  if (has_num_swarms()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->num_swarms(), output);
   }
 
-  // optional uint32 min_players = 3 [default = 2];
+  // optional uint32 monsters_per_swarm = 3 [default = 10];
+  if (has_monsters_per_swarm()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->monsters_per_swarm(), output);
+  }
+
+  // optional uint32 min_players = 4 [default = 2];
   if (has_min_players()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->min_players(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(4, this->min_players(), output);
   }
 
-  // optional uint32 max_players = 4 [default = 4];
+  // optional uint32 max_players = 5 [default = 4];
   if (has_max_players()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(4, this->max_players(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->max_players(), output);
+  }
+
+  // optional uint32 initial_health = 6 [default = 10];
+  if (has_initial_health()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(6, this->initial_health(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -4824,19 +4875,29 @@ void Config::SerializeWithCachedSizes(
         1, this->map_name(), target);
   }
 
-  // optional uint32 num_monsters = 2 [default = 20];
-  if (has_num_monsters()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->num_monsters(), target);
+  // optional uint32 num_swarms = 2 [default = 5];
+  if (has_num_swarms()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->num_swarms(), target);
   }
 
-  // optional uint32 min_players = 3 [default = 2];
+  // optional uint32 monsters_per_swarm = 3 [default = 10];
+  if (has_monsters_per_swarm()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->monsters_per_swarm(), target);
+  }
+
+  // optional uint32 min_players = 4 [default = 2];
   if (has_min_players()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->min_players(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(4, this->min_players(), target);
   }
 
-  // optional uint32 max_players = 4 [default = 4];
+  // optional uint32 max_players = 5 [default = 4];
   if (has_max_players()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(4, this->max_players(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->max_players(), target);
+  }
+
+  // optional uint32 initial_health = 6 [default = 10];
+  if (has_initial_health()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(6, this->initial_health(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -4857,25 +4918,39 @@ int Config::ByteSize() const {
           this->map_name());
     }
 
-    // optional uint32 num_monsters = 2 [default = 20];
-    if (has_num_monsters()) {
+    // optional uint32 num_swarms = 2 [default = 5];
+    if (has_num_swarms()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->num_monsters());
+          this->num_swarms());
     }
 
-    // optional uint32 min_players = 3 [default = 2];
+    // optional uint32 monsters_per_swarm = 3 [default = 10];
+    if (has_monsters_per_swarm()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->monsters_per_swarm());
+    }
+
+    // optional uint32 min_players = 4 [default = 2];
     if (has_min_players()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->min_players());
     }
 
-    // optional uint32 max_players = 4 [default = 4];
+    // optional uint32 max_players = 5 [default = 4];
     if (has_max_players()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->max_players());
+    }
+
+    // optional uint32 initial_health = 6 [default = 10];
+    if (has_initial_health()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->initial_health());
     }
 
   }
@@ -4908,14 +4983,20 @@ void Config::MergeFrom(const Config& from) {
     if (from.has_map_name()) {
       set_map_name(from.map_name());
     }
-    if (from.has_num_monsters()) {
-      set_num_monsters(from.num_monsters());
+    if (from.has_num_swarms()) {
+      set_num_swarms(from.num_swarms());
+    }
+    if (from.has_monsters_per_swarm()) {
+      set_monsters_per_swarm(from.monsters_per_swarm());
     }
     if (from.has_min_players()) {
       set_min_players(from.min_players());
     }
     if (from.has_max_players()) {
       set_max_players(from.max_players());
+    }
+    if (from.has_initial_health()) {
+      set_initial_health(from.initial_health());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -4941,9 +5022,11 @@ bool Config::IsInitialized() const {
 void Config::Swap(Config* other) {
   if (other != this) {
     std::swap(map_name_, other->map_name_);
-    std::swap(num_monsters_, other->num_monsters_);
+    std::swap(num_swarms_, other->num_swarms_);
+    std::swap(monsters_per_swarm_, other->monsters_per_swarm_);
     std::swap(min_players_, other->min_players_);
     std::swap(max_players_, other->max_players_);
+    std::swap(initial_health_, other->initial_health_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

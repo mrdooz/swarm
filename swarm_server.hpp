@@ -47,6 +47,8 @@ namespace swarm
     template <typename T>
     bool SendMessageToClients(const T& msg);
 
+    void AddMonster(const Vector2f& pos, float size);
+
     struct MonsterAttractor
     {
       MonsterAttractor(const Vector2f& pos, float radius) : pos(pos), radius(radius) {}

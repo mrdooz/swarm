@@ -72,7 +72,7 @@ void Server::HandleClientMessages()
 //-----------------------------------------------------------------------------
 void Server::PlayerAdded(TcpSocket* socket)
 {
-  int initialHealth = 1;
+  int initialHealth = _config.initial_health();
 
   _connectedClients.push_back(socket);
 
@@ -101,6 +101,7 @@ void Server::PlayerAdded(TcpSocket* socket)
   game::ServerMessage serverMsg;
   serverMsg.set_type(game::ServerMessage_Type_GAME_STARTED);
   game::GameStarted& msg = *serverMsg.mutable_game_started();
+  msg.set_map_name(_config.map_name());
 
   // add initial player state
   game::PlayerState* playerState = msg.mutable_player_state();
@@ -159,6 +160,7 @@ void Server::ThreadProc()
   clock.restart();
   Time lastUpdate = clock.getElapsedTime();
   Time lastSend = lastUpdate;
+  Time lastCollisionCheck = lastUpdate;
   double timestep = 1/50.0;
   double accumulator = 0;
 
@@ -179,21 +181,21 @@ void Server::ThreadProc()
       Time delta = end - lastUpdate;
       lastUpdate = end;
 
-      // apply attractors..
       for (MonsterData& data : _monsterData)
       {
-        data._state._curState._acc = Vector2f(0,0);
+        data._state._curState._acc = Vector2f(0, 0);
       }
 
-      for (const MonsterAttractor& a : _attractors)
+      // apply attractors..
+      if (!_attractors.empty())
       {
-        ApplyAttractor(a.pos, a.radius);
+        for (const MonsterAttractor& a : _attractors)
+        {
+          ApplyAttractor(a.pos, a.radius);
+        }
       }
 
       accumulator += delta.asMicroseconds() / 1e6;
-
-      if (accumulator >= timestep)
-        _attractors.clear();
 
       while (accumulator >= timestep)
       {
@@ -204,9 +206,15 @@ void Server::ThreadProc()
           UpdateState(state._curState, (float)timestep);
         }
         accumulator -= timestep;
+        _attractors.clear();
       }
 
-      HandleCollisions();
+      Time collisionDelta = end - lastCollisionCheck;
+      if (collisionDelta.asMilliseconds() > 50)
+      {
+        HandleCollisions();
+        lastCollisionCheck = end;
+      }
 
       // send state 10 times/sec
       Time sendDelta = end - lastSend;
@@ -227,6 +235,17 @@ void Server::ThreadProc()
   delete socket;
 }
 
+//-----------------------------------------------------------------------------
+void Server::AddMonster(const Vector2f& pos, float size)
+{
+  _monsterData.push_back(MonsterData());
+  MonsterData& data = _monsterData.back();
+  MonsterState& state = data._state;
+  state._curState._pos = pos;
+  state._prevState._pos = pos;
+  data._size = size;
+}
+
 
 //-----------------------------------------------------------------------------
 bool Server::InitLevel()
@@ -235,28 +254,45 @@ bool Server::InitLevel()
     return false;
 
   float scale = _level._scale;
-  for (size_t i = 0; i < _config.num_monsters(); ++i)
+  // create the swarms
+
+  for (size_t i = 0; i < _config.num_swarms(); ++i)
   {
+    // find swarm center pos
+    int centerX, centerY;
     while (true)
     {
-      int x = rand() % _level._width;
-      int y = rand() % _level._height;
-      float s = 5 + rand() % 5;
-      if (_level._background[y*_level._width+x] == 0)
-      {
-        Vector2f pos(scale * Vector2f(x, y));
-
-
-        _monsterData.push_back(MonsterData());
-        MonsterData& data  = _monsterData.back();
-        MonsterState& state = data._state;
-        state._curState._pos = pos;
-        state._prevState._pos = pos;
-
-        data._size = s;
+      centerX = rand() % _level._width;
+      centerY = rand() % _level._height;
+      u8 val = _level._background[centerY*_level._width + centerX];
+      if (val == 0)
         break;
+    }
+
+    int swarmRadius = 20;
+
+    // add the monsters around the swarm
+    for (size_t j = 0; j < _config.monsters_per_swarm(); ++j)
+    {
+      float s = 3 + 3 * rand() / (float)RAND_MAX;
+      while (true)
+      {
+        float x = centerX - swarmRadius / 2 + swarmRadius / 2.0f * (rand() / (float)RAND_MAX);
+        float y = centerY - swarmRadius / 2 + swarmRadius / 2.0f * (rand() / (float)RAND_MAX);
+
+        x = (int)Clamp<float>(x, 0, _level._width - 1);
+        y = (int)Clamp<float>(y, 0, _level._height - 1);
+
+        u8 val = _level._background[y*_level._width + x];
+        if (val == 0)
+        {
+          AddMonster(scale * Vector2f(x, y), s);
+          break;
+        }
       }
     }
+
+
   }
 
   return true;

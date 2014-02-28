@@ -45,6 +45,8 @@ namespace swarm
     CircleShape _monsterCircle;
     CircleShape _selectionCircle;
 
+    vector<RectangleShape> _textureRects;
+
     ptime _lastUpdate;
   };
 

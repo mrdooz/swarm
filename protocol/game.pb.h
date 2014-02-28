@@ -1677,47 +1677,67 @@ class Config : public ::google::protobuf::Message {
   inline ::std::string* release_map_name();
   inline void set_allocated_map_name(::std::string* map_name);
 
-  // optional uint32 num_monsters = 2 [default = 20];
-  inline bool has_num_monsters() const;
-  inline void clear_num_monsters();
-  static const int kNumMonstersFieldNumber = 2;
-  inline ::google::protobuf::uint32 num_monsters() const;
-  inline void set_num_monsters(::google::protobuf::uint32 value);
+  // optional uint32 num_swarms = 2 [default = 5];
+  inline bool has_num_swarms() const;
+  inline void clear_num_swarms();
+  static const int kNumSwarmsFieldNumber = 2;
+  inline ::google::protobuf::uint32 num_swarms() const;
+  inline void set_num_swarms(::google::protobuf::uint32 value);
 
-  // optional uint32 min_players = 3 [default = 2];
+  // optional uint32 monsters_per_swarm = 3 [default = 10];
+  inline bool has_monsters_per_swarm() const;
+  inline void clear_monsters_per_swarm();
+  static const int kMonstersPerSwarmFieldNumber = 3;
+  inline ::google::protobuf::uint32 monsters_per_swarm() const;
+  inline void set_monsters_per_swarm(::google::protobuf::uint32 value);
+
+  // optional uint32 min_players = 4 [default = 2];
   inline bool has_min_players() const;
   inline void clear_min_players();
-  static const int kMinPlayersFieldNumber = 3;
+  static const int kMinPlayersFieldNumber = 4;
   inline ::google::protobuf::uint32 min_players() const;
   inline void set_min_players(::google::protobuf::uint32 value);
 
-  // optional uint32 max_players = 4 [default = 4];
+  // optional uint32 max_players = 5 [default = 4];
   inline bool has_max_players() const;
   inline void clear_max_players();
-  static const int kMaxPlayersFieldNumber = 4;
+  static const int kMaxPlayersFieldNumber = 5;
   inline ::google::protobuf::uint32 max_players() const;
   inline void set_max_players(::google::protobuf::uint32 value);
+
+  // optional uint32 initial_health = 6 [default = 10];
+  inline bool has_initial_health() const;
+  inline void clear_initial_health();
+  static const int kInitialHealthFieldNumber = 6;
+  inline ::google::protobuf::uint32 initial_health() const;
+  inline void set_initial_health(::google::protobuf::uint32 value);
 
   // @@protoc_insertion_point(class_scope:swarm.game.Config)
  private:
   inline void set_has_map_name();
   inline void clear_has_map_name();
-  inline void set_has_num_monsters();
-  inline void clear_has_num_monsters();
+  inline void set_has_num_swarms();
+  inline void clear_has_num_swarms();
+  inline void set_has_monsters_per_swarm();
+  inline void clear_has_monsters_per_swarm();
   inline void set_has_min_players();
   inline void clear_has_min_players();
   inline void set_has_max_players();
   inline void clear_has_max_players();
+  inline void set_has_initial_health();
+  inline void clear_has_initial_health();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* map_name_;
-  ::google::protobuf::uint32 num_monsters_;
+  ::google::protobuf::uint32 num_swarms_;
+  ::google::protobuf::uint32 monsters_per_swarm_;
   ::google::protobuf::uint32 min_players_;
   ::google::protobuf::uint32 max_players_;
+  ::google::protobuf::uint32 initial_health_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_game_2eproto();
   friend void protobuf_AssignDesc_game_2eproto();
@@ -3176,37 +3196,59 @@ inline void Config::set_allocated_map_name(::std::string* map_name) {
   }
 }
 
-// optional uint32 num_monsters = 2 [default = 20];
-inline bool Config::has_num_monsters() const {
+// optional uint32 num_swarms = 2 [default = 5];
+inline bool Config::has_num_swarms() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Config::set_has_num_monsters() {
+inline void Config::set_has_num_swarms() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Config::clear_has_num_monsters() {
+inline void Config::clear_has_num_swarms() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void Config::clear_num_monsters() {
-  num_monsters_ = 20u;
-  clear_has_num_monsters();
+inline void Config::clear_num_swarms() {
+  num_swarms_ = 5u;
+  clear_has_num_swarms();
 }
-inline ::google::protobuf::uint32 Config::num_monsters() const {
-  return num_monsters_;
+inline ::google::protobuf::uint32 Config::num_swarms() const {
+  return num_swarms_;
 }
-inline void Config::set_num_monsters(::google::protobuf::uint32 value) {
-  set_has_num_monsters();
-  num_monsters_ = value;
+inline void Config::set_num_swarms(::google::protobuf::uint32 value) {
+  set_has_num_swarms();
+  num_swarms_ = value;
 }
 
-// optional uint32 min_players = 3 [default = 2];
-inline bool Config::has_min_players() const {
+// optional uint32 monsters_per_swarm = 3 [default = 10];
+inline bool Config::has_monsters_per_swarm() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void Config::set_has_min_players() {
+inline void Config::set_has_monsters_per_swarm() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void Config::clear_has_min_players() {
+inline void Config::clear_has_monsters_per_swarm() {
   _has_bits_[0] &= ~0x00000004u;
+}
+inline void Config::clear_monsters_per_swarm() {
+  monsters_per_swarm_ = 10u;
+  clear_has_monsters_per_swarm();
+}
+inline ::google::protobuf::uint32 Config::monsters_per_swarm() const {
+  return monsters_per_swarm_;
+}
+inline void Config::set_monsters_per_swarm(::google::protobuf::uint32 value) {
+  set_has_monsters_per_swarm();
+  monsters_per_swarm_ = value;
+}
+
+// optional uint32 min_players = 4 [default = 2];
+inline bool Config::has_min_players() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void Config::set_has_min_players() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Config::clear_has_min_players() {
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void Config::clear_min_players() {
   min_players_ = 2u;
@@ -3220,15 +3262,15 @@ inline void Config::set_min_players(::google::protobuf::uint32 value) {
   min_players_ = value;
 }
 
-// optional uint32 max_players = 4 [default = 4];
+// optional uint32 max_players = 5 [default = 4];
 inline bool Config::has_max_players() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void Config::set_has_max_players() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void Config::clear_has_max_players() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void Config::clear_max_players() {
   max_players_ = 4u;
@@ -3240,6 +3282,28 @@ inline ::google::protobuf::uint32 Config::max_players() const {
 inline void Config::set_max_players(::google::protobuf::uint32 value) {
   set_has_max_players();
   max_players_ = value;
+}
+
+// optional uint32 initial_health = 6 [default = 10];
+inline bool Config::has_initial_health() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void Config::set_has_initial_health() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void Config::clear_has_initial_health() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void Config::clear_initial_health() {
+  initial_health_ = 10u;
+  clear_has_initial_health();
+}
+inline ::google::protobuf::uint32 Config::initial_health() const {
+  return initial_health_;
+}
+inline void Config::set_initial_health(::google::protobuf::uint32 value) {
+  set_has_initial_health();
+  initial_health_ = value;
 }
 
 

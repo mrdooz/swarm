@@ -223,6 +223,7 @@ namespace swarm
     char* buf = (char*)_alloca(len);
     vsprintf_s(buf, len, fmt, args);
     OutputDebugStringA(buf);
+    //printf("%s", buf);
     va_end(args);
   }
 #else

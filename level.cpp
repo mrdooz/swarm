@@ -25,8 +25,9 @@ bool Level::Load(const string& filename)
 
   for (int i = 0; i < _width * _height; ++i)
   {
-    u32 cur = data[i];
-    _background[i] = (u8)(cur & 0xff);
+    // AABBRRGG
+    u32 cur = data[i] & 0x00ffffff;
+    _background[i] = cur == 0 ? 0 : 0xff;
   }
 
   _scale = 2;

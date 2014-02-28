@@ -9,41 +9,12 @@
 using namespace sf;
 using namespace swarm;
 
-void FontPrint(const char* msg)
-{
-  while (*msg)
-  {
-    u8 ch = (u8)*msg;
-    ++msg;
-
-    if (ch > 127)
-      continue;
-
-    char buf[8*9+1];
-    memset(buf, 0, sizeof(buf));
-    for (int y = 0; y < 8; ++y)
-    {
-      u8 b = vincent_data[ch][y];
-
-      for (int x = 0; x < 8; ++x)
-      {
-        u8 a = (b >> (7 - x)) & 1;
-        buf[y*9+x] = a ? 'X' : ' ';
-      }
-
-      buf[y*9+8] = '\n';
-
-    }
-    printf("%s", buf);
-  }
-}
-
 //----------------------------------------------------------------------------------
-void CreateTextRects(const char* str, const Vector2f& center, float scale, vector<RectangleShape>* out)
+int CreateTextRects(const char* str, const Vector2f& center, float scale, vector<RectangleShape>* out)
 {
-  out->clear();
+  int numRects = 0;
   if (!str)
-    return;
+    return numRects;
 
   Vector2f size(scale, scale);
   size_t numChars = strlen(str);
@@ -103,16 +74,24 @@ void CreateTextRects(const char* str, const Vector2f& center, float scale, vecto
         // if the current bit is set, create a rectangle
         if (a)
         {
-          RectangleShape rect;
+          if (numRects >= (int)out->size())
+          {
+            return numRects;
+          }
+
+          RectangleShape& rect = (*out)[numRects++];
           rect.setPosition(pos);
           rect.setSize(size);
-          out->push_back(rect);
+          rect.setFillColor(Color(0x60, 0x60, 0xc0, 0xff));
         }
         pos.x += scale;
       }
       pos.y += scale;
     }
   }
+
+  return numRects;
+
 }
 
 //-----------------------------------------------------------------------------
@@ -171,6 +150,7 @@ MainWindow::MainWindow(const string& title, const Vector2f& pos, const Vector2f&
   , _playerCircle(5, 100)
   , _monsterCircle(5, 50)
   , _lastUpdate(microsec_clock::local_time())
+  , _textureRects(50*8*8*5)
 {
   _playerCircle.setFillColor(Color::Green);
   _monsterCircle.setFillColor(Color::Red);
@@ -212,6 +192,7 @@ void MainWindow::Draw()
     //view.setCenter(_game->_world._players[0]->_pos);
     //_texture.setView(view);
     _texture.draw(_game->_level._sprite);
+
     // draw local player
     Vector2f p(_game->_localPlayer._pos);
     p.x -= 5;
@@ -257,31 +238,39 @@ void MainWindow::Draw()
   else
   {
     s64 ms = microsec_clock::local_time().time_of_day().total_milliseconds();
-    vector<RectangleShape> rects;
-    CreateTextRects("Waiting for\nplayers", 0.5f * VectorCast<float>(_texture.getSize()), 20 + 15 * sinf(ms / 1000.0), &rects);
+    int numRects = CreateTextRects(
+        "Waiting for\nplayers",
+        0.5f * VectorCast<float>(_texture.getSize()), 20 + 15 * sinf(ms / 1000.0),
+        &_textureRects);
 
-    for (const RectangleShape& rect : rects)
+    for (int i = 0; i < numRects; ++i)
     {
-      _texture.draw(rect);
+      _texture.draw(_textureRects[i]);
     }
   }
 
   if (_game->_gameEnded)
   {
     s64 ms = microsec_clock::local_time().time_of_day().total_milliseconds();
-    vector<RectangleShape> rects;
+    int numRects;
     if (_game->_winnerId == _game->_playerId)
     {
-      CreateTextRects("A winner is you!", 0.5f * VectorCast<float>(_texture.getSize()), 20 + 15 * sinf(ms / 1000.0), &rects);
+      numRects = CreateTextRects(
+          "A winner is you!",
+          0.5f * VectorCast<float>(_texture.getSize()), 20 + 15 * sinf(ms / 1000.0),
+          &_textureRects);
     }
     else
     {
-      CreateTextRects("Game over!", 0.5f * VectorCast<float>(_texture.getSize()), 20 + 15 * sinf(ms / 1000.0), &rects);
+      numRects = CreateTextRects(
+        "Game over!",
+        0.5f * VectorCast<float>(_texture.getSize()), 20 + 15 * sinf(ms / 1000.0),
+        &_textureRects);
     }
 
-    for (const RectangleShape& rect : rects)
+    for (int i = 0; i < numRects; ++i)
     {
-      _texture.draw(rect);
+      _texture.draw(_textureRects[i]);
     }
   }
 
@@ -355,8 +344,9 @@ bool Game::Init()
 #endif
 
   sf::ContextSettings settings;
-  settings.antialiasingLevel = 8;
-  _renderWindow.reset(new RenderWindow(sf::VideoMode(8 * width / 10, 8 * height / 10), "...", sf::Style::Default, settings));
+  //settings.antialiasingLevel = 8;
+  _renderWindow.reset(new RenderWindow(
+    sf::VideoMode(8 * width / 10, 8 * height / 10), "swarm - magnus osterlind", sf::Style::Default, settings));
   //_renderWindow->setFramerateLimit(60);
   _renderWindow->setVerticalSyncEnabled(true);
   _eventManager.reset(new WindowEventManager(_renderWindow.get()));
@@ -648,17 +638,21 @@ void Game::UpdateState(PhysicsState& state, float dt)
 //----------------------------------------------------------------------------------
 void Game::ProcessNetworkPackets()
 {
-  static char buf[32*1024];
+  static char buf[64*1024];
 
   size_t bytesReceived = 0;
   Socket::Status status = _socket.receive(buf, sizeof(buf), bytesReceived);
   if (status == Socket::Done)
   {
-    // LOG_INFO("received from server" << LogKeyValue("num_bytes", bytesReceived));
+    //LOG_INFO("received from server" << LogKeyValue("num_bytes", bytesReceived));
     char *ptr = buf;
     while (ptr < buf + bytesReceived)
     {
       u32 msgSize = ntohl(*(u32*)ptr);
+      // break if this message isn't complete
+      if (ptr + msgSize >= buf + bytesReceived)
+        break;
+
       ptr += sizeof(u32);
       game::ServerMessage msg;
       if (msg.ParseFromArray(ptr, msgSize))
